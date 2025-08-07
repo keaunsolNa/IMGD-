@@ -1,0 +1,24 @@
+package com.nks.imgd.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class UserTableDTO {
+
+	private String userId;
+	private String name;
+	private String email;
+	private String nickName;
+	private String pictureId;
+	private Character LoginType;
+	private String lastLoginDate;
+	private String regDtm;
+	private String regId;
+	private String modDtm;
+	private String modId;
+
+}

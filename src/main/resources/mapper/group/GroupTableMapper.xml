@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nks.imgd.mapper.GroupTableMapper">
+
+    <insert id="findAll" parameterType="com.nks.imgd.dto.GroupTableDTO">
+        INSERT
+          INTO GROUP_TABLE
+          ( GROUP_NM
+          , GROUP_MST_USER_ID
+          , REG_DTM
+          , REG_ID
+          , MOD_DTM
+          , MOD_ID
+          )
+          VALUES
+          (
+            #{groupNm}
+          , #{groupMstUserId}
+          , DATE_FORMAT(NOW(), '%Y%m%d')
+          , #{groupMstUserId}
+          , DATE_FORMAT(NOW(), '%Y%m%d')
+          , #{groupMstUserId}
+          )
+    </insert>
+
+</mapper>
