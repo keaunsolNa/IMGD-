@@ -5,7 +5,7 @@
 
 <mapper namespace="com.nks.imgd.mapper.GroupTableMapper">
 
-    <insert id="findAll" parameterType="com.nks.imgd.dto.GroupTableDTO">
+    <insert id="makeNewGroup">
         INSERT
           INTO GROUP_TABLE
           ( GROUP_NM
@@ -17,13 +17,71 @@
           )
           VALUES
           (
-            #{groupNm}
-          , #{groupMstUserId}
+            #{group.groupNm}
+          , #{group.groupMstUserId}
           , DATE_FORMAT(NOW(), '%Y%m%d')
-          , #{groupMstUserId}
+          , #{group.groupMstUserId}
           , DATE_FORMAT(NOW(), '%Y%m%d')
-          , #{groupMstUserId}
+          , #{group.groupMstUserId}
           )
     </insert>
+
+    <insert id="makeNewGroupUserTable">
+      INSERT
+      INTO GROUP_USER
+      ( GROUP_ID
+      , USER_ID
+      , REG_DTM
+      , REG_ID
+      , MOD_DTM
+      , MOD_ID
+      )
+      VALUES
+        (
+          #{group.groupId}
+        , #{userId}
+        , DATE_FORMAT(NOW(), '%Y%m%d')
+        , #{group.groupMstUserId}
+        , DATE_FORMAT(NOW(), '%Y%m%d')
+        , #{group.groupMstUserId}
+        )
+    </insert>
+
+    <select id="isUserCheck">
+        SELECT COUNT(GROUP_ID)
+          FROM GROUP_USER
+         WHERE GROUP_ID = ${group.groupId}
+           AND USER_ID  = ${userId}
+    </select>
+
+    <select id="countGroupUser">
+        SELECT COUNT(T2.USER_ID)
+          FROM GROUP_TABLE T1
+             , GROUP_USER  T2
+         WHERE T1.GROUP_ID = ${group.groupId}
+           AND T1.GROUP_ID = T2.GROUP_ID
+    </select>
+
+    <delete id="deleteGroupUser">
+      DELETE GROUP_USER
+       WHERE GROUP_ID = ${group.groupId}
+         AND USER_ID  = ${group.userId}
+    </delete>
+
+    <delete id="deleteGroupTable">
+        DELETE GROUP_TABLE
+         WHERE GROUP_ID = ${group.groupId}
+    </delete>
+
+
+    <update id="changeMstUserGroup">
+        UPDATE GROUP_TABLE
+           SET GROUP_MST_USER_ID = ${userId}
+             , MOD_DTM = DATE_FORMAT(NOW(), '%Y%m%d')
+             , MOD_ID = ${group.groupMstUserId}
+         WHERE GROUP_ID = ${group.groupId}
+    </update>
+
+
 
 </mapper>
