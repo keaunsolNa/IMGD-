@@ -50,36 +50,36 @@
     <select id="isUserCheck">
         SELECT COUNT(GROUP_ID)
           FROM GROUP_USER
-         WHERE GROUP_ID = ${group.groupId}
-           AND USER_ID  = ${userId}
+         WHERE GROUP_ID = #{group.groupId}
+           AND USER_ID  = #{userId}
     </select>
 
     <select id="countGroupUser">
         SELECT COUNT(T2.USER_ID)
           FROM GROUP_TABLE T1
              , GROUP_USER  T2
-         WHERE T1.GROUP_ID = ${group.groupId}
+         WHERE T1.GROUP_ID = #{group.groupId}
            AND T1.GROUP_ID = T2.GROUP_ID
     </select>
 
     <delete id="deleteGroupUser">
       DELETE GROUP_USER
-       WHERE GROUP_ID = ${group.groupId}
-         AND USER_ID  = ${group.userId}
+       WHERE GROUP_ID = #{group.groupId}
+         AND USER_ID  = #{group.userId}
     </delete>
 
     <delete id="deleteGroupTable">
         DELETE GROUP_TABLE
-         WHERE GROUP_ID = ${group.groupId}
+         WHERE GROUP_ID = #{group.groupId}
     </delete>
 
 
     <update id="changeMstUserGroup">
         UPDATE GROUP_TABLE
-           SET GROUP_MST_USER_ID = ${userId}
+           SET GROUP_MST_USER_ID = #{userId}
              , MOD_DTM = DATE_FORMAT(NOW(), '%Y%m%d')
-             , MOD_ID = ${group.groupMstUserId}
-         WHERE GROUP_ID = ${group.groupId}
+             , MOD_ID = #{group.groupMstUserId}
+         WHERE GROUP_ID = #{group.groupId}
     </update>
 
 

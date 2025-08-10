@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nks.imgd.mapper.GroupTableMapper">
+
+    <insert id="makeGroupDir">
+        INSERT
+          INTO FILE_TABLE
+          ( FILE_NM
+          , FILE_ORG_NM
+          , FILE_PATH
+          , TYPE
+          , PARENT_ID
+          , REG_DTM
+          , REG_ID
+          , MOD_DTM
+          , MOD_ID
+          )
+          VALUES
+          (
+            CONCAT(#{group.groupId}, '_', #{group.groupNm})
+          , CONCAT(#{group.groupId}, '_', #{group.groupNm})
+          , '/GROUP_IMG'
+          , 'DIR'
+          , (SELECT FILE_ID
+               FROM FILE_TABLE
+              WHERE PARENT_ID IS NULL
+            )
+          , DATE_FORMAT(NOW(), '%Y%m%d')
+          , #{group.groupMstUserId}
+          , DATE_FORMAT(NOW(), '%Y%m%d')
+          , #{group.groupMstUserId}
+          )
+    </insert>
+
+    <insert id="makeDir">
+      INSERT
+      INTO FILE_TABLE
+      ( FILE_NM
+      , FILE_ORG_NM
+      , FILE_PATH
+      , TYPE
+      , PARENT_ID
+      , REG_DTM
+      , REG_ID
+      , MOD_DTM
+      , MOD_ID
+      )
+      VALUES
+        (
+          #{dirNm}
+        , #{dirNm}
+        , CONCAT(#{group.groupId}, '_', #{group.groupNm})
+        , 'DIR'
+        , (SELECT FILE_ID
+             FROM FILE_TABLE
+            WHERE FILE_NM = CONCAT(#{group.groupId}, '_', #{group.groupNm})
+              AND TYPE = 'DIR'
+          )
+        , DATE_FORMAT(NOW(), '%Y%m%d')
+        , #{group.groupMstUserId}
+        , DATE_FORMAT(NOW(), '%Y%m%d')
+        , #{group.groupMstUserId}
+        )
+    </insert>
+
+    <insert id="makeFile">
+      INSERT
+      INTO FILE_TABLE
+      ( FILE_NM
+      , FILE_ORG_NM
+      , FILE_PATH
+      , TYPE
+      , PARENT_ID
+      , REG_DTM
+      , REG_ID
+      , MOD_DTM
+      , MOD_ID
+      )
+      VALUES
+        (
+          #{file.fileNm}
+        , #{file.fileOrgNm}
+        , CONCAT('/', #{group.groupId}, '_', #{group.groupNm})
+        , 'FILE'
+        , (SELECT FILE_ID
+           FROM FILE_TABLE
+           WHERE FILE_NM = CONCAT(#{group.groupId}, '_', #{group.groupNm})
+             AND TYPE = 'FILE'
+          )
+        , DATE_FORMAT(NOW(), '%Y%m%d')
+        , #{group.groupMstUserId}
+        , DATE_FORMAT(NOW(), '%Y%m%d')
+        , #{group.groupMstUserId}
+        )
+    </insert>
+
+
+
+</mapper>
