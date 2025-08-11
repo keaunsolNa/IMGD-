@@ -1,8 +1,9 @@
-package com.nks.imgd.service.group;
+package com.nks.imgd.controller.group;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nks.imgd.controller.group.GroupController;
 import com.nks.imgd.dto.GroupTableDTO;
+import com.nks.imgd.service.group.GroupService;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 @WebMvcTest(GroupController.class)
-@AutoConfigureRestDocs(outputDir = "build/generated-snippets")
+@AutoConfigureRestDocs(outputDir = "build/generated-snippets/group")
 @WithMockUser("nks")
 public class GroupControllerTest {
 
@@ -62,7 +63,7 @@ public class GroupControllerTest {
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(savedGroup)))
 				.andExpect(status().isOk())
-				.andExpect(content().string("그룹 생성 완료"))
+				.andExpect(content().string("Complete make group."))
 				.andDo(document("group-create",
 						requestFields(
 								fieldWithPath("groupId").optional().type(JsonFieldType.NUMBER).description("그룹 ID (자동 생성)"),
@@ -93,7 +94,7 @@ public class GroupControllerTest {
 						.param("userId", "test")
 						.content(objectMapper.writeValueAsString(savedGroup)))
 				.andExpect(status().isOk())
-				.andExpect(content().string("그룹 유저 생성 완료"))
+				.andExpect(content().string("Complete make group user."))
 				.andDo(document("groupUser-create",
 						requestFields(
 								fieldWithPath("groupId").optional().type(JsonFieldType.NUMBER).description("그룹 ID (자동 생성)"),
