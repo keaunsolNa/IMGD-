@@ -36,7 +36,7 @@ public class GroupServiceTest {
 		int result = groupService.makeNewGroup(groupDto);
 
 		// ✅ Assert
-		assertEquals(1, result, "정상적으로 1개의 그룹이 생성되어야 합니다.");
+		assertEquals(1, result, "Complete make group.");
 		verify(mockMapper, times(1)).makeNewGroup(groupDto); // 호출 여부 확인
 	}
 }

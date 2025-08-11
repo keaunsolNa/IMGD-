@@ -28,9 +28,9 @@ public class GroupController {
 	public ResponseEntity<String> createGroup(@RequestBody GroupTableDTO dto) {
 		int inserted = groupService.makeNewGroup(dto);
 		if (inserted > 0) {
-			return ResponseEntity.ok("그룹 생성 완료");
+			return ResponseEntity.ok("Complete make group.");
 		} else {
-			return ResponseEntity.internalServerError().body("그룹 생성 실패");
+			return ResponseEntity.internalServerError().body("Failed make group.");
 		}
 	}
 
@@ -46,9 +46,9 @@ public class GroupController {
 	public ResponseEntity<String> makeNewGroupUser(@RequestBody GroupTableDTO dto, @RequestParam String userId) {
 		int inserted = groupService.makeNewGroupUser(dto, userId);
 		if (inserted > 0) {
-			return ResponseEntity.ok("그룹 유저 생성 완료");
+			return ResponseEntity.ok("Complete make group user.");
 		} else {
-			return ResponseEntity.internalServerError().body("그룹 생성 실패");
+			return ResponseEntity.internalServerError().body("Failed make group user.");
 		}
 	}
 
@@ -57,18 +57,18 @@ public class GroupController {
 
 		int inserted = groupService.deleteGroupUser(dto, userId);
 		if (inserted == -1) {
-			return ResponseEntity.ok("대상 유저가 그룹 내에 존재하지 않습니다.");
+			return ResponseEntity.ok("Target user does not exist.");
 		}
 		else if (inserted == -2) {
-			return ResponseEntity.ok("그룹 마스터 유저일 경우 마스터 권한을 다른 유저에게 먼저 넘기셔야 합니다.");
+			return ResponseEntity.ok("Group master user must transfer master rights to another user.");
 		}
 		else if (inserted > 0)
 		{
-			return ResponseEntity.ok("정상적으로 그룹이 삭제되었습니다.");
+			return ResponseEntity.ok("Complete delete group user.");
 		}
 		else
 		{
-			return ResponseEntity.internalServerError().body("그룹 계정 삭제 실패");
+			return ResponseEntity.internalServerError().body("Failed delete group user.");
 		}
 	}
 
@@ -77,15 +77,15 @@ public class GroupController {
 
 		int inserted = groupService.changeMstUserGroup(dto, userId);
 		if (inserted == -1) {
-			return ResponseEntity.ok("대상 유저가 그룹 내에 존재하지 않습니다.");
+			return ResponseEntity.ok("Target user does not exist.");
 		}
 		else if (inserted > 0)
 		{
-			return ResponseEntity.ok("Group 마스터 계정 변경 완료");
+			return ResponseEntity.ok("Complete group master user transfer.");
 		}
 		else
 		{
-			return ResponseEntity.internalServerError().body("그룹 계정 변경 실패");
+			return ResponseEntity.internalServerError().body("Failed group master user transfer.");
 		}
 	}
 }

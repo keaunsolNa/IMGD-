@@ -53,7 +53,7 @@ public class GroupControllerTest {
 	void makeNewGroupTest() throws Exception {
 
 		// ✅ given
-		// BeforeEach 로 대체한다.
+		// BeforeEach 로 대체 한다.
 
 		// ✅ when & then
 		when(groupService.makeNewGroup(savedGroup)).thenReturn(1);
@@ -82,7 +82,7 @@ public class GroupControllerTest {
 	void makeNewGroupUserTest() throws Exception {
 
 		// ✅ given
-		// BeforeEach 로 대체한다.
+		// BeforeEach 로 대체 한다.
 
 		// ✅ when & then
 		when(groupService.makeNewGroupUser(any(GroupTableDTO.class), eq("test"))).thenReturn(1);
@@ -118,14 +118,14 @@ public class GroupControllerTest {
 		// ✅ when & then
 		when(groupService.deleteGroupUser(any(GroupTableDTO.class), eq("test"))).thenReturn(1);
 
-		// 정상적인 삭제 과정
+		// 정상 적인 삭제 과정
 		mockMvc.perform(delete("/group/deleteGroupUser")
 				.with(csrf())
 				.contentType(MediaType.APPLICATION_JSON)
 				.param("userId", "test")
 				.content(objectMapper.writeValueAsString(savedGroup)))
 			.andExpect(status().isOk())
-			.andExpect(content().string("정상적으로 그룹이 삭제되었습니다."))
+			.andExpect(content().string("Complete delete group user."))
 			.andDo(document("groupUserDelete",
 					requestFields(
 							fieldWithPath("groupId").optional().type(JsonFieldType.NUMBER).description("그룹 ID (자동 생성)"),
@@ -140,14 +140,14 @@ public class GroupControllerTest {
 			));
 
 		when(groupService.deleteGroupUser(any(GroupTableDTO.class), eq("ksna"))).thenReturn(1);
-		// 삭제하려는 계정이 MST 계정일 경우
+		// 삭제 하려는 계정이 MST 계정일 경우
 		mockMvc.perform(delete("/group/deleteGroupUser")
 						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON)
 						.param("userId", "ksna")
 						.content(objectMapper.writeValueAsString(savedGroup)))
 				.andExpect(status().isOk())
-				.andExpect(content().string("정상적으로 그룹이 삭제되었습니다."))
+				.andExpect(content().string("Complete delete group user."))
 				.andDo(document("groupUserDelete",
 						requestFields(
 								fieldWithPath("groupId").optional().type(JsonFieldType.NUMBER).description("그룹 ID (자동 생성)"),

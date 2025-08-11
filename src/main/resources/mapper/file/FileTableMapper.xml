@@ -3,9 +3,29 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.nks.imgd.mapper.GroupTableMapper">
+<mapper namespace="com.nks.imgd.mapper.FileTableMapper">
 
-    <insert id="makeGroupDir">
+    <select id="selectRootPath">
+      SELECT FILE_PATH
+           , PARENT_ID
+        FROM FILE_TABLE
+       WHERE FILE_ID = #{fileId}
+    </select>
+
+    <select id="selectFileIdByFileOrgNmInDirCase">
+      SELECT FILE_ID
+        FROM FILE_TABLE
+       WHERE FILE_ORG_NM = CONCAT(#{group.groupId}, '_', #{group.groupNm})
+         AND TYPE = 'DIR'
+    </select>
+
+  <select id="selectFileNmById">
+    SELECT FILE_NM
+    FROM FILE_TABLE
+    WHERE FILE_ID = #{fileId}
+  </select>
+
+    <insert id="makeGroupDir" >
         INSERT
           INTO FILE_TABLE
           ( FILE_NM
@@ -24,10 +44,7 @@
           , CONCAT(#{group.groupId}, '_', #{group.groupNm})
           , '/GROUP_IMG'
           , 'DIR'
-          , (SELECT FILE_ID
-               FROM FILE_TABLE
-              WHERE PARENT_ID IS NULL
-            )
+          , 1
           , DATE_FORMAT(NOW(), '%Y%m%d')
           , #{group.groupMstUserId}
           , DATE_FORMAT(NOW(), '%Y%m%d')
@@ -52,17 +69,13 @@
         (
           #{dirNm}
         , #{dirNm}
-        , CONCAT(#{group.groupId}, '_', #{group.groupNm})
+        , #{path}
         , 'DIR'
-        , (SELECT FILE_ID
-             FROM FILE_TABLE
-            WHERE FILE_NM = CONCAT(#{group.groupId}, '_', #{group.groupNm})
-              AND TYPE = 'DIR'
-          )
+        , #{parentId}
         , DATE_FORMAT(NOW(), '%Y%m%d')
-        , #{group.groupMstUserId}
+        , #{userId}
         , DATE_FORMAT(NOW(), '%Y%m%d')
-        , #{group.groupMstUserId}
+        , #{userId}
         )
     </insert>
 
