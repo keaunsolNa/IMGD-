@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.nks.imgd.dto.GroupTableDTO;
-import com.nks.imgd.dto.MakeDirDTO;
+import com.nks.imgd.dto.group.GroupTableDTO;
+import com.nks.imgd.dto.data.MakeDirDTO;
 import com.nks.imgd.service.file.FileService;
 
 @RestController
@@ -35,9 +35,6 @@ public class FileController {
 	@PostMapping("/makeDir")
 	public ResponseEntity<String> makeDir(@RequestBody MakeDirDTO req) {
 
-		System.out.println("userId = " + req.getUserId());
-		System.out.println("parentId = " + req.getParentId());
-		System.out.println("dirNm = " + req.getDirNm());
 		int inserted = fileService.makeDir(req.getUserId(), req.getParentId(), req.getDirNm());
 		if (inserted > 0) {
 			return ResponseEntity.ok("Complete make group root directory");

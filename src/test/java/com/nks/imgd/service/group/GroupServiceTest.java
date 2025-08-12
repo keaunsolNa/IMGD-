@@ -6,8 +6,8 @@ import static org.mockito.Mockito.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import com.nks.imgd.dto.GroupTableDTO;
-import com.nks.imgd.mapper.GroupTableMapper;
+import com.nks.imgd.dto.group.GroupTableDTO;
+import com.nks.imgd.mapper.group.GroupTableMapper;
 
 /**
  * Unit test for {@link GroupService}.

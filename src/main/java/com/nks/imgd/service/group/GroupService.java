@@ -2,8 +2,8 @@ package com.nks.imgd.service.group;
 
 import org.springframework.stereotype.Service;
 
-import com.nks.imgd.dto.GroupTableDTO;
-import com.nks.imgd.mapper.GroupTableMapper;
+import com.nks.imgd.dto.group.GroupTableDTO;
+import com.nks.imgd.mapper.group.GroupTableMapper;
 
 /**
  * @author nks

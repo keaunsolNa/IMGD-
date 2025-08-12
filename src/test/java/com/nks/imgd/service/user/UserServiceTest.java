@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.nks.imgd.dto.UserTableDTO;
+import com.nks.imgd.dto.userAndRole.UserTableDTO;
 
 @SpringBootTest
 public class UserServiceTest {

@@ -1,10 +1,10 @@
-package com.nks.imgd.mapper;
+package com.nks.imgd.mapper.user;
 
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
 
-import com.nks.imgd.dto.UserTableDTO;
+import com.nks.imgd.dto.userAndRole.UserTableDTO;
 
 @Mapper
 public interface UserTableMapper {

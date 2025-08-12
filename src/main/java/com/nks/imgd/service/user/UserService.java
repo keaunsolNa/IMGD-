@@ -4,8 +4,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.nks.imgd.dto.UserTableDTO;
-import com.nks.imgd.mapper.UserTableMapper;
+import com.nks.imgd.dto.userAndRole.UserTableDTO;
+import com.nks.imgd.mapper.user.UserTableMapper;
 
 @Service
 public class UserService {

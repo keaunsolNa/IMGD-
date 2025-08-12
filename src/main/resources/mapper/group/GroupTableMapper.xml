@@ -3,7 +3,7 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.nks.imgd.mapper.GroupTableMapper">
+<mapper namespace="com.nks.imgd.mapper.group.GroupTableMapper">
 
     <insert id="makeNewGroup">
         INSERT
@@ -63,13 +63,15 @@
     </select>
 
     <delete id="deleteGroupUser">
-      DELETE GROUP_USER
+      DELETE
+        FROM GROUP_USER
        WHERE GROUP_ID = #{group.groupId}
          AND USER_ID  = #{group.userId}
     </delete>
 
     <delete id="deleteGroupTable">
-        DELETE GROUP_TABLE
+        DELETE
+          FROM GROUP_TABLE
          WHERE GROUP_ID = #{group.groupId}
     </delete>
 

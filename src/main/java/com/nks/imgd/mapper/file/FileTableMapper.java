@@ -1,7 +1,7 @@
-package com.nks.imgd.mapper;
+package com.nks.imgd.mapper.file;
 
-import com.nks.imgd.dto.FileTableDTO;
-import com.nks.imgd.dto.GroupTableDTO;
+import com.nks.imgd.dto.file.FileTableDTO;
+import com.nks.imgd.dto.group.GroupTableDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 

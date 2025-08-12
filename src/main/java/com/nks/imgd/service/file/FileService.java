@@ -2,9 +2,9 @@ package com.nks.imgd.service.file;
 
 import java.io.File;
 
-import com.nks.imgd.dto.FileTableDTO;
-import com.nks.imgd.dto.GroupTableDTO;
-import com.nks.imgd.mapper.FileTableMapper;
+import com.nks.imgd.dto.file.FileTableDTO;
+import com.nks.imgd.dto.group.GroupTableDTO;
+import com.nks.imgd.mapper.file.FileTableMapper;
 
 import org.springframework.stereotype.Service;
 

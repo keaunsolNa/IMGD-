@@ -3,7 +3,7 @@ package com.nks.imgd.controller.group;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.nks.imgd.dto.GroupTableDTO;
+import com.nks.imgd.dto.group.GroupTableDTO;
 import com.nks.imgd.service.group.GroupService;
 
 @RestController

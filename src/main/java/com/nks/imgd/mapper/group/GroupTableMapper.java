@@ -1,8 +1,8 @@
-package com.nks.imgd.mapper;
+package com.nks.imgd.mapper.group;
 
 import org.apache.ibatis.annotations.Mapper;
 
-import com.nks.imgd.dto.GroupTableDTO;
+import com.nks.imgd.dto.group.GroupTableDTO;
 import org.apache.ibatis.annotations.Param;
 
 @Mapper

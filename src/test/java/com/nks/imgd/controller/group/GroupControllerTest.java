@@ -1,10 +1,9 @@
 package com.nks.imgd.controller.group;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nks.imgd.dto.GroupTableDTO;
+import com.nks.imgd.dto.group.GroupTableDTO;
 import com.nks.imgd.service.group.GroupService;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 @WebMvcTest(GroupController.class)
-@AutoConfigureRestDocs(outputDir = "build/generated-snippets/group")
+@AutoConfigureRestDocs(outputDir = "build/generated-snippets/group/controller")
 @WithMockUser("nks")
 public class GroupControllerTest {
 
@@ -40,24 +39,19 @@ public class GroupControllerTest {
 	@Autowired
 	private ObjectMapper objectMapper;
 
-	private GroupTableDTO savedGroup; // 🔹 필드로 선언
+	@Test
+	@DisplayName("POST /group - 그룹 생성 API 테스트 - 성공")
+	void makeNewGroupTestSuccess() throws Exception {
 
-	@BeforeEach
-	void setUp() {
-		savedGroup = new GroupTableDTO();
+		// ✅ Given
+		GroupTableDTO savedGroup = new GroupTableDTO();
 		savedGroup.setGroupNm("테스트 그룹");
 		savedGroup.setGroupMstUserId("ksna");
-	}
 
-	@Test
-	@DisplayName("POST /group - 그룹 생성 API 테스트")
-	void makeNewGroupTest() throws Exception {
-
-		// ✅ given
-		// BeforeEach 로 대체 한다.
-
-		// ✅ when & then
+		// ✅ When
 		when(groupService.makeNewGroup(savedGroup)).thenReturn(1);
+
+		// ✅ Then
 		mockMvc.perform(post("/group/makeGroup")
 						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON)
@@ -79,15 +73,18 @@ public class GroupControllerTest {
 	}
 
 	@Test
-	@DisplayName("POST /group - 그룹 유저 Row 추가 테스트")
-	void makeNewGroupUserTest() throws Exception {
+	@DisplayName("POST /group - 그룹 유저 Row 추가 테스트 - 성공")
+	void makeNewGroupUserTestSuccess() throws Exception {
 
-		// ✅ given
-		// BeforeEach 로 대체 한다.
+		// ✅ Given
+		GroupTableDTO savedGroup = new GroupTableDTO();
+		savedGroup.setGroupNm("테스트 그룹");
+		savedGroup.setGroupMstUserId("ksna");
 
-		// ✅ when & then
+		// ✅ When
 		when(groupService.makeNewGroupUser(any(GroupTableDTO.class), eq("test"))).thenReturn(1);
 
+		// ✅ Then
 		mockMvc.perform(post("/group/addGroupUser")
 						.with(csrf())
 						.contentType(MediaType.APPLICATION_JSON)
@@ -110,16 +107,19 @@ public class GroupControllerTest {
 	}
 
 	@Test
-	@DisplayName("DELETE / group - 그룹 유저 Row 삭제 테스트")
-	void deleteGroupUser() throws Exception {
+	@DisplayName("DELETE / group - 그룹 유저 Row 삭제 테스트 - 성공")
+	void deleteGroupUserSuccess() throws Exception {
 
-		// ✅ given
+		// ✅ Given
+		GroupTableDTO savedGroup = new GroupTableDTO();
+		savedGroup.setGroupNm("테스트 그룹");
+		savedGroup.setGroupMstUserId("ksna");
 		savedGroup.setGroupId(1L);
 
-		// ✅ when & then
+		// ✅ When
 		when(groupService.deleteGroupUser(any(GroupTableDTO.class), eq("test"))).thenReturn(1);
 
-		// 정상 적인 삭제 과정
+		// ✅ Then
 		mockMvc.perform(delete("/group/deleteGroupUser")
 				.with(csrf())
 				.contentType(MediaType.APPLICATION_JSON)
@@ -128,38 +128,51 @@ public class GroupControllerTest {
 			.andExpect(status().isOk())
 			.andExpect(content().string("Complete delete group user."))
 			.andDo(document("groupUserDelete",
-					requestFields(
-							fieldWithPath("groupId").optional().type(JsonFieldType.NUMBER).description("그룹 ID (자동 생성)"),
-							fieldWithPath("groupNm").type(JsonFieldType.STRING).description("그룹 이름"),
-							fieldWithPath("groupMstUserId").type(JsonFieldType.STRING).description("그룹 마스터 사용자 ID"),
-							fieldWithPath("regDtm").optional().type(JsonFieldType.STRING).description("등록 일시"),
-							fieldWithPath("regId").optional().type(JsonFieldType.STRING).description("등록자 ID"),
-							fieldWithPath("modDtm").optional().type(JsonFieldType.STRING).description("수정 일시"),
-							fieldWithPath("modId").optional().type(JsonFieldType.STRING).description("수정자 ID")
-					),
-					responseBody()
+				requestFields(
+					fieldWithPath("groupId").optional().type(JsonFieldType.NUMBER).description("그룹 ID (자동 생성)"),
+					fieldWithPath("groupNm").type(JsonFieldType.STRING).description("그룹 이름"),
+					fieldWithPath("groupMstUserId").type(JsonFieldType.STRING).description("그룹 마스터 사용자 ID"),
+					fieldWithPath("regDtm").optional().type(JsonFieldType.STRING).description("등록 일시"),
+					fieldWithPath("regId").optional().type(JsonFieldType.STRING).description("등록자 ID"),
+					fieldWithPath("modDtm").optional().type(JsonFieldType.STRING).description("수정 일시"),
+					fieldWithPath("modId").optional().type(JsonFieldType.STRING).description("수정자 ID")
+				),
+				responseBody()
 			));
+	}
 
+	@Test
+	@DisplayName("DELETE / group - 그룹 유저 Row 삭제 테스트 - 성공")
+	void deleteGroupUserFail() throws Exception {
+
+		// ✅ Given
+		GroupTableDTO savedGroup = new GroupTableDTO();
+		savedGroup.setGroupNm("테스트 그룹");
+		savedGroup.setGroupMstUserId("ksna");
+		savedGroup.setGroupId(1L);
+
+		// ✅ When
 		when(groupService.deleteGroupUser(any(GroupTableDTO.class), eq("ksna"))).thenReturn(1);
-		// 삭제 하려는 계정이 MST 계정일 경우
+
+		// ✅ Then
 		mockMvc.perform(delete("/group/deleteGroupUser")
-						.with(csrf())
-						.contentType(MediaType.APPLICATION_JSON)
-						.param("userId", "ksna")
-						.content(objectMapper.writeValueAsString(savedGroup)))
-				.andExpect(status().isOk())
-				.andExpect(content().string("Complete delete group user."))
-				.andDo(document("groupUserDelete",
-						requestFields(
-								fieldWithPath("groupId").optional().type(JsonFieldType.NUMBER).description("그룹 ID (자동 생성)"),
-								fieldWithPath("groupNm").type(JsonFieldType.STRING).description("그룹 이름"),
-								fieldWithPath("groupMstUserId").type(JsonFieldType.STRING).description("그룹 마스터 사용자 ID"),
-								fieldWithPath("regDtm").optional().type(JsonFieldType.STRING).description("등록 일시"),
-								fieldWithPath("regId").optional().type(JsonFieldType.STRING).description("등록자 ID"),
-								fieldWithPath("modDtm").optional().type(JsonFieldType.STRING).description("수정 일시"),
-								fieldWithPath("modId").optional().type(JsonFieldType.STRING).description("수정자 ID")
-						),
-						responseBody()
-				));
+				.with(csrf())
+				.contentType(MediaType.APPLICATION_JSON)
+				.param("userId", "ksna")
+				.content(objectMapper.writeValueAsString(savedGroup)))
+			.andExpect(status().isOk())
+			.andExpect(content().string("Complete delete group user."))
+			.andDo(document("groupUserDelete",
+				requestFields(
+					fieldWithPath("groupId").optional().type(JsonFieldType.NUMBER).description("그룹 ID (자동 생성)"),
+					fieldWithPath("groupNm").type(JsonFieldType.STRING).description("그룹 이름"),
+					fieldWithPath("groupMstUserId").type(JsonFieldType.STRING).description("그룹 마스터 사용자 ID"),
+					fieldWithPath("regDtm").optional().type(JsonFieldType.STRING).description("등록 일시"),
+					fieldWithPath("regId").optional().type(JsonFieldType.STRING).description("등록자 ID"),
+					fieldWithPath("modDtm").optional().type(JsonFieldType.STRING).description("수정 일시"),
+					fieldWithPath("modId").optional().type(JsonFieldType.STRING).description("수정자 ID")
+				),
+				responseBody()
+			));
 	}
 }

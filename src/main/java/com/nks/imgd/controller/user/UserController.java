@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.nks.imgd.dto.UserTableDTO;
+import com.nks.imgd.dto.userAndRole.UserTableDTO;
 import com.nks.imgd.service.user.UserService;
 
 @RestController
