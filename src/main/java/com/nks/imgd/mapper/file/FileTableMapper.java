@@ -12,13 +12,20 @@ public interface FileTableMapper {
 
     FileTableDTO selectFileIdByFileOrgNmInDirCase(@Param("group") GroupTableDTO groupTableDTO);
 
-    FileTableDTO selectFileNmById(@Param("fileId") Long fileId);
-
+    FileTableDTO selectFileNmByDirId(@Param("dirId") Long dirId);
 
     int makeGroupDir(@Param("group")GroupTableDTO groupTableDTO);
 
     int makeDir(@Param("userId") String userId
               , @Param("dirNm") String dirNm
               , @Param("path") String path
-              , @Param("parentId") Long parentId);
+              , @Param("parentId") Long parentId
+			  , @Param("groupId") Long groupId);
+
+	int makeFile(@Param("fileNm") String fileNm
+			   , @Param("fileOrgNm") String fileOrgNm
+		       , @Param("path") String path
+	  		   , @Param("parentId") Long parentId
+			   , @Param("groupId") Long groupId
+	  		   , @Param("userId") String userId);
 }

@@ -21,7 +21,7 @@ import static org.mockito.Mockito.*;
  * <p>
  * This test verifies that a group is correctly inserted through
  * {@link FileService#makeGroupDir(GroupTableDTO)} 
- * {@link FileService#makeDir(String, Long, String)}
+ * {@link FileService#makeDir(String, Long, Long, String)}
  * using a mocked {@link FileTableMapper}.
  */
 class FileServiceTest {
@@ -99,6 +99,7 @@ class FileServiceTest {
 		// ✅ Given
 		String userId = "nks";
 		Long parentId = 10L;
+		Long groupId = 1L;
 		String parentName = "1_테스트 그룹";
 		String childName = "추억";
 
@@ -113,15 +114,16 @@ class FileServiceTest {
 
 		// ✅ When
 		when(mapper.selectRootPath(parentId)).thenReturn(root);
-		when(mapper.selectFileNmById(parentId)).thenReturn(nameRow);
+		when(mapper.selectFileNmByDirId(parentId)).thenReturn(nameRow);
 		// DB insert 성공
-		when(mapper.makeDir(eq(userId), eq(childName), eq(parentName), eq(parentId))).thenReturn(1);
+		when(mapper.makeDir(eq(userId), eq(childName), eq(parentName), eq(parentId), eq(groupId))).thenReturn(1);
 
-		int result = service.makeDir(userId, parentId, childName);
+		int result = service.makeDir(userId, parentId, groupId, childName);
 
 		// ✅ Then
 		assertEquals(1, result);
 		File expected = new File("/" + root.getFilePath() + "/" + parentName + "/" + childName);
 		assertTrue(expected.exists() && expected.isDirectory(), "하위 디렉터리가 실제로 생성되어야 합니다.");
 	}
+
 }

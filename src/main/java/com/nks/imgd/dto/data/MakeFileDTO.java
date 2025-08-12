@@ -1,5 +1,7 @@
 package com.nks.imgd.dto.data;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -7,9 +9,11 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class MakeDirDTO {
+public class MakeFileDTO {
+
+	private Long folderId;
 	private String userId;
-	private Long parentId;
-	private String dirNm;
 	private Long groupId;
+	private String fileName;
+	private MultipartFile originalFile;
 }

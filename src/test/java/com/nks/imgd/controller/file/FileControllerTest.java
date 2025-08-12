@@ -101,10 +101,11 @@ public class FileControllerTest {
 		MakeDirDTO req = new MakeDirDTO();
 		req.setUserId("ksna");
 		req.setParentId(3L);
+		req.setGroupId(1L);
 		req.setDirNm("추억");
 
 		// ✅ When
-		when(fileService.makeDir(eq("ksna"), eq(3L), eq("추억"))).thenReturn(1);
+		when(fileService.makeDir(eq("ksna"), eq(3L), eq(1L), eq("추억"))).thenReturn(1);
 
 		// ✅ Then
 		mockMvc.perform(post("/file/makeDir")
@@ -123,10 +124,11 @@ public class FileControllerTest {
 		MakeDirDTO req = new MakeDirDTO();
 		req.setUserId("ksnaIsNot");
 		req.setParentId(10L);
+		req.setGroupId(1L);
 		req.setDirNm("추억");
 
 		// ✅ When
-		when(fileService.makeDir(anyString(), anyLong(), anyString())).thenReturn(-1);
+		when(fileService.makeDir(anyString(), anyLong(), anyLong(), anyString())).thenReturn(-1);
 
 		// ✅ Then
 		mockMvc.perform(post("/file/makeDir")

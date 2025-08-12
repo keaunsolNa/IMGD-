@@ -6,24 +6,24 @@
 <mapper namespace="com.nks.imgd.mapper.file.FileTableMapper">
 
     <select id="selectRootPath">
-      SELECT FILE_PATH
-           , PARENT_ID
-        FROM FILE_TABLE
-       WHERE FILE_ID = #{fileId}
+        SELECT FILE_PATH
+             , PARENT_ID
+          FROM FILE_TABLE
+         WHERE FILE_ID = #{fileId}
     </select>
 
     <select id="selectFileIdByFileOrgNmInDirCase">
-      SELECT FILE_ID
-        FROM FILE_TABLE
-       WHERE FILE_ORG_NM = CONCAT(#{group.groupId}, '_', #{group.groupNm})
-         AND TYPE = 'DIR'
+        SELECT FILE_ID
+          FROM FILE_TABLE
+         WHERE FILE_ORG_NM = CONCAT(#{group.groupId}, '_', #{group.groupNm})
+           AND TYPE = 'DIR'
     </select>
 
-  <select id="selectFileNmById">
-    SELECT FILE_NM
-    FROM FILE_TABLE
-    WHERE FILE_ID = #{fileId}
-  </select>
+    <select id="selectFileNmByDirId">
+        SELECT FILE_NM
+          FROM FILE_TABLE
+         WHERE FILE_ID = #{dirId}
+    </select>
 
     <insert id="makeGroupDir" >
         INSERT
@@ -33,6 +33,7 @@
           , FILE_PATH
           , TYPE
           , PARENT_ID
+          , GROUP_ID
           , REG_DTM
           , REG_ID
           , MOD_DTM
@@ -45,6 +46,7 @@
           , '/GROUP_IMG'
           , 'DIR'
           , 1
+          , #{group.groupId}
           , DATE_FORMAT(NOW(), '%Y%m%d')
           , #{group.groupMstUserId}
           , DATE_FORMAT(NOW(), '%Y%m%d')
@@ -54,24 +56,26 @@
 
     <insert id="makeDir">
       INSERT
-      INTO FILE_TABLE
-      ( FILE_NM
-      , FILE_ORG_NM
-      , FILE_PATH
-      , TYPE
-      , PARENT_ID
-      , REG_DTM
-      , REG_ID
-      , MOD_DTM
-      , MOD_ID
-      )
-      VALUES
+        INTO FILE_TABLE
+        ( FILE_NM
+        , FILE_ORG_NM
+        , FILE_PATH
+        , TYPE
+        , PARENT_ID
+        , GROUP_ID
+        , REG_DTM
+        , REG_ID
+        , MOD_DTM
+        , MOD_ID
+        )
+        VALUES
         (
           #{dirNm}
         , #{dirNm}
         , #{path}
         , 'DIR'
         , #{parentId}
+        , #{groupId}
         , DATE_FORMAT(NOW(), '%Y%m%d')
         , #{userId}
         , DATE_FORMAT(NOW(), '%Y%m%d')
@@ -81,32 +85,30 @@
 
     <insert id="makeFile">
       INSERT
-      INTO FILE_TABLE
-      ( FILE_NM
-      , FILE_ORG_NM
-      , FILE_PATH
-      , TYPE
-      , PARENT_ID
-      , REG_DTM
-      , REG_ID
-      , MOD_DTM
-      , MOD_ID
-      )
-      VALUES
+        INTO FILE_TABLE
+        ( FILE_NM
+        , FILE_ORG_NM
+        , FILE_PATH
+        , TYPE
+        , PARENT_ID
+        , GROUP_ID
+        , REG_DTM
+        , REG_ID
+        , MOD_DTM
+        , MOD_ID
+        )
+        VALUES
         (
-          #{file.fileNm}
-        , #{file.fileOrgNm}
-        , CONCAT('/', #{group.groupId}, '_', #{group.groupNm})
+          #{fileNm}
+        , #{fileOrgNm}
+        , #{path}
         , 'FILE'
-        , (SELECT FILE_ID
-           FROM FILE_TABLE
-           WHERE FILE_NM = CONCAT(#{group.groupId}, '_', #{group.groupNm})
-             AND TYPE = 'FILE'
-          )
+        , #{parentId}
+        , #{groupId}
         , DATE_FORMAT(NOW(), '%Y%m%d')
-        , #{group.groupMstUserId}
+        , #{userId}
         , DATE_FORMAT(NOW(), '%Y%m%d')
-        , #{group.groupMstUserId}
+        , #{userId}
         )
     </insert>
 
