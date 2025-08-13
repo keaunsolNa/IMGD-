@@ -20,4 +20,59 @@
           FROM USER_TABLE
     </select>
 
+    <select id="findById">
+        SELECT USER_ID
+             , NAME
+             , EMAIL
+             , NICK_NAME
+             , PICTURE_ID
+             , LOGIN_TYPE
+             , LAST_LOGIN_DATE
+             , REG_DTM
+             , REG_ID
+             , MOD_DTM
+             , MOD_ID
+          FROM USER_TABLE
+         WHERE USER_ID = ${userId}
+    </select>
+
+    <select id="findHighestUserRole">
+        SELECT T3.ROLE_ID
+             , T3.ROLE_NM
+          FROM USER_TABLE T1
+             , USER_ROLE T2
+             , ROLES T3
+         WHERE T1.USER_ID = ${userId}
+           AND T1.USER_ID = T2.USER_ID
+           AND T2.ROLE_ID = T3.ROLE_ID
+         ORDER BY T3.ROLE_ID DESC
+         LIMIT 1
+    </select>
+
+    <insert id="makeNewUser">
+        INSERT
+          INTO USER_TABLE
+        VALUES (
+                 ${user.userId}
+               , ${user.name}
+               , ${user.email}
+               , ${user.nickName}
+               , NULL
+               , ${user.loginType}
+               , DATE_FORMAT(NOW(), '%Y%m%d')
+               , DATE_FORMAT(NOW(), '%Y%m%d')
+               , #{group.groupMstUserId}
+               , DATE_FORMAT(NOW(), '%Y%m%d')
+               , #{group.groupMstUserId}
+               )
+    </insert>
+
+    <update id="updateUser">
+        UPDATE USER_TABLE
+           SET NAME = ${user.name}
+             , EMAIL = ${user.email}
+             , LAST_LOGIN_DATE = DATE_FORMAT(NOW(), '%Y%m%d')
+             , MOD_DTM = DATE_FORMAT(NOW(), '%Y%m%d')
+         WHERE USER_ID = #{user.id};
+    </update>
 </mapper>

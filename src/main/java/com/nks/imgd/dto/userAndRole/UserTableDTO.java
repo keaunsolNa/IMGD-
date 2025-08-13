@@ -1,5 +1,7 @@
 package com.nks.imgd.dto.userAndRole;
 
+import com.nks.imgd.dto.Enum.SocialLoginType;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,7 +16,7 @@ public class UserTableDTO {
 	private String email;
 	private String nickName;
 	private String pictureId;
-	private Character LoginType;
+	private SocialLoginType LoginType;
 	private String lastLoginDate;
 	private String regDtm;
 	private String regId;

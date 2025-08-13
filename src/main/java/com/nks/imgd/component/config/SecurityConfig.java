@@ -1,4 +1,4 @@
-package com.nks.imgd.config;
+package com.nks.imgd.component.config;
 
 import java.util.List;
 

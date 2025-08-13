@@ -15,4 +15,5 @@ public class UserRoleDTO {
 	private String regId;
 	private String modDtm;
 	private String modId;
+
 }
