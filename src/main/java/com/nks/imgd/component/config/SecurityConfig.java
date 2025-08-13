@@ -14,6 +14,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import com.nks.imgd.component.converter.JwtKeyConverter;
+
 /**
  * @author nks
  * @apiNote Spring Security Filter Chain
@@ -47,10 +49,15 @@ public class SecurityConfig {
                                 .requestMatchers("/auth/**").permitAll()            // 로그인, 토큰 인증 관련
                                 .requestMatchers("/user/**").permitAll()            // 사용자 관련
                                 .requestMatchers("/group/**").permitAll()           // 그룹 관련       
-                                .requestMatchers("/api/**").permitAll()             // API 관련
+                                .requestMatchers("/file/**").permitAll()             // API 관련
                                 .requestMatchers("/favicon.ico").permitAll()        // favicon
                                 .anyRequest().authenticated()
                 )
+				// OAuth2 리소스 서버 설정 (JWT 인증 방식 사용)
+				.oauth2ResourceServer(oauth2 -> oauth2
+					.jwt(jwt -> jwt.jwtAuthenticationConverter(new JwtKeyConverter()))
+					.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+				)
                 // 인증 실패 시 401 반환
                 .exceptionHandling(exceptionHandling ->
                         exceptionHandling.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
