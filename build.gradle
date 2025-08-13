@@ -50,6 +50,10 @@ dependencies {
     implementation 'io.jsonwebtoken:jjwt-impl:0.12.3'
     implementation 'io.jsonwebtoken:jjwt-jackson:0.12.3'
 
+    // ✅ Oauth2
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+
     // ✅ Image Processing
     implementation "com.sksamuel.scrimage:scrimage-core:4.3.0"
     implementation "com.sksamuel.scrimage:scrimage-webp:4.3.0"
