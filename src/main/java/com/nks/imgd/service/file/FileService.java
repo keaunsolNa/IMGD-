@@ -133,7 +133,7 @@ public class FileService {
     }
 
 	/**
-	 * @param parentId 폴더가 생성될 부모 폴더 ID
+	 * @param folderId 폴더가 생성될 부모 폴더 ID
 	 * @param userId 폴더를 생성하는 그룹의 MST_USER_ID
 	 * @param groupId 폴더가 생성될 그룹 ID
 	 * @param fileOrgNm 생성할 파일 원본 이름
@@ -144,15 +144,15 @@ public class FileService {
 	 * DB row 생성 → 물리 디렉터리 생성(실패 시 롤백)
 	 */
 	@Transactional(rollbackFor = Exception.class)
-	public int makeFile(Long parentId, String userId, Long groupId, String fileOrgNm, File originalFile)
+	public int makeFile(Long folderId, String userId, Long groupId, String fileOrgNm, File originalFile)
 	{
 
-		String parentName = selectFileNmByDirId(parentId);
-		String relativeChain = selectRootPath(parentId);
+		String parentName = selectFileNmByDirId(folderId);
+		String relativeChain = selectRootPath(folderId);
 		String fileNm = UUID.randomUUID().toString();
-		String path = selectFileNmByDirId(parentId);
+		String path = selectFileNmByDirId(folderId);
 
-		int result = fileTableMapper.makeFile(fileNm, fileOrgNm, path, parentId, groupId, userId);
+		int result = fileTableMapper.makeFile(fileNm, fileOrgNm, path, folderId, groupId, userId);
 		if (result != 1) return -1;
 
 		Path base        = resolveUnderRoot(relativeChain).resolve(sanitizeSegment(parentName));
