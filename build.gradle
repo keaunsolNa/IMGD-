@@ -45,6 +45,11 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
+    // ✅ JWT
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
+    implementation 'io.jsonwebtoken:jjwt-impl:0.12.3'
+    implementation 'io.jsonwebtoken:jjwt-jackson:0.12.3'
+
     // ✅ Image Processing
     implementation "com.sksamuel.scrimage:scrimage-core:4.3.0"
     implementation "com.sksamuel.scrimage:scrimage-webp:4.3.0"
