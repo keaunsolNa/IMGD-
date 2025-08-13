@@ -21,10 +21,10 @@ import lombok.RequiredArgsConstructor;
  */
 @Service
 @RequiredArgsConstructor
-public class OauthService {
+public class AuthService {
 
 	private static final ObjectMapper mapper = new ObjectMapper();
-	private static final Logger logger = LoggerFactory.getLogger(OauthService.class);
+	private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
 	private final List<SocialOauth> socialOauthList;
 
 	public Map<String, String> request(SocialLoginType socialLoginType) {

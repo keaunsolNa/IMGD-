@@ -149,15 +149,15 @@ public class KakaoOauth implements SocialOauth {
 
 		if (null == user) {
 
-			UserTableDTO userTableDTO = new UserTableDTO();
+			user = new UserTableDTO();
 
-			userTableDTO.setUserId(id);
-			userTableDTO.setName(jsonNode.get("properties").get("nickname").asText());
-			userTableDTO.setEmail("익명");
-			userTableDTO.setNickName(jsonNode.get("properties").get("nickname").asText());
-			userTableDTO.setLoginType(SocialLoginType.KAKAO);
+			user.setUserId(id);
+			user.setName(jsonNode.get("properties").get("nickname").asText());
+			user.setEmail("익명");
+			user.setNickName(jsonNode.get("properties").get("nickname").asText());
+			user.setLoginType(SocialLoginType.KAKAO);
 
-			userTableMapper.makeNewUser(userTableDTO);
+			userTableMapper.makeNewUser(user);
 
 		} else {
 
@@ -170,7 +170,6 @@ public class KakaoOauth implements SocialOauth {
 		String userRefreshToken = jwtTokenProvider.generateRefreshToken(user);
 		String userAccessToken = jwtTokenProvider.generateAccessToken(user);
 
-		assert user != null;
 		logger.info("LOGIN : [{}]", user.getName());
 
 		return new String[] {userRefreshToken, userAccessToken};

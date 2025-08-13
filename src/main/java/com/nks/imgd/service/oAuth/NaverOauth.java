@@ -169,16 +169,15 @@ public class NaverOauth implements SocialOauth {
 
 		if (null == user) {
 
-			RandomNickNameMaker randomNickNameMaker = new RandomNickNameMaker();
-			UserTableDTO userTableDTO = new UserTableDTO();
+			user = new UserTableDTO();
 
-			userTableDTO.setUserId(id);
-			userTableDTO.setName(jsonNode.get("name").asText());
-			userTableDTO.setEmail(jsonNode.get("email").asText());
-			userTableDTO.setNickName(randomNickNameMaker.makeRandomNickName());
-			userTableDTO.setLoginType(SocialLoginType.NAVER);
+			user.setUserId(id);
+			user.setName(jsonNode.get("name").asText());
+			user.setEmail(jsonNode.get("email").asText());
+			user.setNickName(new RandomNickNameMaker().makeRandomNickName());
+			user.setLoginType(SocialLoginType.NAVER);
 
-			userTableMapper.makeNewUser(userTableDTO);
+			userTableMapper.makeNewUser(user);
 
 		} else {
 
@@ -191,7 +190,6 @@ public class NaverOauth implements SocialOauth {
 		String userRefreshToken = jwtTokenProvider.generateRefreshToken(user);
 		String userAccessToken = jwtTokenProvider.generateAccessToken(user);
 
-		assert user != null;
 		logger.info("LOGIN : [{}]", user.getName());
 
 		return new String[] {userRefreshToken, userAccessToken};

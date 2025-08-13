@@ -21,7 +21,7 @@ import com.nks.imgd.component.config.JwtTokenProvider;
 import com.nks.imgd.component.util.maker.TokenMaker;
 import com.nks.imgd.dto.Enum.SocialLoginType;
 import com.nks.imgd.dto.userAndRole.UserTableDTO;
-import com.nks.imgd.service.oAuth.OauthService;
+import com.nks.imgd.service.oAuth.AuthService;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -38,7 +38,7 @@ import lombok.RequiredArgsConstructor;
 public class OauthController {
 
 	private static final Logger logger = LoggerFactory.getLogger(OauthController.class);
-	private final OauthService oauthService;
+	private final AuthService authService;
 	private final JwtTokenProvider jwtTokenProvider;
 	private final TokenMaker tokenMaker;
 
@@ -52,7 +52,7 @@ public class OauthController {
 		@PathVariable(name = "socialLoginType") SocialLoginType socialLoginType) {
 
 		return ResponseEntity.ok()
-			.body(oauthService.request(socialLoginType));
+			.body(authService.request(socialLoginType));
 	}
 
 	/**
@@ -72,9 +72,9 @@ public class OauthController {
 
 		String[] tokens;
 		if (socialLoginType.equals(SocialLoginType.GOOGLE)) {
-			tokens = oauthService.requestUserInfo(authorizationCode.get("authorizationCode"));
+			tokens = authService.requestUserInfo(authorizationCode.get("authorizationCode"));
 		} else {
-			tokens = oauthService.requestAccessToken(socialLoginType, authorizationCode.get("authorizationCode"));
+			tokens = authService.requestAccessToken(socialLoginType, authorizationCode.get("authorizationCode"));
 		}
 
 		// refreshToken
