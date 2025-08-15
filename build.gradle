@@ -61,7 +61,7 @@ dependencies {
     // ✅ Devtools
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
-
+    implementation 'org.apache.httpcomponents.client5:httpclient5'
     // ✅ TEST
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
