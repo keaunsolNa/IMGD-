@@ -31,7 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(controllers = OauthController.class)
 @AutoConfigureMockMvc(addFilters = false) // 시큐리티 필터 비활성화
-class OauthControllerTest {
+class AuthControllerTest {
 
 	@Autowired
 	MockMvc mockMvc;
