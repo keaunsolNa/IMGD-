@@ -75,7 +75,10 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(
-                List.of("http://localhost:3000", "https://localhost:3000"   // 로컬 환경
+                List.of("http://localhost:3000", "https://localhost:3000",
+                        "http://127.0.0.1:8081",
+                        "http://192.168.25.6:8081",
+                        "http://localhost:8081"// 로컬 환경
                 ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));       // 허용할 HTTP 메서드
         configuration.setAllowedHeaders(List.of("Content-Type", "Authorization"));      // 허용할 요청 헤더
