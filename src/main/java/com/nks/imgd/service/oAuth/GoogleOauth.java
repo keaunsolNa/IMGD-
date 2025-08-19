@@ -11,8 +11,11 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -85,23 +88,45 @@ public class GoogleOauth implements SocialOauth {
 	@Override
 	public String requestAccessToken(String code) {
 
-		Map<String, Object> params = new HashMap<>();
-		params.put("code", code);
-		params.put("client_id", GOOGLE_CLIENT_ID);
-		params.put("client_secret", GOOGLE_CLIENT_SECRET);
-		params.put("redirect_uri", GOOGLE_CALLBACK_URL);
-		params.put("grant_type", GOOGLE_GRANT_TYPE);
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+		MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+		form.add("code", code);
+		form.add("client_id", GOOGLE_CLIENT_ID);
+		form.add("client_secret", GOOGLE_CLIENT_SECRET);
+		form.add("redirect_uri", GOOGLE_CALLBACK_URL); // authorize 때와 1글자도 동일해야 함
+		form.add("grant_type", GOOGLE_GRANT_TYPE);     // authorization_code
+		//
+		// Map<String, Object> params = new HashMap<>();
+		// params.put("code", code);
+		// params.put("client_id", GOOGLE_CLIENT_ID);
+		// params.put("client_secret", GOOGLE_CLIENT_SECRET);
+		// params.put("redirect_uri", GOOGLE_CALLBACK_URL);
+		// params.put("grant_type", GOOGLE_GRANT_TYPE);
 
 		try {
 
-			ResponseEntity<String> responseEntity = restTemplate.postForEntity(GOOGLE_TOKEN_URL, params, String.class);
+			HttpEntity<MultiValueMap<String, String>> req = new HttpEntity<>(form, headers);
+			ResponseEntity<String> res =
+				restTemplate.postForEntity(GOOGLE_TOKEN_URL, req, String.class);
 
-			if (responseEntity.getStatusCode() == HttpStatus.OK) {
-				return responseEntity.getBody();
+			// ResponseEntity<String> responseEntity = restTemplate.postForEntity(GOOGLE_TOKEN_URL, params, String.class);
+
+			// if (responseEntity.getStatusCode() == HttpStatus.OK) {
+			// 	return responseEntity.getBody();
+			// } else {
+			// 	logger.warn("Failed to retrieve Google token: {}", responseEntity.getStatusCode());
+			// 	throw new RuntimeException("Failed to retrieve Google token");
+			// }
+
+			if (res.getStatusCode() == HttpStatus.OK) {
+				return res.getBody();
 			} else {
-				logger.warn("Failed to retrieve Google token: {}", responseEntity.getStatusCode());
+				logger.warn("Failed to retrieve Google token: {}", res.getStatusCode());
 				throw new RuntimeException("Failed to retrieve Google token");
 			}
+
 		} catch (Exception e) {
 			logger.warn("Exception during Google token retrieval: ", e);
 			throw new RuntimeException("Exception during Google token retrieval", e);

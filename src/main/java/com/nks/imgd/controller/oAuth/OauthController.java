@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -66,16 +67,20 @@ public class OauthController {
 	 */
 	@PostMapping(value = "/login/{socialLoginType}/callback")
 	@ResponseBody
+	@CrossOrigin(origins = "http://localhost:8081")
 	public ResponseEntity<Map<String, Object>> callback(
 		@PathVariable(name = "socialLoginType") SocialLoginType socialLoginType,
 		@RequestBody Map<String, String> authorizationCode, HttpServletResponse httpServletResponse) {
 
 		String[] tokens;
-		if (socialLoginType.equals(SocialLoginType.GOOGLE)) {
-			tokens = authService.requestUserInfo(authorizationCode.get("authorizationCode"));
-		} else {
-			tokens = authService.requestAccessToken(socialLoginType, authorizationCode.get("authorizationCode"));
-		}
+		String code = authorizationCode.get("authorizationCode");
+
+		tokens = authService.requestAccessToken(socialLoginType, code /*, redirectUri*/);
+		// if (socialLoginType.equals(SocialLoginType.GOOGLE)) {
+		// 	tokens = authService.requestUserInfo(authorizationCode.get("authorizationCode"));
+		// } else {
+		// 	tokens = authService.requestAccessToken(socialLoginType, authorizationCode.get("authorizationCode"));
+		// }
 
 		// refreshToken
 		String refreshTokenValue = tokens[0];
@@ -91,7 +96,8 @@ public class OauthController {
 
 		Map<String, Object> response = new HashMap<>();
 		response.put("redirectUrl", redirectUrl);
-		response.put("accessToken", accessToken);
+		// response.put("accessToken", accessToken);
+		response.put("accessToken", accessTokenValue);
 
 		return ResponseEntity.ok(response);
 
@@ -104,6 +110,7 @@ public class OauthController {
 	 */
 	@PostMapping(value = "/getAccessToken")
 	@ResponseBody
+	@CrossOrigin(origins = "http://localhost:8081")
 	public ResponseEntity<Map<String, String>> getAccessToken(HttpServletRequest request) {
 
 		String token = jwtTokenProvider.resolveToken(request);
@@ -136,6 +143,7 @@ public class OauthController {
 	 */
 	@PostMapping(value = "/logout")
 	@ResponseBody
+	@CrossOrigin(origins = "http://localhost:8081")
 	public ResponseEntity<Map<String, String>> logout(HttpServletRequest request, HttpServletResponse response) {
 
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();

@@ -33,7 +33,7 @@
              , MOD_DTM
              , MOD_ID
           FROM USER_TABLE
-         WHERE USER_ID = ${userId}
+         WHERE USER_ID = #{id}
     </select>
 
     <select id="findHighestUserRole">
@@ -42,7 +42,7 @@
           FROM USER_TABLE T1
              , USER_ROLE T2
              , ROLES T3
-         WHERE T1.USER_ID = ${userId}
+         WHERE T1.USER_ID = #{id}
            AND T1.USER_ID = T2.USER_ID
            AND T2.ROLE_ID = T3.ROLE_ID
          ORDER BY T3.ROLE_ID DESC
@@ -53,26 +53,26 @@
         INSERT
           INTO USER_TABLE
         VALUES (
-                 ${user.userId}
-               , ${user.name}
-               , ${user.email}
-               , ${user.nickName}
+                 #{user.userId}
+               , #{user.name}
+               , #{user.email}
+               , #{user.nickName}
                , NULL
-               , ${user.loginType}
+               , #{user.loginType}
                , DATE_FORMAT(NOW(), '%Y%m%d')
                , DATE_FORMAT(NOW(), '%Y%m%d')
-               , #{group.groupMstUserId}
+               , #{user.userId}
                , DATE_FORMAT(NOW(), '%Y%m%d')
-               , #{group.groupMstUserId}
+               , #{user.userId}
                )
     </insert>
 
     <update id="updateUser">
         UPDATE USER_TABLE
-           SET NAME = ${user.name}
-             , EMAIL = ${user.email}
+           SET NAME = #{user.name}
+             , EMAIL = #{user.email}
              , LAST_LOGIN_DATE = DATE_FORMAT(NOW(), '%Y%m%d')
              , MOD_DTM = DATE_FORMAT(NOW(), '%Y%m%d')
-         WHERE USER_ID = #{user.id};
+         WHERE USER_ID = #{user.userId}
     </update>
 </mapper>
