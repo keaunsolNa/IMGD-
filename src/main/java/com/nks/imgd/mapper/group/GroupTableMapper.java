@@ -1,5 +1,7 @@
 package com.nks.imgd.mapper.group;
 
+import java.util.List;
+
 import org.apache.ibatis.annotations.Mapper;
 
 import com.nks.imgd.dto.group.GroupTableDTO;
@@ -7,6 +9,8 @@ import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface GroupTableMapper {
+
+	List<GroupTableDTO> findGroupName(@Param("userId") String userId);
 
 	int makeNewGroup(@Param("group") GroupTableDTO dto);
 

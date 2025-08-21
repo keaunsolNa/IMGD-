@@ -1,15 +1,21 @@
 package com.nks.imgd.service.group;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.nks.imgd.dto.group.GroupTableDTO;
 import com.nks.imgd.mapper.group.GroupTableMapper;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author nks
  * @apiNote Group 관련 작업을 하는 서비스
  * 			해당 서비스는 Group MST_USER 만 접근 가능하다.
  */
+@Slf4j
 @Service
 public class GroupService {
 
@@ -17,6 +23,19 @@ public class GroupService {
 
 	public GroupService(GroupTableMapper groupTableMapper) {
 		this.groupTableMapper = groupTableMapper;
+	}
+
+	/**
+	 * 유저가 가지고 있는 그룹 목록을 반환한다.
+	 *
+	 * @param userId 대상 유저 아이디
+	 * @return 대상이 가지고 있는 그룹 목록
+	 */
+	public List<GroupTableDTO> findGroupName(String userId)
+	{
+
+		System.out.println(groupTableMapper.findGroupName(userId));
+		return groupTableMapper.findGroupName(userId);
 	}
 
 	/**

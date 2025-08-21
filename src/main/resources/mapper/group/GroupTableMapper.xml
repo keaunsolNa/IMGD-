@@ -5,6 +5,20 @@
 
 <mapper namespace="com.nks.imgd.mapper.group.GroupTableMapper">
 
+    <select id="findGroupName">
+        SELECT T1.GROUP_NM
+          FROM GROUP_TABLE T1
+             , GROUP_USER T2
+         WHERE T1.GROUP_ID = T2.GROUP_ID
+           AND T2.USER_ID = #{userId}
+           AND T1.GROUP_ID NOT IN ( SELECT GROUP_ID
+                                     FROM FILE_TABLE
+                                    WHERE TYPE = 'DIR'
+                                      AND FILE_PATH = '/GROUP_IMG'
+                                      AND PARENT_ID = 1
+                                  )
+    </select>
+
     <insert id="makeNewGroup">
         INSERT
           INTO GROUP_TABLE

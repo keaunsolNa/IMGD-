@@ -48,9 +48,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
                                 .requestMatchers("/auth/**").permitAll()            // 로그인, 토큰 인증 관련
-                                .requestMatchers("/user/**").permitAll()            // 사용자 관련
-                                .requestMatchers("/group/**").permitAll()           // 그룹 관련       
-                                .requestMatchers("/file/**").permitAll()             // API 관련
+                                .requestMatchers("/user/**").authenticated()            // 사용자 관련
+                                .requestMatchers("/group/**").authenticated()           // 그룹 관련
+                                .requestMatchers("/file/**").authenticated()             // API 관련
                                 .requestMatchers("/favicon.ico").permitAll()        // favicon
                                 .anyRequest().authenticated()
                 )
