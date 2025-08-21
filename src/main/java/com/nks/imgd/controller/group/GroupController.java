@@ -52,8 +52,6 @@ public class GroupController {
 		}
 	}
 
-
-
 	/**
 	 * 생성된 그룹에 유저를 추가한다.
 	 * 그룹원의 구성은 GroupTable 유지하고,

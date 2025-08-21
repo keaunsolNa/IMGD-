@@ -84,11 +84,14 @@ public class FileService {
     public int makeGroupDir(GroupTableDTO dto)
     {
 
+		System.out.println(dto);
         int result = fileTableMapper.makeGroupDir(dto);
 
 		if (result != 1) return -1;
 
 		FileTableDTO fileDTO = fileTableMapper.selectFileIdByFileOrgNmInDirCase(dto);
+
+		System.out.println(fileDTO);
 		if (fileDTO == null || fileDTO.getFileId() == null) {
 			throw new IllegalStateException("Inserted group row not found: " + dto);
 		}
@@ -98,6 +101,7 @@ public class FileService {
 		String groupFolder = sanitizeSegment(dto.getGroupId() + "_" + dto.getGroupNm());
 		Path target = base.resolve(groupFolder);
 
+		System.out.println(target);
 		createDirectoriesOrThrow(target);
 		log.debug("Created group dir: {}", target);
 		return 1;

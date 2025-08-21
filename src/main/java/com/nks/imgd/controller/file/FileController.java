@@ -6,6 +6,8 @@ import java.nio.file.Path;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,8 +30,11 @@ public class FileController {
 	}
 
 	@PostMapping("/makeGroupDir")
-	public ResponseEntity<String> makeGroupDir(@RequestBody GroupTableDTO dto) {
+	public ResponseEntity<String> makeGroupDir(@RequestBody GroupTableDTO dto, @AuthenticationPrincipal Jwt jwt) {
 
+		dto.setGroupMstUserId(jwt.getSubject());
+
+		System.out.println(dto);
 		int inserted = fileService.makeGroupDir(dto);
 		if (inserted > 0) {
 			return ResponseEntity.ok("Complete make group root directory");

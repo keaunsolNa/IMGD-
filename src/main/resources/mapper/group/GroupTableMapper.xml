@@ -6,7 +6,8 @@
 <mapper namespace="com.nks.imgd.mapper.group.GroupTableMapper">
 
     <select id="findGroupName">
-        SELECT T1.GROUP_NM
+        SELECT T1.GROUP_ID
+             , T1.GROUP_NM
           FROM GROUP_TABLE T1
              , GROUP_USER T2
          WHERE T1.GROUP_ID = T2.GROUP_ID
