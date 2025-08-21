@@ -1,6 +1,5 @@
 package com.nks.imgd.component.config;
 
-import com.nks.imgd.component.util.maker.KeyMaker;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
@@ -15,12 +14,8 @@ public class JwtDecoderConfig {
      *
      * @return decoding 된 정보
      */
-    @Bean
-    public NimbusJwtDecoder jwtDecoder() {
-
-        KeyMaker keyMaker = new KeyMaker();
-        SecretKey key = keyMaker.generateKey();
-
-        return NimbusJwtDecoder.withSecretKey(key).build();
-    }
+	@Bean
+	public NimbusJwtDecoder jwtDecoder(SecretKey jwtSecretKey) {
+		return NimbusJwtDecoder.withSecretKey(jwtSecretKey).build();
+	}
 }

@@ -24,7 +24,7 @@ public class GroupController {
 	 * @param dto 그룹 생성 요청 DTO
 	 * @return 생성 성공 여부
 	 */
-	@PostMapping(value = "/makeGroup")
+	@PostMapping(value = "/createGroup")
 	public ResponseEntity<String> createGroup(@RequestBody GroupTableDTO dto) {
 		int inserted = groupService.makeNewGroup(dto);
 		if (inserted > 0) {
@@ -42,7 +42,7 @@ public class GroupController {
 	 * @param userId 추가할 유저의 ID
 	 * @return 생성 성공 여부
 	 */
-	@PostMapping(value = "/addGroupUser")
+	@PostMapping(value = "/makeNewGroupUser")
 	public ResponseEntity<String> makeNewGroupUser(@RequestBody GroupTableDTO dto, @RequestParam String userId) {
 		int inserted = groupService.makeNewGroupUser(dto, userId);
 		if (inserted > 0) {

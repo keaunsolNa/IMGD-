@@ -13,7 +13,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 
-import com.nks.imgd.component.util.maker.KeyMaker;
 import com.nks.imgd.dto.userAndRole.RolesDTO;
 import com.nks.imgd.dto.userAndRole.UserTableDTO;
 import com.nks.imgd.mapper.user.UserTableMapper;
@@ -35,9 +34,7 @@ import lombok.RequiredArgsConstructor;
 public class JwtTokenProvider {
 
 	private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
-	private static final KeyMaker keyMaker = new KeyMaker();
-	private static final SecretKey KEY = keyMaker.generateKey();
-
+	private final SecretKey jwtSecretKey;
 	private final UserTableMapper userTableMapper;
 
 	@Value("${spring.security.oauth2.authorizationserver.issuer}")
@@ -62,7 +59,7 @@ public class JwtTokenProvider {
 			.claims(createClaims(user))
 			.subject(String.valueOf(user.getUserId()))
 			.expiration(new Date(now + ACCESS_EXPIRATION))
-			.signWith(KEY)
+			.signWith(jwtSecretKey)
 			.compact();
 
 	}
@@ -86,7 +83,7 @@ public class JwtTokenProvider {
 			.claims(createClaims(user))
 			.subject(String.valueOf(user.getUserId()))
 			.expiration(new Date(now + REFRESH_EXPIRATION))
-			.signWith(KEY)
+			.signWith(jwtSecretKey)
 			.compact();
 
 	}
@@ -163,7 +160,7 @@ public class JwtTokenProvider {
 			if (null == token || token.isEmpty())
 				return null;
 			Claims claims = Jwts.parser()
-				.verifyWith(KEY)
+				.verifyWith(jwtSecretKey)
 				.build()
 				.parseSignedClaims(token)
 				.getPayload();
@@ -210,7 +207,7 @@ public class JwtTokenProvider {
 				return false;
 
 			Jwts.parser()
-				.verifyWith(KEY)
+				.verifyWith(jwtSecretKey)
 				.build()
 				.parseSignedClaims(jwtToken)
 				.getPayload();
