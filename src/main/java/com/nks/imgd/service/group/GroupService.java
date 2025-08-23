@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.nks.imgd.component.util.commonMethod.CommonMethod;
 import com.nks.imgd.dto.group.GroupTableDTO;
 import com.nks.imgd.mapper.group.GroupTableMapper;
 
@@ -20,9 +21,21 @@ import lombok.extern.slf4j.Slf4j;
 public class GroupService {
 
 	private final GroupTableMapper groupTableMapper;
+	private final CommonMethod commonMethod = new CommonMethod();
 
 	public GroupService(GroupTableMapper groupTableMapper) {
 		this.groupTableMapper = groupTableMapper;
+	}
+
+	/**
+	 * 유저가 가지고 있는 루트 폴더가 생성되지 않은 그룹 목록을 반환한다.
+	 *
+	 * @param userId 대상 유저 아이디
+	 * @return 대상이 가지고 있는 그룹 목록
+	 */
+	public List<GroupTableDTO> findGroupName(String userId)
+	{
+		return groupTableMapper.findGroupName(userId);
 	}
 
 	/**
@@ -31,11 +44,14 @@ public class GroupService {
 	 * @param userId 대상 유저 아이디
 	 * @return 대상이 가지고 있는 그룹 목록
 	 */
-	public List<GroupTableDTO> findGroupName(String userId)
+	public List<GroupTableDTO> findGroupWhatInside(String userId)
 	{
+		List<GroupTableDTO> list = groupTableMapper.findGroupWhatInside(userId);
+		for (GroupTableDTO groupTableDTO : list) {
+			groupTableDTO.setRegDtm(commonMethod.translateDate(groupTableDTO.getRegDtm()));
+		}
 
-		System.out.println(groupTableMapper.findGroupName(userId));
-		return groupTableMapper.findGroupName(userId);
+		return list;
 	}
 
 	/**

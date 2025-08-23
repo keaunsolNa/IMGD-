@@ -21,7 +21,7 @@ public class GroupController {
 	}
 
 	/**
-	 * 로그인 한 유저가 가지고 있는 그룹을 확인한다.
+	 * 로그인 한 유저가 가지고 있는 그룹 폴더가 없는 그룹을 확인한다.
 	 *
 	 * @param jwt JWT 로그인 되어 있는 권한
 	 * @return 대상 유저가 가지고 있는 그룹 목록
@@ -29,6 +29,17 @@ public class GroupController {
 	@GetMapping("/findGroupName")
 	public ResponseEntity<List<GroupTableDTO>> findGroupName(@AuthenticationPrincipal Jwt jwt) {
 		return ResponseEntity.ok(groupService.findGroupName(jwt.getSubject()));
+	}
+
+	/**
+	 * 로그인 한 유저가 가지고 있는 그룹을 확인한다.
+	 *
+	 * @param jwt JWT 로그인 되어 있는 권한
+	 * @return 대상 유저가 가지고 있는 그룹 목록
+	 */
+	@GetMapping("/findGroupWhatInside")
+	public ResponseEntity<List<GroupTableDTO>> findGroupWhatInside(@AuthenticationPrincipal Jwt jwt) {
+		return ResponseEntity.ok(groupService.findGroupWhatInside(jwt.getSubject()));
 	}
 
 	/**

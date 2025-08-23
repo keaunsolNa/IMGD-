@@ -12,6 +12,7 @@ public class GroupTableDTO {
 	private Long groupId;
 	private String groupNm;
 	private String groupMstUserId;
+	private String groupMstUserNm;
 	private String regDtm;
 	private String regId;
 	private String modDtm;

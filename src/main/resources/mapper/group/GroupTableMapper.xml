@@ -20,6 +20,17 @@
                                   )
     </select>
 
+    <select id="findGroupWhatInside">
+        SELECT T1.GROUP_ID
+             , T1.GROUP_NM
+             , F_GET_USER_NM(T1.GROUP_MST_USER_ID) AS `GROUP_MST_USER_NM`
+             , T1.REG_DTM
+          FROM GROUP_TABLE T1
+             , GROUP_USER T2
+         WHERE T1.GROUP_ID = T2.GROUP_ID
+           AND T2.USER_ID = #{userId}
+    </select>
+
     <insert id="makeNewGroup">
         INSERT
           INTO GROUP_TABLE

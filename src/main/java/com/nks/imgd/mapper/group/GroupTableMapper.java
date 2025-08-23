@@ -12,6 +12,8 @@ public interface GroupTableMapper {
 
 	List<GroupTableDTO> findGroupName(@Param("userId") String userId);
 
+	List<GroupTableDTO> findGroupWhatInside(@Param("userId") String userId);
+
 	int makeNewGroup(@Param("group") GroupTableDTO dto);
 
 	int makeNewGroupUserTable(@Param("group") GroupTableDTO dto,
