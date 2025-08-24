@@ -27,7 +27,12 @@ public class CommonMethod {
 	 */
 	public String translateDate(String date)
 	{
-		if (date == null || !date.matches("\\d{8}")) {
+		if (date == null)
+		{
+			return "";
+		}
+
+		else if (!date.matches("\\d{8}")) {
 			return "입력은 8자리 숫자(yyyyMMdd)여야 합니다: " + date;
 		}
 

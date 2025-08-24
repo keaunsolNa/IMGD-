@@ -5,7 +5,7 @@
 
 <mapper namespace="com.nks.imgd.mapper.user.UserTableMapper">
 
-    <select id="findAll" resultType="com.nks.imgd.dto.userAndRole.UserTableDTO">
+    <select id="findAllUsers" resultType="com.nks.imgd.dto.userAndRole.UserTableDTO">
         SELECT USER_ID
              , NAME
              , EMAIL
@@ -20,7 +20,7 @@
           FROM USER_TABLE
     </select>
 
-    <select id="findById">
+    <select id="findById" resultType="com.nks.imgd.dto.userAndRole.UserTableDTO">
         SELECT USER_ID
              , NAME
              , EMAIL
@@ -36,7 +36,7 @@
          WHERE USER_ID = #{id}
     </select>
 
-    <select id="findHighestUserRole">
+    <select id="findHighestUserRole" resultType="com.nks.imgd.dto.userAndRole.RolesDTO">
         SELECT T3.ROLE_ID
              , T3.ROLE_NM
           FROM USER_TABLE T1
@@ -69,8 +69,7 @@
 
     <update id="updateUser">
         UPDATE USER_TABLE
-           SET NAME = #{user.name}
-             , EMAIL = #{user.email}
+           SET NICK_NAME = #{user.nickName}
              , LAST_LOGIN_DATE = DATE_FORMAT(NOW(), '%Y%m%d')
              , MOD_DTM = DATE_FORMAT(NOW(), '%Y%m%d')
          WHERE USER_ID = #{user.userId}

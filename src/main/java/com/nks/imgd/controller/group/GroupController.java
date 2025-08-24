@@ -96,6 +96,13 @@ public class GroupController {
 		}
 	}
 
+	/**
+	 * 그룹에서 해당 유저를 제거한다.
+	 * @param dto 대상 그룹 테이블
+	 * @param userId 제거할 유저의 ID
+	 * @param jwt JWT 로그인 되어 있는 권한
+	 * @return 삭제 성공 여부
+	 */
 	@DeleteMapping(value = "/deleteGroupUser")
 	public ResponseEntity<String> deleteGroupUser(@RequestBody GroupTableDTO dto, @RequestParam String userId, @AuthenticationPrincipal Jwt jwt) {
 		dto.setGroupMstUserId(jwt.getSubject());
@@ -117,6 +124,13 @@ public class GroupController {
 		}
 	}
 
+	/**
+	 * 그룹에서 MST_USER_ID 를 변경한다.
+	 * @param dto 대상 그룹 테이블
+	 * @param userId 제거할 유저의 ID
+	 * @param jwt JWT 로그인 되어 있는 권한
+	 * @return 삭제 성공 여부
+	 */
 	@PostMapping(value = "/changeMstUserGroup")
 	public ResponseEntity<String> changeMstUserGroup(@RequestBody GroupTableDTO dto, @RequestParam String userId, @AuthenticationPrincipal Jwt jwt) {
 		dto.setGroupMstUserId(jwt.getSubject());

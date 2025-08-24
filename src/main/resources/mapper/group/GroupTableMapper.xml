@@ -5,7 +5,7 @@
 
 <mapper namespace="com.nks.imgd.mapper.group.GroupTableMapper">
 
-    <select id="findGroupName">
+    <select id="findGroupName" resultType="com.nks.imgd.dto.group.GroupTableDTO">
         SELECT T1.GROUP_ID
              , T1.GROUP_NM
           FROM GROUP_TABLE T1
@@ -20,7 +20,7 @@
                                   )
     </select>
 
-    <select id="findGroupWhatInside">
+    <select id="findGroupWhatInside" resultType="com.nks.imgd.dto.group.GroupTableDTO">
         SELECT T1.GROUP_ID
              , T1.GROUP_NM
              , F_GET_USER_NM(T1.GROUP_MST_USER_ID) AS `GROUP_MST_USER_NM`
@@ -31,7 +31,7 @@
            AND T2.USER_ID = #{userId}
     </select>
 
-    <select id="findGroupUserWhatInside">
+    <select id="findGroupUserWhatInside" resultType="com.nks.imgd.dto.group.GroupUserDTO">
         SELECT T1.USER_ID
              , F_GET_USER_NM(T1.USER_ID) AS `USER_NM`
              , T1.REG_DTM
