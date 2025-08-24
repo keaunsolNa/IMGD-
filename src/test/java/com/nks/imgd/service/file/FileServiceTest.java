@@ -1,8 +1,10 @@
 package com.nks.imgd.service.file;
 
+import com.nks.imgd.dto.data.MakeDirDTO;
 import com.nks.imgd.dto.file.FileTableDTO;
 import com.nks.imgd.dto.group.GroupTableDTO;
 import com.nks.imgd.mapper.file.FileTableMapper;
+import com.nks.imgd.service.user.UserProfilePort;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,7 +28,7 @@ import javax.imageio.ImageIO;
  * <p>
  * This test verifies that a group is correctly inserted through
  * {@link FileService#makeGroupDir(GroupTableDTO)} 
- * {@link FileService#makeDir(String, Long, Long, String)}
+ * {@link FileService#makeDir(MakeDirDTO)}
  * {@link FileService#makeFile(Long, String, Long, String, File)}
  * using a mocked {@link FileTableMapper}.
  */
@@ -37,11 +39,12 @@ class FileServiceTest {
 
 	FileTableMapper mapper;
 	FileService service;
+	UserProfilePort userProfilePort;
 
 	@BeforeEach
 	void setUp() {
 		mapper = mock(FileTableMapper.class);
-		service = new FileService(mapper, tempDir.toString());
+		service = new FileService(mapper, userProfilePort);
 
 	}
 
@@ -119,13 +122,19 @@ class FileServiceTest {
 		FileTableDTO nameRow = new FileTableDTO();
 		nameRow.setFileNm(parentName);
 
+		MakeDirDTO dto = new MakeDirDTO();
+		dto.setUserId(userId);
+		dto.setParentId(parentId);
+		dto.setGroupId(groupId);
+		dto.setPath(childName);
+
 		// ✅ When
 		when(mapper.selectRootPath(parentId)).thenReturn(root);
 		when(mapper.selectFileNmByDirId(parentId)).thenReturn(nameRow);
 		// DB insert 성공
-		when(mapper.makeDir(eq(userId), eq(childName), eq(parentName), eq(parentId), eq(groupId))).thenReturn(1);
+		when(mapper.makeDir(dto)).thenReturn(1);
 
-		int result = service.makeDir(userId, parentId, groupId, childName);
+		int result = service.makeDir(dto);
 
 		// ✅ Then
 		assertEquals(1, result);

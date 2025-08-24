@@ -5,24 +5,36 @@
 
 <mapper namespace="com.nks.imgd.mapper.file.FileTableMapper">
 
-    <select id="selectRootPath">
+    <select id="selectRootPath" resultType="com.nks.imgd.dto.file.FileTableDTO">
         SELECT FILE_PATH
              , PARENT_ID
           FROM FILE_TABLE
          WHERE FILE_ID = #{fileId}
     </select>
 
-    <select id="selectFileIdByFileOrgNmInDirCase">
+    <select id="selectFileIdByFileOrgNmInDirCase" resultType="com.nks.imgd.dto.file.FileTableDTO">
         SELECT FILE_ID
           FROM FILE_TABLE
          WHERE FILE_ORG_NM = CONCAT(#{group.groupId}, '_', #{group.groupNm})
            AND TYPE = 'DIR'
     </select>
 
-    <select id="selectFileNmByDirId">
+    <select id="selectFileNmByDirId" resultType="com.nks.imgd.dto.file.FileTableDTO">
         SELECT FILE_NM
           FROM FILE_TABLE
          WHERE FILE_ID = #{dirId}
+    </select>
+    
+    <select id="selectFileById" resultType="com.nks.imgd.dto.file.FileTableDTO">
+        SELECT FILE_ID
+             , FILE_NM
+             , FILE_ORG_NM
+             , FILE_PATH
+             , TYPE
+             , PARENT_ID
+             , GROUP_ID
+          FROM FILE_TABLE
+         WHERE FILE_ID = #{fileId}
     </select>
 
     <insert id="makeGroupDir" >
@@ -45,7 +57,7 @@
           , CONCAT(#{group.groupId}, '_', #{group.groupNm})
           , '/GROUP_IMG'
           , 'DIR'
-          , 1
+          , 2
           , #{group.groupId}
           , DATE_FORMAT(NOW(), '%Y%m%d')
           , #{group.groupMstUserId}
@@ -70,16 +82,16 @@
         )
         VALUES
         (
-          #{dirNm}
-        , #{dirNm}
-        , #{path}
+          #{dto.dirNm}
+        , #{dto.dirNm}
+        , #{dto.path}
         , 'DIR'
-        , #{parentId}
-        , #{groupId}
+        , #{dto.parentId}
+        , #{dto.groupId}
         , DATE_FORMAT(NOW(), '%Y%m%d')
-        , #{userId}
+        , #{dto.userId}
         , DATE_FORMAT(NOW(), '%Y%m%d')
-        , #{userId}
+        , #{dto.userId}
         )
     </insert>
 
@@ -112,6 +124,36 @@
         )
     </insert>
 
+    <insert id="makeUserProfileImg"
+            useGeneratedKeys="true"
+            keyProperty="file.fileId"
+            keyColumn="FILE_ID">
+        INSERT
+          INTO FILE_TABLE
+          ( FILE_NM
+          , FILE_ORG_NM
+          , FILE_PATH
+          , TYPE
+          , PARENT_ID
+          , GROUP_ID
+          , REG_DTM
+          , REG_ID
+          , MOD_DTM
+          , MOD_ID
+          )
+          VALUES
+          ( #{file.fileNm}
+          , #{file.fileOrgNm}
+          , '/PROFILE_IMG'
+          , 'PROFILE'
+          , 3
+          , NULL
+          , DATE_FORMAT(NOW(), '%Y%m%d')
+          , #{userId}
+          , DATE_FORMAT(NOW(), '%Y%m%d')
+          , #{userId}
+          )
+    </insert>
 
 
 </mapper>

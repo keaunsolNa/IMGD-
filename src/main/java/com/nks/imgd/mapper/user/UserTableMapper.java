@@ -16,4 +16,8 @@ public interface UserTableMapper {
 	void makeNewUser(@Param("user") UserTableDTO user);
 
 	int updateUser(@Param("user") UserTableDTO user);
+
+	int updatePictureId(@Param("userId") String userId,
+						@Param("fileId") Long fileId);
+
 }

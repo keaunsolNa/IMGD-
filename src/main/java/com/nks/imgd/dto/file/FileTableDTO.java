@@ -15,6 +15,7 @@ public class FileTableDTO {
 	private String filePath;
 	private String type;
 	private Long parentId;
+	private Long groupId;
 	private String regDtm;
 	private String regId;
 	private String modDtm;

@@ -15,7 +15,8 @@ public class UserTableDTO {
 	private String name;
 	private String email;
 	private String nickName;
-	private String pictureId;
+	private Long pictureId;
+	private String pictureUrl;
 	private SocialLoginType loginType;
 	private String lastLoginDate;
 	private String regDtm;

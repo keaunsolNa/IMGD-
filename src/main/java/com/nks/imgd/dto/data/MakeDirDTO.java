@@ -12,4 +12,5 @@ public class MakeDirDTO {
 	private Long parentId;
 	private String dirNm;
 	private Long groupId;
+	private String path;
 }

@@ -34,7 +34,6 @@ public class FileController {
 
 		dto.setGroupMstUserId(jwt.getSubject());
 
-		System.out.println(dto);
 		int inserted = fileService.makeGroupDir(dto);
 		if (inserted > 0) {
 			return ResponseEntity.ok("Complete make group root directory");
@@ -48,7 +47,7 @@ public class FileController {
 	@PostMapping("/makeDir")
 	public ResponseEntity<String> makeDir(@RequestBody MakeDirDTO req) {
 
-		int inserted = fileService.makeDir(req.getUserId(), req.getParentId(), req.getGroupId(), req.getDirNm());
+		int inserted = fileService.makeDir(req);
 		if (inserted > 0) {
 			return ResponseEntity.ok("Complete make group root directory");
 		}
@@ -79,6 +78,24 @@ public class FileController {
 		} finally {
 			Files.deleteIfExists(tmp); // 임시파일 정리
 		}
-
 	}
+
+	@PostMapping(value = "/makeUserProfileImg", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<String> makeUserProfileImg(@ModelAttribute MakeFileDTO req) throws IOException {
+
+		Path tmp = Files.createTempFile("upload-", ".bin");
+		MultipartFile mf = req.getOriginalFile();
+		mf.transferTo(tmp);
+
+		try {
+			int inserted = fileService.makeUserProfileImg(req, tmp.toFile());
+			return inserted > 0
+				? ResponseEntity.ok("Complete make file")
+				: ResponseEntity.internalServerError().body("Failed make file");
+		} finally {
+			Files.deleteIfExists(tmp); // 임시파일 정리
+		}
+	}
+
+
 }

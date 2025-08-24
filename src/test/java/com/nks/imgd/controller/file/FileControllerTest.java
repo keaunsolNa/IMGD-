@@ -105,7 +105,7 @@ public class FileControllerTest {
 		req.setDirNm("추억");
 
 		// ✅ When
-		when(fileService.makeDir(eq("ksna"), eq(3L), eq(1L), eq("추억"))).thenReturn(1);
+		when(fileService.makeDir(eq(req))).thenReturn(1);
 
 		// ✅ Then
 		mockMvc.perform(post("/file/makeDir")
@@ -128,7 +128,7 @@ public class FileControllerTest {
 		req.setDirNm("추억");
 
 		// ✅ When
-		when(fileService.makeDir(anyString(), anyLong(), anyLong(), anyString())).thenReturn(-1);
+		when(fileService.makeDir(req)).thenReturn(-1);
 
 		// ✅ Then
 		mockMvc.perform(post("/file/makeDir")

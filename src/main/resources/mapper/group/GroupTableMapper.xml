@@ -16,7 +16,7 @@
                                      FROM FILE_TABLE
                                     WHERE TYPE = 'DIR'
                                       AND FILE_PATH = '/GROUP_IMG'
-                                      AND PARENT_ID = 1
+                                      AND PARENT_ID = 2
                                   )
     </select>
 

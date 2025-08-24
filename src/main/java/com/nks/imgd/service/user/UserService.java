@@ -7,14 +7,20 @@ import org.springframework.transaction.annotation.Transactional;
 import com.nks.imgd.component.util.commonMethod.CommonMethod;
 import com.nks.imgd.dto.userAndRole.UserTableDTO;
 import com.nks.imgd.mapper.user.UserTableMapper;
+import com.nks.imgd.service.file.FileService;
 
 @Service
 public class UserService {
 
 	private final UserTableMapper userTableMapper;
 	private final CommonMethod commonMethod = new CommonMethod();
+	private final FileService fileService;
 
-	public UserService(UserTableMapper userTableMapper) { this.userTableMapper = userTableMapper; }
+	public UserService(UserTableMapper userTableMapper, FileService fileService)
+	{
+		this.userTableMapper = userTableMapper;
+		this.fileService = fileService;
+	}
 
 	/**
 	 * 로그인 한 유저가 가지고 있는 회원 정보를 반환한다.
@@ -27,6 +33,14 @@ public class UserService {
 		UserTableDTO userTableDTO = userTableMapper.findById(userId);
 		userTableDTO.setLastLoginDate(commonMethod.translateDate(userTableDTO.getLastLoginDate()));
 		userTableDTO.setRegDtm(commonMethod.translateDate(userTableDTO.getRegDtm()));
+
+		Long fileId = userTableDTO.getPictureId();
+
+		if (null != fileId)
+		{
+			String chainUrl = fileService.selectRootPath(fileId); // "/GROUP_IMG/1_테스트그룹1"
+			userTableDTO.setPictureUrl(chainUrl);
+		}
 
 		return userTableDTO;
 	}
