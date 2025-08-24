@@ -73,7 +73,7 @@ public class FileController {
 				tmp.toFile()
 			);
 			return inserted > 0
-				? ResponseEntity.ok("Complete make file")
+				? ResponseEntity.ok().build()
 				: ResponseEntity.internalServerError().body("Failed make file");
 		} finally {
 			Files.deleteIfExists(tmp); // 임시파일 정리
@@ -84,13 +84,14 @@ public class FileController {
 	public ResponseEntity<String> makeUserProfileImg(@ModelAttribute MakeFileDTO req) throws IOException {
 
 		Path tmp = Files.createTempFile("upload-", ".bin");
+
 		MultipartFile mf = req.getOriginalFile();
 		mf.transferTo(tmp);
 
 		try {
 			int inserted = fileService.makeUserProfileImg(req, tmp.toFile());
 			return inserted > 0
-				? ResponseEntity.ok("Complete make file")
+				? ResponseEntity.ok().build()
 				: ResponseEntity.internalServerError().body("Failed make file");
 		} finally {
 			Files.deleteIfExists(tmp); // 임시파일 정리

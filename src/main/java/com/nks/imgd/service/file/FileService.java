@@ -79,15 +79,6 @@ public class FileService {
 		log.info("IMGD root path = {}", this.rootPath);
 	}
 
-	/**
-	 * 파일의 ID로 파일 정보를 가져온다.
-	 * @param fileId 가져올 파일의 ID
-	 * @return 파일의 정보가 담긴 DTO
-	 */
-	public FileTableDTO selectFileById(Long fileId)
-	{
-		return fileTableMapper.selectFileById(fileId);
-	}
     /**
      * @param dto directory 생성할 그룹
 	 * @return int 결과 값
@@ -107,12 +98,9 @@ public class FileService {
 			throw new IllegalStateException("Inserted group row not found: " + dto);
 		}
 
-		String relativeChain = selectRootPath(fileDTO.getFileId());   // ex) "/GROUP_IMG"
-		Path base = resolveUnderRoot(relativeChain);
-		String groupFolder = sanitizeSegment(dto.getGroupId() + "_" + dto.getGroupNm());
-		Path target = base.resolve(groupFolder);
-
+		Path target = makePathByFileIdAndFileNm(fileDTO.getFileId());
 		createDirectoriesOrThrow(target);
+
 		return 1;
 
 	}
@@ -127,15 +115,11 @@ public class FileService {
     public int makeDir(MakeDirDTO req)
     {
 
-		String parentName = selectFileNmByDirId(req.getParentId());
-		String relativeChain = selectRootPath(req.getParentId());
 		req.setPath(selectFileNmByDirId(req.getParentId()));
-
         int result = fileTableMapper.makeDir(req);
 		if (result != 1) return -1;
 
-		Path base = resolveUnderRoot(relativeChain).resolve(sanitizeSegment(parentName));
-		Path target = base.resolve(sanitizeSegment(req.getDirNm()));
+		Path target = makePathByFileIdAndFileNm(req.getParentId());
 
 		createDirectoriesOrThrow(target);
 		log.debug("Created child dir: {}", target);
@@ -162,11 +146,11 @@ public class FileService {
 		int result = fileTableMapper.makeUserProfileImg(fileDTO, dto.getUserId());
 
 		// 성공 했다면 user 정보 변경한다.
-		if (result == 0)
+		if (result == 1)
 		{
 
 			long fileId = fileDTO.getFileId();
-			
+
 			// ✅ 유저 정보 확인
 			UserTableDTO userTableDTO = userProfilePort.findUserById(dto.getUserId());
 
@@ -183,13 +167,9 @@ public class FileService {
 			userTableDTO.setPictureId(fileId);
 			int userResult = userProfilePort.updatePictureId(userTableDTO.getUserId(), fileId);
 
-			if (userResult == 0)
+			if (userResult == 1)
 			{
-				String relativeChain = selectRootPath(3L);
-				String parentName = selectFileNmByDirId(3L);
-
-				Path base        = resolveUnderRoot(relativeChain).resolve(sanitizeSegment(parentName));
-				Path targetNoExt = base.resolve(sanitizeSegment(fileNm)); // ✅ 실제 저장 파일명 = storedName
+				Path targetNoExt = makePathByFileIdAndFileNm(3L);
 
 				// ✅ 파일 Webp 형태로 변환 및 저장
 				File webp = convertToWebp(targetNoExt, originalFile);
@@ -217,17 +197,13 @@ public class FileService {
 	public int makeFile(Long folderId, String userId, Long groupId, String fileOrgNm, File originalFile)
 	{
 
-		String parentName = selectFileNmByDirId(folderId);
-		String relativeChain = selectRootPath(folderId);
 		String fileNm = UUID.randomUUID().toString();
 		String path = selectFileNmByDirId(folderId);
 
 		int result = fileTableMapper.makeFile(fileNm, fileOrgNm, path, folderId, groupId, userId);
 		if (result != 1) return -1;
 
-		Path base        = resolveUnderRoot(relativeChain).resolve(sanitizeSegment(parentName));
-		Path targetNoExt = base.resolve(sanitizeSegment(fileNm)); // ✅ 실제 저장 파일명 = storedName
-
+		Path targetNoExt = makePathByFileIdAndFileNm(folderId);
 		File webp = convertToWebp(targetNoExt, originalFile);
 
 		log.debug("Created file: {}", webp.getAbsolutePath());
@@ -235,6 +211,20 @@ public class FileService {
 	}
 
 	// ───────────────────────────────── helper methods ───────────────────────────────
+
+	/**
+	 * 파일의 ID와 NM으로
+	 * @param fileId 파일의 ID
+	 * @return 파일의 절대 경로
+	 */
+	public Path makePathByFileIdAndFileNm(Long fileId)
+	{
+
+		String relativeChain = selectRootPath(fileId);
+		String parentName = selectFileNmByDirId(fileId);
+
+		return resolveUnderRoot(relativeChain).resolve(sanitizeSegment(parentName));
+	}
 
 	/**
 	 * 사진 파일을 Webp 형식 파일로 변환한다.

@@ -38,8 +38,10 @@ public class UserService {
 
 		if (null != fileId)
 		{
-			String chainUrl = fileService.selectRootPath(fileId); // "/GROUP_IMG/1_테스트그룹1"
-			userTableDTO.setPictureUrl(chainUrl);
+			String filePath = fileService.makePathByFileIdAndFileNm(fileId) + ".webp";
+
+			System.out.println(filePath);
+			userTableDTO.setPictureUrl(filePath);
 		}
 
 		return userTableDTO;
