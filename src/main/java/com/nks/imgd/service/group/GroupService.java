@@ -3,10 +3,10 @@ package com.nks.imgd.service.group;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import com.nks.imgd.component.util.commonMethod.CommonMethod;
 import com.nks.imgd.dto.group.GroupTableDTO;
+import com.nks.imgd.dto.group.GroupUserDTO;
 import com.nks.imgd.mapper.group.GroupTableMapper;
 
 import lombok.extern.slf4j.Slf4j;
@@ -48,6 +48,22 @@ public class GroupService {
 	{
 		List<GroupTableDTO> list = groupTableMapper.findGroupWhatInside(userId);
 		for (GroupTableDTO groupTableDTO : list) {
+			groupTableDTO.setRegDtm(commonMethod.translateDate(groupTableDTO.getRegDtm()));
+		}
+
+		return list;
+	}
+
+	/**
+	 * 그룹에 속해 있는 유저의 아이디를 조회한다.
+	 *
+	 * @param groupId 대상 그룹 아이디
+	 * @return 그룹이 가지고 있는 유저 목록
+	 */
+	public List<GroupUserDTO> findGroupUserWhatInside(String groupId)
+	{
+		List<GroupUserDTO> list = groupTableMapper.findGroupUserWhatInside(groupId);
+		for (GroupUserDTO groupTableDTO : list) {
 			groupTableDTO.setRegDtm(commonMethod.translateDate(groupTableDTO.getRegDtm()));
 		}
 

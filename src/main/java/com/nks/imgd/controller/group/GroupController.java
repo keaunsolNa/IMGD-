@@ -8,6 +8,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import com.nks.imgd.dto.group.GroupTableDTO;
+import com.nks.imgd.dto.group.GroupUserDTO;
 import com.nks.imgd.service.group.GroupService;
 
 @RestController
@@ -21,7 +22,7 @@ public class GroupController {
 	}
 
 	/**
-	 * 로그인 한 유저가 가지고 있는 그룹 폴더가 없는 그룹을 확인한다.
+	 * 로그인 한 유저가 가지고 있는 그룹 폴더가 없는 그룹을 반환한다.
 	 *
 	 * @param jwt JWT 로그인 되어 있는 권한
 	 * @return 대상 유저가 가지고 있는 그룹 목록
@@ -32,7 +33,7 @@ public class GroupController {
 	}
 
 	/**
-	 * 로그인 한 유저가 가지고 있는 그룹을 확인한다.
+	 * 로그인 한 유저가 가지고 있는 그룹을 반환한다.
 	 *
 	 * @param jwt JWT 로그인 되어 있는 권한
 	 * @return 대상 유저가 가지고 있는 그룹 목록
@@ -40,6 +41,17 @@ public class GroupController {
 	@GetMapping("/findGroupWhatInside")
 	public ResponseEntity<List<GroupTableDTO>> findGroupWhatInside(@AuthenticationPrincipal Jwt jwt) {
 		return ResponseEntity.ok(groupService.findGroupWhatInside(jwt.getSubject()));
+	}
+
+	/**
+	 * 대상 그룹이 가지고 있는 유저 목록을 반환한다.
+	 *
+	 * @param groupId 대상 그룹의 아이디
+	 * @return 대상 유저가 가지고 있는 그룹 목록
+	 */
+	@GetMapping("/findGroupUserWhatInside")
+	public ResponseEntity<List<GroupUserDTO>> findGroupUserWhatInside(@RequestParam String groupId) {
+		return ResponseEntity.ok(groupService.findGroupUserWhatInside(groupId));
 	}
 
 	/**
