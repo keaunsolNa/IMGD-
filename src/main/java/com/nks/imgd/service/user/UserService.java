@@ -7,19 +7,16 @@ import org.springframework.transaction.annotation.Transactional;
 import com.nks.imgd.component.util.commonMethod.CommonMethod;
 import com.nks.imgd.dto.userAndRole.UserTableDTO;
 import com.nks.imgd.mapper.user.UserTableMapper;
-import com.nks.imgd.service.file.FileService;
 
 @Service
 public class UserService {
 
 	private final UserTableMapper userTableMapper;
 	private final CommonMethod commonMethod = new CommonMethod();
-	private final FileService fileService;
 
-	public UserService(UserTableMapper userTableMapper, FileService fileService)
+	public UserService(UserTableMapper userTableMapper)
 	{
 		this.userTableMapper = userTableMapper;
-		this.fileService = fileService;
 	}
 
 	/**
@@ -34,15 +31,15 @@ public class UserService {
 		userTableDTO.setLastLoginDate(commonMethod.translateDate(userTableDTO.getLastLoginDate()));
 		userTableDTO.setRegDtm(commonMethod.translateDate(userTableDTO.getRegDtm()));
 
-		Long fileId = userTableDTO.getPictureId();
+		System.out.println(userTableDTO);
+		// Long fileId = userTableDTO.getPictureId();
 
-		if (null != fileId)
-		{
-			String filePath = fileService.makePathByFileIdAndFileNm(fileId) + ".webp";
-
-			System.out.println(filePath);
-			userTableDTO.setPictureUrl(filePath);
-		}
+		// if (null != fileId)
+		// {
+		// 	String filePath = fileService.makePathByFileIdAndFileNm(fileId) + ".webp";
+		//
+		// 	userTableDTO.setPictureUrl(filePath);
+		// }
 
 		return userTableDTO;
 	}

@@ -155,5 +155,11 @@
           )
     </insert>
 
+    <delete id="deleteById">
+        DELETE
+          FROM FILE_TABLE
+         WHERE FILE_ID = #{fileId}
+    </delete>
+
 
 </mapper>

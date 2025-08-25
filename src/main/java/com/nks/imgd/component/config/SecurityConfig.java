@@ -76,7 +76,10 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(
                 List.of("http://192.168.35.199:8081",
-                        "http://localhost:8081"// 로컬 환경
+                        "http://localhost:8081", // React Native 웹
+						"http://localhost:3000", // React Native 웹 (다른 포트)
+						"http://localhost:19006",// Expo 웹 서버
+						"http://localhost:19000" // Expo 웹 서버 (다른 포트)
                 ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));       // 허용할 HTTP 메서드
         configuration.setAllowedHeaders(List.of("Content-Type", "Authorization"));      // 허용할 요청 헤더

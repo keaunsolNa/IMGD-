@@ -18,15 +18,20 @@ import org.springframework.web.multipart.MultipartFile;
 import com.nks.imgd.dto.data.MakeFileDTO;
 import com.nks.imgd.dto.group.GroupTableDTO;
 import com.nks.imgd.dto.data.MakeDirDTO;
+import com.nks.imgd.dto.userAndRole.UserTableDTO;
 import com.nks.imgd.service.file.FileService;
+import com.nks.imgd.service.user.UserService;
 
 @RestController
 @RequestMapping("/file")
 public class FileController {
 
 	private final FileService fileService;
-	public FileController(FileService fileService) {
+	private final UserService userService;
+
+	public FileController(FileService fileService, UserService userService) {
 		this.fileService = fileService;
+		this.userService = userService;
 	}
 
 	@PostMapping("/makeGroupDir")
@@ -81,7 +86,7 @@ public class FileController {
 	}
 
 	@PostMapping(value = "/makeUserProfileImg", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<String> makeUserProfileImg(@ModelAttribute MakeFileDTO req) throws IOException {
+	public ResponseEntity<UserTableDTO> makeUserProfileImg(@ModelAttribute MakeFileDTO req) throws IOException {
 
 		Path tmp = Files.createTempFile("upload-", ".bin");
 
@@ -91,8 +96,8 @@ public class FileController {
 		try {
 			int inserted = fileService.makeUserProfileImg(req, tmp.toFile());
 			return inserted > 0
-				? ResponseEntity.ok().build()
-				: ResponseEntity.internalServerError().body("Failed make file");
+				? ResponseEntity.ok(userService.findUserById(req.getUserId()))
+				: ResponseEntity.internalServerError().body(null);
 		} finally {
 			Files.deleteIfExists(tmp); // 임시파일 정리
 		}

@@ -159,8 +159,17 @@ public class FileService {
 			// 기존 유저 정보에 사진이 있다면 해당 파일을 삭제한다.
 			if (null != userTableDTO.getPictureId())
 			{
-				// TODO 파일 삭제
-				System.out.println("파일 삭제");
+				try {
+
+					boolean resultDeleteFile = deleteFileById(userTableDTO.getPictureId());
+
+					if (resultDeleteFile) log.info("Deleted file ID: {}", fileId);
+					else log.info("Failed to delete file ID: {}", fileId);
+
+				} catch (Exception e) {
+					// 실패해도 신규 사용에는 영향 없음
+					log.warn("Best-effort delete of old profile image failed. oldPictureId={}", userTableDTO.getPictureId(), e);
+				}
 			}
 
 			// ✅ 유저 정보(사진 ID) 변경
@@ -172,7 +181,7 @@ public class FileService {
 				Path targetNoExt = makePathByFileIdAndFileNm(3L);
 
 				// ✅ 파일 Webp 형태로 변환 및 저장
-				File webp = convertToWebp(targetNoExt, originalFile);
+				File webp = convertToWebp(targetNoExt, originalFile, fileDTO.getFileNm());
 
 				log.debug("Created user profile IMG: {}", webp.getAbsolutePath());
 				return 1;
@@ -204,11 +213,56 @@ public class FileService {
 		if (result != 1) return -1;
 
 		Path targetNoExt = makePathByFileIdAndFileNm(folderId);
-		File webp = convertToWebp(targetNoExt, originalFile);
+		File webp = convertToWebp(targetNoExt, originalFile, fileNm);
 
 		log.debug("Created file: {}", webp.getAbsolutePath());
 		return 1;
 	}
+
+	/**
+	 * 파일 삭제 메서드
+	 * @param fileId 삭제할 파일 아이디
+	 * @return 삭제 성공/실패
+	 */
+	@Transactional(rollbackFor = Exception.class)
+	public boolean deleteFileById(Long fileId) {
+		// 1) 파일 메타 조회
+		FileTableDTO row = fileTableMapper.selectFileById(fileId);
+		if (row == null) {
+			log.warn("deleteFileById: file row not found, fileId={}", fileId);
+			return false;
+		}
+
+		// 디렉터리인 경우 별도 API로 처리하도록 가드
+		if ("DIR".equalsIgnoreCase(row.getType())) {
+			throw new IllegalArgumentException("Directory deletion is not supported here. Use deleteDirRecursively: " + fileId);
+		}
+
+		// 2) 물리 경로 계산
+		//    파일은 "부모 디렉터리 경로" + "fileNm + 확장자"
+		Path parentDir = makePathByFileIdAndFileNm(row.getParentId());
+		// 기본 저장 포맷이 webp라면:
+		Path main = parentDir.resolve(row.getFileNm() + ".webp");
+
+		boolean deletedAny = deleteQuietly(main);
+		// 2-1) 같은 baseName의 파생 파일들(.jpg, .png, *_thumb.webp 등)도 함께 제거
+		deletedAny |= deleteSiblingsByBaseName(parentDir, row.getFileNm());
+
+		if (deletedAny) log.info("deleted physical file ID: {}", fileId);
+		else log.info("failed deleted physical file ID: {}", fileId);
+
+		// 3) DB Row 삭제 (파일 삭제가 일부 실패해도 DB는 맞춰주는 편/또는 soft delete로 전환 가능)
+		int db = fileTableMapper.deleteById(fileId);
+		if (db != 1) {
+			log.warn("deleteFileById: DB row delete failed, fileId={}", fileId);
+		}
+
+		// 4) (선택) 빈 디렉터리 정리
+		cleanupIfEmpty(parentDir);
+
+		return (db == 1);
+	}
+
 
 	// ───────────────────────────────── helper methods ───────────────────────────────
 
@@ -232,12 +286,12 @@ public class FileService {
 	 * @param originalFile 업로드할 파일
 	 * @return 변환된 파일
 	 */
-	public File convertToWebp(Path path, File originalFile)
+	public File convertToWebp(Path path, File originalFile, String fileNm)
 	{
 
 		// 최종 대상: uuid.webp
-		Path target = path.resolveSibling(
-			path.getFileName().toString() + ".webp"
+		Path target = path.resolve(
+			fileNm + ".webp"
 		);
 
 		createDirectoriesOrThrow(target.getParent());
@@ -254,8 +308,11 @@ public class FileService {
 		}
 	}
 
-
-	/** FILE_TABLE를 역추적하여 상대 경로 체인을 돌려준다. */
+	/**
+	 * FILE_TABLE를 역추적하여 상대 경로 체인을 돌려준다.
+	 * @param fileId 대상 파일 ID
+	 * @return 상대 경로 체인
+	 */
 	public String selectRootPath(Long fileId) {
 
 		StringBuilder sb = new StringBuilder();
@@ -274,12 +331,21 @@ public class FileService {
 
 	}
 
+	/**
+	 * 경로 아이디로 파일 이름 반환
+	 * @param dirId 경로 ID
+	 * @return 파일 이름
+	 */
 	public String selectFileNmByDirId(Long dirId) {
 
 		return fileTableMapper.selectFileNmByDirId(dirId).getFileNm();
 	}
 
-	/** DB가 돌려준 상대/절대 비슷한 문자열을 루트 기준 절대 Path로 정규화. */
+	/**
+	 * DB가 돌려준 상대/절대 비슷한 문자열을 루트 기준 절대 Path로 정규화.
+	 * @param relativeOrAbsolute 대상 문자열
+	 * @return 절대경로
+	 */
 	private Path resolveUnderRoot(String relativeOrAbsolute) {
 
 		if (relativeOrAbsolute == null || relativeOrAbsolute.isBlank()) {
@@ -291,13 +357,20 @@ public class FileService {
 
 	}
 
-	/** 금칙문자 치환: Windows 등에서 문제되는 문자들을 '_'로 대체. */
+	/**
+	 * 금칙문자 치환: Windows 등에서 문제되는 문자들을 '_'로 대체.
+	 * @param name 대상 문자열
+	 * @return 치환 문자열
+	 */
 	private String sanitizeSegment(String name) {
 		if (name == null) return "_";
 		return name.replaceAll("[\\\\/:*?\"<>|]", "_").trim();
 	}
 
-	/** 디렉터리 생성(존재 시 통과). 실패 시 일관된 예외로 래핑. */
+	/**
+	 * 디렉터리 생성(존재 시 통과). 실패 시 일관된 예외로 래핑.
+	 * @param dir 대상 디렉터리
+	 */
 	private void createDirectoriesOrThrow(Path dir) {
 		try {
 			Files.createDirectories(dir);
@@ -309,7 +382,10 @@ public class FileService {
 		}
 	}
 
-	// 환경변수 읽어오기
+	/**
+	 * 환경변수 읽어오기
+	 * @return 환경 변수 
+	 */
 	private static String resolveRootFromEnv() {
 		// 1) JVM 옵션: -Dimgd.root.path=...
 		String v = System.getProperty("imgd.root.path");
@@ -323,4 +399,55 @@ public class FileService {
 		}
 		return (v == null || v.isBlank()) ? "C:/IMGD" : v;
 	}
+
+	/**
+	 * 물리 파일을 삭제한다.
+	 * @param p 대상 경로
+	 * @return 결과값
+	 */
+	private boolean deleteQuietly(Path p) {
+		try {
+			return Files.deleteIfExists(p);
+		} catch (IOException e) {
+			log.warn("Failed to delete file: {}", p, e);
+			return false;
+		}
+	}
+
+	/**
+	 * 유사한 이름의 파일을 삭제한다. (확장자별)
+	 * @param dir 대상 경로
+	 * @param baseName 대상 이름
+	 * @return 결과값
+	 */
+	private boolean deleteSiblingsByBaseName(Path dir, String baseName) {
+		boolean any = false;
+		try (var ds = java.nio.file.Files.newDirectoryStream(dir, baseName + "*")) {
+			for (Path p : ds) {
+				// 이미 지운 메인 파일과 같으면 skip
+				any |= deleteQuietly(p);
+			}
+		} catch (IOException e) {
+			log.debug("Skip scanning siblings for {} in {}: {}", baseName, dir, e.toString());
+		}
+		return any;
+	}
+
+	/**
+	 * 폴더가 비었을 경우 폴더를 삭제한다.
+	 * @param dir 대상 폴더
+	 */
+	private void cleanupIfEmpty(Path dir) {
+		try {
+			if (Files.isDirectory(dir) && Files.list(dir).findAny().isEmpty()) {
+				Files.delete(dir);
+				log.debug("Removed empty dir: {}", dir);
+			}
+		} catch (IOException e) {
+			// 디렉터리 정리는 선택 사항이므로 조용히 패스
+			log.debug("Skip cleanup for {}: {}", dir, e.toString());
+		}
+	}
+
+
 }

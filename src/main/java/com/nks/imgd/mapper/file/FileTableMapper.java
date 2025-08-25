@@ -30,4 +30,6 @@ public interface FileTableMapper {
 
 	int makeUserProfileImg(@Param("file") FileTableDTO file
 						 , @Param("userId") String userId);
+
+	int deleteById(@Param("fileId") Long fileId);
 }
