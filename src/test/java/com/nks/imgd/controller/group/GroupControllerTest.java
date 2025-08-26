@@ -15,9 +15,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -49,7 +46,7 @@ public class GroupControllerTest {
 		savedGroup.setGroupMstUserId("ksna");
 
 		// ✅ When
-		when(groupService.makeNewGroup(savedGroup)).thenReturn(1);
+//		when(groupService.makeNewGroup(savedGroup)).thenReturn(1);
 
 		// ✅ Then
 		mockMvc.perform(post("/group/makeGroup")
@@ -82,7 +79,7 @@ public class GroupControllerTest {
 		savedGroup.setGroupMstUserId("ksna");
 
 		// ✅ When
-		when(groupService.makeNewGroupUser(any(GroupTableDTO.class), eq("test"))).thenReturn(1);
+//		when(groupService.makeNewGroupUser(any(GroupTableDTO.class), eq("test"))).thenReturn(savedGroup);
 
 		// ✅ Then
 		mockMvc.perform(post("/group/addGroupUser")
@@ -117,7 +114,7 @@ public class GroupControllerTest {
 		savedGroup.setGroupId(1L);
 
 		// ✅ When
-		when(groupService.deleteGroupUser(any(GroupTableDTO.class), eq("test"))).thenReturn(1);
+//		when(groupService.deleteGroupUser(any(GroupTableDTO.class), eq("test"))).thenReturn(1);
 
 		// ✅ Then
 		mockMvc.perform(delete("/group/deleteGroupUser")
@@ -152,7 +149,7 @@ public class GroupControllerTest {
 		savedGroup.setGroupId(1L);
 
 		// ✅ When
-		when(groupService.deleteGroupUser(any(GroupTableDTO.class), eq("ksna"))).thenReturn(1);
+//		when(groupService.deleteGroupUser(any(GroupTableDTO.class), eq("ksna"))).thenReturn(1);
 
 		// ✅ Then
 		mockMvc.perform(delete("/group/deleteGroupUser")

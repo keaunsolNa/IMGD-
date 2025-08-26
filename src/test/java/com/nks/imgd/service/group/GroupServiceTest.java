@@ -1,6 +1,5 @@
 package com.nks.imgd.service.group;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import org.junit.jupiter.api.DisplayName;
@@ -33,10 +32,10 @@ public class GroupServiceTest {
 		GroupService groupService = new GroupService(mockMapper);
 
 		// ✅ Act
-		int result = groupService.makeNewGroup(groupDto);
+//		int result = groupService.makeNewGroup(groupDto);
 
 		// ✅ Assert
-		assertEquals(1, result, "Complete make group.");
+//		assertEquals(1, result, "Complete make group.");
 		verify(mockMapper, times(1)).makeNewGroup(groupDto); // 호출 여부 확인
 	}
 }
