@@ -18,6 +18,7 @@ public interface GroupTableMapper {
 
 	List<GroupUserDTO> findGroupUserWhatInside(@Param("groupId") Long groupId);
 
+	List<GroupTableDTO> findGroupByGroupId(@Param("groupId") Long groupId);
 	int makeNewGroup(@Param("group") GroupTableDTO dto);
 
 	int makeNewGroupUserTable(@Param("group") GroupTableDTO dto,

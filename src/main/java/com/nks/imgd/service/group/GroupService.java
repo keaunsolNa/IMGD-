@@ -72,10 +72,10 @@ public class GroupService {
 	 * @return 생성 성공 여부
 	 */
 	@Transactional(rollbackFor = Exception.class)
-	public ResponseEntity<List<GroupUserDTO>> makeNewGroup(GroupTableDTO dto) {
+	public ResponseEntity<List<GroupTableDTO>> createGroup(GroupTableDTO dto) {
 
 		if (groupTableMapper.makeNewGroup(dto) != 1) return ResponseEntity.badRequest().build();
-		return returnResultWhenTransaction(groupTableMapper.makeNewGroupUserTable(dto, dto.getGroupMstUserId()), () -> findGroupUserWhatInside(dto.getGroupId()));
+		return returnResultWhenTransaction(groupTableMapper.makeNewGroupUserTable(dto, dto.getGroupMstUserId()), () -> groupTableMapper.findGroupByGroupId(dto.getGroupId()));
 	}
 
 	/**
@@ -209,6 +209,8 @@ public class GroupService {
 	 */
 	public <T> ResponseEntity<T> returnResultWhenTransaction(int result, Supplier<T> onSuccess) {
 
+		log.info("result, {}", result);
+		log.info("onSuccess.get(), {}", onSuccess.get());
 		if (result == 1) return ResponseEntity.ok(onSuccess.get());
 		else if (result == 0) return ResponseEntity.notFound().build();
 		else return ResponseEntity.badRequest().build();

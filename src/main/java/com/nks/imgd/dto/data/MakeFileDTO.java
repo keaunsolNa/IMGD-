@@ -11,6 +11,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class MakeFileDTO {
 
+	private long fileId;
+	private String fileNm;
+	private String fileOrgNm;
+	private String path;
 	private Long folderId;
 	private String userId;
 	private Long groupId;

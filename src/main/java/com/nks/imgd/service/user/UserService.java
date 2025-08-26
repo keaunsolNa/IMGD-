@@ -12,7 +12,10 @@ import com.nks.imgd.mapper.user.UserTableMapper;
 import java.util.List;
 import java.util.function.Supplier;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Service
+@Slf4j
 public class UserService {
 
 	private final UserTableMapper userTableMapper;
@@ -131,6 +134,8 @@ public class UserService {
 	 */
 	public <T> ResponseEntity<T> returnResultWhenTransaction(int result, Supplier<T> onSuccess)
 	{
+		log.info("result, {}", result);
+		log.info("onSuccess.get(), {}", onSuccess.get());
 		if (result == 1) return ResponseEntity.ok(onSuccess.get());
 		else if (result == 0) return ResponseEntity.notFound().build();
 		else return ResponseEntity.badRequest().build();

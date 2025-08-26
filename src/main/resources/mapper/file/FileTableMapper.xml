@@ -21,6 +21,12 @@
 
     <select id="selectFileNmByDirId" resultType="com.nks.imgd.dto.file.FileTableDTO">
         SELECT FILE_NM
+             , FILE_NM
+             , FILE_ORG_NM
+             , FILE_PATH
+             , TYPE
+             , PARENT_ID
+             , GROUP_ID
           FROM FILE_TABLE
          WHERE FILE_ID = #{dirId}
     </select>
@@ -66,7 +72,10 @@
           )
     </insert>
 
-    <insert id="makeDir">
+    <insert id="makeDir"
+            useGeneratedKeys="true"
+            keyProperty="file.fileId"
+            keyColumn="FILE_ID">
       INSERT
         INTO FILE_TABLE
         ( FILE_NM
@@ -95,7 +104,10 @@
         )
     </insert>
 
-    <insert id="makeFile">
+    <insert id="makeFile"
+            useGeneratedKeys="true"
+            keyProperty="file.fileId"
+            keyColumn="FILE_ID">
       INSERT
         INTO FILE_TABLE
         ( FILE_NM
@@ -111,16 +123,16 @@
         )
         VALUES
         (
-          #{fileNm}
-        , #{fileOrgNm}
-        , #{path}
+          #{dto.fileNm}
+        , #{dto.fileOrgNm}
+        , #{dto.path}
         , 'FILE'
-        , #{parentId}
-        , #{groupId}
+        , #{dto.parentId}
+        , #{dto.groupId}
         , DATE_FORMAT(NOW(), '%Y%m%d')
-        , #{userId}
+        , #{dto.userId}
         , DATE_FORMAT(NOW(), '%Y%m%d')
-        , #{userId}
+        , #{dto.userId}
         )
     </insert>
 

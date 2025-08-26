@@ -16,70 +16,49 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.nks.imgd.dto.data.MakeFileDTO;
+import com.nks.imgd.dto.file.FileTableDTO;
 import com.nks.imgd.dto.group.GroupTableDTO;
 import com.nks.imgd.dto.data.MakeDirDTO;
 import com.nks.imgd.dto.user.UserTableDTO;
 import com.nks.imgd.service.file.FileService;
-import com.nks.imgd.service.user.UserService;
 
 @RestController
 @RequestMapping("/file")
 public class FileController {
 
 	private final FileService fileService;
-	private final UserService userService;
 
-	public FileController(FileService fileService, UserService userService) {
+	public FileController(FileService fileService) {
 		this.fileService = fileService;
-		this.userService = userService;
 	}
 
 	@PostMapping("/makeGroupDir")
-	public ResponseEntity<String> makeGroupDir(@RequestBody GroupTableDTO dto, @AuthenticationPrincipal Jwt jwt) {
-
+	public ResponseEntity<FileTableDTO> makeGroupDir(@RequestBody GroupTableDTO dto, @AuthenticationPrincipal Jwt jwt) {
 		dto.setGroupMstUserId(jwt.getSubject());
+		return fileService.makeGroupDir(dto);
 
-		int inserted = fileService.makeGroupDir(dto);
-		if (inserted > 0) {
-			return ResponseEntity.ok("Complete make group root directory");
-		}
-		else
-		{
-			return ResponseEntity.internalServerError().body("Failed make group root directory");
-		}
 	}
 
 	@PostMapping("/makeDir")
-	public ResponseEntity<String> makeDir(@RequestBody MakeDirDTO req) {
-
-		int inserted = fileService.makeDir(req);
-		if (inserted > 0) {
-			return ResponseEntity.ok("Complete make group root directory");
-		}
-		else
-		{
-			return ResponseEntity.internalServerError().body("Failed make group root directory");
-		}
+	public ResponseEntity<FileTableDTO> makeDir(@RequestBody MakeDirDTO req) {
+		return fileService.makeDir(req);
 	}
 
 	@PostMapping(value = "/makeFile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<String> makeFile(@ModelAttribute MakeFileDTO req) throws IOException {
+	public ResponseEntity<FileTableDTO> makeFile(@ModelAttribute MakeFileDTO req) throws IOException {
 
 		Path tmp = Files.createTempFile("upload-", ".bin");
 		MultipartFile mf = req.getOriginalFile();
 		mf.transferTo(tmp);
 
 		try {
-			int inserted = fileService.makeFile(
+			return fileService.makeFile(
 				req.getFolderId(),
 				req.getUserId(),
 				req.getGroupId(),
 				mf.getOriginalFilename(),     // DB의 원본명 컬럼에는 실제 업로드 파일명 사용
 				tmp.toFile()
 			);
-			return inserted > 0
-				? ResponseEntity.ok().build()
-				: ResponseEntity.internalServerError().body("Failed make file");
 		} finally {
 			Files.deleteIfExists(tmp); // 임시파일 정리
 		}
@@ -94,10 +73,7 @@ public class FileController {
 		mf.transferTo(tmp);
 
 		try {
-			int inserted = fileService.makeUserProfileImg(req, tmp.toFile());
-			return inserted > 0
-				? ResponseEntity.ok(userService.findUserById(req.getUserId()))
-				: ResponseEntity.internalServerError().body(null);
+			return fileService.makeUserProfileImg(req, tmp.toFile());
 		} finally {
 			Files.deleteIfExists(tmp); // 임시파일 정리
 		}

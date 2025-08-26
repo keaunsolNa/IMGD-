@@ -119,7 +119,6 @@
     <update id="updateUser">
         UPDATE USER_TABLE
            SET NICK_NAME = #{user.nickName}
-             , PICTURE_ID = #{user.pictureId}
              , LAST_LOGIN_DATE = DATE_FORMAT(NOW(), '%Y%m%d')
              , MOD_DTM = DATE_FORMAT(NOW(), '%Y%m%d')
          WHERE USER_ID = #{user.userId}

@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 import com.nks.imgd.dto.data.MakeDirDTO;
 import com.nks.imgd.dto.data.MakeFileDTO;
@@ -19,6 +20,7 @@ import com.sksamuel.scrimage.ImmutableImage;
 import com.sksamuel.scrimage.webp.WebpWriter;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -80,51 +82,43 @@ public class FileService {
 	}
 
     /**
-     * @param dto directory 생성할 그룹
-	 * @return int 결과 값
 	 * 그룹 생성시 그룹의 루트가 될 폴더를 만든다.
 	 * DB row 생성 → 물리 디렉터리 생성(실패 시 롤백)
+	 *
+     * @param dto directory 생성할 그룹
+	 * @return 생성된 폴더의 정보
      */
 	@Transactional(rollbackFor = Exception.class)
-    public int makeGroupDir(GroupTableDTO dto)
+    public ResponseEntity<FileTableDTO> makeGroupDir(GroupTableDTO dto)
     {
 
-        int result = fileTableMapper.makeGroupDir(dto);
-		if (result != 1) return -1;
+		if (fileTableMapper.makeGroupDir(dto) != 1) return ResponseEntity.badRequest().build();
 
 		FileTableDTO fileDTO = fileTableMapper.selectFileIdByFileOrgNmInDirCase(dto);
 
 		if (fileDTO == null || fileDTO.getFileId() == null) {
-			throw new IllegalStateException("Inserted group row not found: " + dto);
+			return ResponseEntity.badRequest().build();
 		}
 
-		Path target = makePathByFileIdAndFileNm(fileDTO.getFileId());
-		createDirectoriesOrThrow(target);
-
-		return 1;
+		return returnResultWhenTransaction(createDirectoriesOrThrow(makePathByFileIdAndFileNm(fileDTO.getFileId())),
+			() -> selectFileById(fileDTO.getFileId()));
 
 	}
 
 	/**
-	 * @param req 폴더 정보가 담긴 DTO
-	 * @return int 결과 값
 	 * 하위 디렉터리 생성
 	 * DB row 생성 → 물리 디렉터리 생성(실패 시 롤백)
+	 *
+	 * @param req 폴더 정보가 담긴 DTO
+	 * @return 생성된 폴더 정보
 	 */
 	@Transactional(rollbackFor = Exception.class)
-    public int makeDir(MakeDirDTO req)
+    public ResponseEntity<FileTableDTO> makeDir(MakeDirDTO req)
     {
+		if (fileTableMapper.makeDir(req) != 1) return ResponseEntity.badRequest().build();
 
-		req.setPath(selectFileNmByDirId(req.getParentId()));
-        int result = fileTableMapper.makeDir(req);
-		if (result != 1) return -1;
-
-		Path target = makePathByFileIdAndFileNm(req.getParentId());
-
-		createDirectoriesOrThrow(target);
-		log.debug("Created child dir: {}", target);
-		return 1;
-
+		return returnResultWhenTransaction(createDirectoriesOrThrow(makePathByFileIdAndFileNm(req.getParentId())),
+			() -> selectFileById(req.getFileId()));
     }
 
 	/**
@@ -134,7 +128,7 @@ public class FileService {
 	 * @return insert 후 결과값
 	 */
 	@Transactional(rollbackFor = Exception.class)
-	public int makeUserProfileImg(MakeFileDTO dto, File originalFile)
+	public ResponseEntity<UserTableDTO> makeUserProfileImg(MakeFileDTO dto, File originalFile)
 	{
 		String fileNm = UUID.randomUUID().toString();
 
@@ -145,50 +139,43 @@ public class FileService {
 		// ✅ 파일 테이블에 ROW 생성
 		int result = fileTableMapper.makeUserProfileImg(fileDTO, dto.getUserId());
 
+		if (result != 1) return ResponseEntity.badRequest().build();
+
 		// 성공 했다면 user 정보 변경한다.
-		if (result == 1)
+		long fileId = fileDTO.getFileId();
+
+		// ✅ 유저 정보 확인
+		UserTableDTO userTableDTO = userProfilePort.findUserById(dto.getUserId());
+
+		if (null == userTableDTO) return ResponseEntity.badRequest().build();
+
+		// 기존 유저 정보에 사진이 있다면 해당 파일을 삭제한다.
+		if (null != userTableDTO.getPictureId())
 		{
+			try {
 
-			long fileId = fileDTO.getFileId();
+				boolean resultDeleteFile = deleteFileById(userTableDTO.getPictureId());
 
-			// ✅ 유저 정보 확인
-			UserTableDTO userTableDTO = userProfilePort.findUserById(dto.getUserId());
+				if (resultDeleteFile) log.info("Deleted file ID: {}", fileId);
+				else log.info("Failed to delete file ID: {}", fileId);
 
-			if (null == userTableDTO) return 1;
-
-			// 기존 유저 정보에 사진이 있다면 해당 파일을 삭제한다.
-			if (null != userTableDTO.getPictureId())
-			{
-				try {
-
-					boolean resultDeleteFile = deleteFileById(userTableDTO.getPictureId());
-
-					if (resultDeleteFile) log.info("Deleted file ID: {}", fileId);
-					else log.info("Failed to delete file ID: {}", fileId);
-
-				} catch (Exception e) {
-					// 실패해도 신규 사용에는 영향 없음
-					log.warn("Best-effort delete of old profile image failed. oldPictureId={}", userTableDTO.getPictureId(), e);
-				}
+			} catch (Exception e) {
+				// 실패해도 신규 사용에는 영향 없음
+				log.warn("Best-effort delete of old profile image failed. oldPictureId={}", userTableDTO.getPictureId(), e);
 			}
-
-			// ✅ 유저 정보(사진 ID) 변경
-			userTableDTO.setPictureId(fileId);
-			int userResult = userProfilePort.updatePictureId(userTableDTO.getUserId(), fileId);
-
-			if (userResult == 1)
-			{
-				Path targetNoExt = makePathByFileIdAndFileNm(3L);
-
-				// ✅ 파일 Webp 형태로 변환 및 저장
-				File webp = convertToWebp(targetNoExt, originalFile, fileDTO.getFileNm());
-
-				log.debug("Created user profile IMG: {}", webp.getAbsolutePath());
-				return 1;
-			}
-			else return 0;
 		}
-		else return 0;
+
+		// ✅ 유저 정보(사진 ID) 변경
+		userTableDTO.setPictureId(fileId);
+		int userResult = userProfilePort.updatePictureId(userTableDTO.getUserId(), fileId);
+
+		if (userResult != 1) return ResponseEntity.badRequest().build();
+		Path targetNoExt = makePathByFileIdAndFileNm(3L);
+
+		// ✅ 파일 Webp 형태로 변환 및 저장
+		if (null == convertToWebp(targetNoExt, originalFile, fileDTO.getFileNm())) return ResponseEntity.badRequest().build();
+		else return ResponseEntity.ok(userTableDTO);
+
 	}
 
 	/**
@@ -203,21 +190,32 @@ public class FileService {
 	 * DB row 생성 → 물리 디렉터리 생성(실패 시 롤백)
 	 */
 	@Transactional(rollbackFor = Exception.class)
-	public int makeFile(Long folderId, String userId, Long groupId, String fileOrgNm, File originalFile)
+	public ResponseEntity<FileTableDTO> makeFile(Long folderId, String userId, Long groupId, String fileOrgNm, File originalFile)
 	{
 
+		MakeFileDTO dto =  new MakeFileDTO();
 		String fileNm = UUID.randomUUID().toString();
 		String path = selectFileNmByDirId(folderId);
 
-		int result = fileTableMapper.makeFile(fileNm, fileOrgNm, path, folderId, groupId, userId);
-		if (result != 1) return -1;
+		dto.setFileName(fileNm);
+		dto.setFileOrgNm(fileOrgNm);
+		dto.setPath(path);
+		dto.setFolderId(folderId);
+		dto.setGroupId(groupId);
+		dto.setUserId(userId);
+
+		if (fileTableMapper.makeFile(dto) != 1)
+			return ResponseEntity.badRequest().build();
 
 		Path targetNoExt = makePathByFileIdAndFileNm(folderId);
-		File webp = convertToWebp(targetNoExt, originalFile, fileNm);
 
-		log.debug("Created file: {}", webp.getAbsolutePath());
-		return 1;
+		if (null == convertToWebp(targetNoExt, originalFile, fileNm)) return ResponseEntity.badRequest().build();
+		else return ResponseEntity.ok(selectFileById(dto.getFileId()));
+
 	}
+
+
+	// ───────────────────────────────── helper methods ───────────────────────────────
 
 	/**
 	 * 파일 삭제 메서드
@@ -227,7 +225,7 @@ public class FileService {
 	@Transactional(rollbackFor = Exception.class)
 	public boolean deleteFileById(Long fileId) {
 		// 1) 파일 메타 조회
-		FileTableDTO row = fileTableMapper.selectFileById(fileId);
+		FileTableDTO row = selectFileById(fileId);
 		if (row == null) {
 			log.warn("deleteFileById: file row not found, fileId={}", fileId);
 			return false;
@@ -262,9 +260,6 @@ public class FileService {
 
 		return (db == 1);
 	}
-
-
-	// ───────────────────────────────── helper methods ───────────────────────────────
 
 	/**
 	 * 파일의 ID와 NM으로
@@ -341,6 +336,11 @@ public class FileService {
 		return fileTableMapper.selectFileNmByDirId(dirId).getFileNm();
 	}
 
+	// ───────────────────────────────── helper methods ───────────────────────────────
+
+	public FileTableDTO selectFileById(Long fileId) {
+		return fileTableMapper.selectFileById(fileId);
+	}
 	/**
 	 * DB가 돌려준 상대/절대 비슷한 문자열을 루트 기준 절대 Path로 정규화.
 	 * @param relativeOrAbsolute 대상 문자열
@@ -371,9 +371,11 @@ public class FileService {
 	 * 디렉터리 생성(존재 시 통과). 실패 시 일관된 예외로 래핑.
 	 * @param dir 대상 디렉터리
 	 */
-	private void createDirectoriesOrThrow(Path dir) {
+	private int createDirectoriesOrThrow(Path dir) {
+
 		try {
 			Files.createDirectories(dir);
+			return 1;
 		} catch (FileAlreadyExistsException e) {
 			// 같은 이름의 "파일"이 이미 있는 경우
 			throw new IllegalStateException("Path exists but is not a directory: " + dir, e);
@@ -449,5 +451,19 @@ public class FileService {
 		}
 	}
 
+	/**
+	 * Transaction 결과 값을 반환 한다.
+	 *
+	 * @param result 결과값
+	 * @return 결과값
+	 */
+	public <T> ResponseEntity<T> returnResultWhenTransaction(int result, Supplier<T> onSuccess) {
+
+		log.info("result, {}", result);
+		log.info("onSuccess.get(), {}", onSuccess.get());
+		if (result == 1) return ResponseEntity.ok(onSuccess.get());
+		else if (result == 0) return ResponseEntity.notFound().build();
+		else return ResponseEntity.badRequest().build();
+	}
 
 }

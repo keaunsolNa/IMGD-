@@ -1,6 +1,7 @@
 package com.nks.imgd.mapper.file;
 
 import com.nks.imgd.dto.data.MakeDirDTO;
+import com.nks.imgd.dto.data.MakeFileDTO;
 import com.nks.imgd.dto.file.FileTableDTO;
 import com.nks.imgd.dto.group.GroupTableDTO;
 import org.apache.ibatis.annotations.Mapper;
@@ -21,12 +22,7 @@ public interface FileTableMapper {
 
     int makeDir(@Param("dto") MakeDirDTO dto);
 
-	int makeFile(@Param("fileNm") String fileNm
-			   , @Param("fileOrgNm") String fileOrgNm
-		       , @Param("path") String path
-	  		   , @Param("parentId") Long parentId
-			   , @Param("groupId") Long groupId
-	  		   , @Param("userId") String userId);
+	int makeFile(@Param("dto") MakeFileDTO dto);
 
 	int makeUserProfileImg(@Param("file") FileTableDTO file
 						 , @Param("userId") String userId);

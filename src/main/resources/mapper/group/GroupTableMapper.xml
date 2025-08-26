@@ -39,7 +39,23 @@
         WHERE T1.GROUP_ID = #{groupId}
     </select>
 
-    <insert id="makeNewGroup">
+    <select id="findGroupByGroupId" resultType="com.nks.imgd.dto.group.GroupTableDTO">
+        SELECT GROUP_ID
+             , GROUP_NM
+             , GROUP_MST_USER_ID
+             , REG_DTM
+             , REG_ID
+             , MOD_DTM
+             , MOD_ID
+          FROM GROUP_TABLE
+         WHERE GROUP_ID = #{groupId}
+    </select>
+
+
+    <insert id="makeNewGroup"
+            useGeneratedKeys="true"
+            keyProperty="group.groupId"
+            keyColumn="GROUP_ID">
         INSERT
           INTO GROUP_TABLE
           ( GROUP_NM

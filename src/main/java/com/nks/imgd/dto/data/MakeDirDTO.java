@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MakeDirDTO {
+	private Long fileId;
 	private String userId;
 	private Long parentId;
 	private String dirNm;

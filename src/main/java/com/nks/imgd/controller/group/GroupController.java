@@ -64,10 +64,10 @@ public class GroupController {
 	 * @return 생성 된 그룹의 인원
 	 */
 	@PostMapping("/createGroup")
-	public ResponseEntity<List<GroupUserDTO>> createGroup(@RequestBody GroupTableDTO dto, @AuthenticationPrincipal Jwt jwt) {
+	public ResponseEntity<List<GroupTableDTO>> createGroup(@RequestBody GroupTableDTO dto, @AuthenticationPrincipal Jwt jwt) {
 
 		dto.setGroupMstUserId(jwt.getSubject());
-		return groupService.makeNewGroup(dto);
+		return groupService.createGroup(dto);
 	}
 
 	/**
