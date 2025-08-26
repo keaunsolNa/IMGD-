@@ -26,6 +26,7 @@
              , EMAIL
              , NICK_NAME
              , PICTURE_ID
+             , IF(PICTURE_ID = NULL, 'user_profile_default.png', (SELECT FILE_NM FROM FILE_TABLE WHERE FILE_ID = PICTURE_ID)) PICTURE_NM
              , LOGIN_TYPE
              , LAST_LOGIN_DATE
              , REG_DTM
