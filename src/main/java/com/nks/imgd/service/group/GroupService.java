@@ -168,8 +168,8 @@ public class GroupService {
 	 */
 	public void postProcessingGroupTable(GroupTableDTO group) {
 
-		group.setRegDtm(group.getRegDtm() != null ? commonMethod.translateDate(group.getRegDtm()) : null);
-		group.setModDtm(group.getModDtm() != null ? commonMethod.translateDate(group.getModDtm()) : null);
+		group.setRegDtm(null != group.getRegDtm() ? commonMethod.translateDate(group.getRegDtm()) : null);
+		group.setModDtm(null != group.getModDtm() ? commonMethod.translateDate(group.getModDtm()) : null);
 	}
 
 	/**
@@ -198,8 +198,8 @@ public class GroupService {
 	 */
 	public void postProcessingGroupUserTable(GroupUserDTO group) {
 
-		group.setRegDtm(group.getRegDtm() != null ? commonMethod.translateDate(group.getRegDtm()) : null);
-		group.setModDtm(group.getModDtm() != null ? commonMethod.translateDate(group.getModDtm()) : null);
+		group.setRegDtm(null != group.getRegDtm() ? commonMethod.translateDate(group.getRegDtm()) : null);
+		group.setModDtm(null != group.getModDtm() ? commonMethod.translateDate(group.getModDtm()) : null);
 	}
 	/**
 	 * Transaction 결과 값을 반환 한다.

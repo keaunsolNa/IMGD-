@@ -120,9 +120,10 @@ public class UserService {
 	 */
 	public UserTableDTO postProcessingUserTable(UserTableDTO user) {
 
-		user.setLastLoginDate(user.getLastLoginDate() != null ? commonMethod.translateDate(user.getLastLoginDate()) : null);
-		user.setRegDtm(user.getRegDtm() != null ? commonMethod.translateDate(user.getRegDtm()) : null);
-		user.setModDtm(user.getModDtm() != null ? commonMethod.translateDate(user.getModDtm()) : null);
+		if (null == user) return null;
+		user.setLastLoginDate(null != user.getLastLoginDate()  ? commonMethod.translateDate(user.getLastLoginDate()) : null);
+		user.setRegDtm(null != user.getRegDtm() ? commonMethod.translateDate(user.getRegDtm()) : null);
+		user.setModDtm(null != user.getModDtm() ? commonMethod.translateDate(user.getModDtm()) : null);
 
 		return user;
 	}

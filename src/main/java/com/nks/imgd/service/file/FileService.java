@@ -96,7 +96,7 @@ public class FileService {
 
 		FileTableDTO fileDTO = fileTableMapper.selectFileIdByFileOrgNmInDirCase(dto);
 
-		if (fileDTO == null || fileDTO.getFileId() == null) {
+		if (null == fileDTO  || null == fileDTO.getFileId()) {
 			return ResponseEntity.badRequest().build();
 		}
 
@@ -226,7 +226,7 @@ public class FileService {
 	public boolean deleteFileById(Long fileId) {
 		// 1) 파일 메타 조회
 		FileTableDTO row = selectFileById(fileId);
-		if (row == null) {
+		if (null == row) {
 			log.warn("deleteFileById: file row not found, fileId={}", fileId);
 			return false;
 		}
@@ -314,10 +314,10 @@ public class FileService {
 
 		Long cur = fileId;
 
-		while (cur != null) {
+		while (null != cur) {
 			FileTableDTO r = fileTableMapper.selectRootPath(cur);
 			if (r == null) break;
-			if (r.getFilePath() != null) {
+			if (null != r.getFilePath()) {
 				sb.insert(0, "/" + r.getFilePath());
 			}
 			cur = r.getParentId();
@@ -348,7 +348,7 @@ public class FileService {
 	 */
 	private Path resolveUnderRoot(String relativeOrAbsolute) {
 
-		if (relativeOrAbsolute == null || relativeOrAbsolute.isBlank()) {
+		if (null == relativeOrAbsolute || relativeOrAbsolute.isBlank()) {
 			return rootPath;
 		}
 
@@ -363,7 +363,7 @@ public class FileService {
 	 * @return 치환 문자열
 	 */
 	private String sanitizeSegment(String name) {
-		if (name == null) return "_";
+		if (null == name) return "_";
 		return name.replaceAll("[\\\\/:*?\"<>|]", "_").trim();
 	}
 
@@ -391,7 +391,7 @@ public class FileService {
 	private static String resolveRootFromEnv() {
 		// 1) JVM 옵션: -Dimgd.root.path=...
 		String v = System.getProperty("imgd.root.path");
-		if (v == null || v.isBlank()) {
+		if (null == v || v.isBlank()) {
 			// 2) 환경변수(우선): IMGD_ROOT_PATH (예: C:/IMGD)
 			v = System.getenv("IMGD_ROOT_PATH");
 		}
@@ -399,7 +399,7 @@ public class FileService {
 			// 3) 레거시 호환
 			v = System.getenv("FILE_ROOT");
 		}
-		return (v == null || v.isBlank()) ? "C:/IMGD" : v;
+		return (null == v || v.isBlank()) ? "C:/IMGD" : v;
 	}
 
 	/**
