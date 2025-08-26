@@ -1,4 +1,4 @@
-package com.nks.imgd.dto.userAndRole;
+package com.nks.imgd.dto.Role;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,13 +7,13 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class RolesDTO {
+public class UserRoleDTO {
 
-	private Integer roleId;
-	private String roleNm;
-	private String roleDesc;
+	private String userId;
+	private String roleId;
 	private String regDtm;
 	private String regId;
 	private String modDtm;
 	private String modId;
+
 }

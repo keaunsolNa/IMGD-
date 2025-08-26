@@ -23,7 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nks.imgd.component.config.JwtTokenProvider;
 import com.nks.imgd.component.util.maker.RandomNickNameMaker;
 import com.nks.imgd.dto.Enum.SocialLoginType;
-import com.nks.imgd.dto.userAndRole.UserTableDTO;
+import com.nks.imgd.dto.user.UserTableDTO;
 import com.nks.imgd.mapper.user.UserTableMapper;
 
 import lombok.RequiredArgsConstructor;

@@ -2,7 +2,7 @@ package com.nks.imgd.service.oAuth;
 
 import com.nks.imgd.component.config.JwtTokenProvider;
 import com.nks.imgd.dto.Enum.SocialLoginType;
-import com.nks.imgd.dto.userAndRole.UserTableDTO;
+import com.nks.imgd.dto.user.UserTableDTO;
 import com.nks.imgd.mapper.user.UserTableMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

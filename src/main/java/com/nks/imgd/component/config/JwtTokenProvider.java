@@ -13,8 +13,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 
-import com.nks.imgd.dto.userAndRole.RolesDTO;
-import com.nks.imgd.dto.userAndRole.UserTableDTO;
+import com.nks.imgd.dto.Role.RolesDTO;
+import com.nks.imgd.dto.user.UserTableDTO;
 import com.nks.imgd.mapper.user.UserTableMapper;
 
 import io.jsonwebtoken.Claims;

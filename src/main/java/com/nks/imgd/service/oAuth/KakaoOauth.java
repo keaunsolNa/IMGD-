@@ -19,7 +19,7 @@ import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nks.imgd.dto.Enum.SocialLoginType;
-import com.nks.imgd.dto.userAndRole.UserTableDTO;
+import com.nks.imgd.dto.user.UserTableDTO;
 import com.nks.imgd.mapper.user.UserTableMapper;
 
 import lombok.RequiredArgsConstructor;

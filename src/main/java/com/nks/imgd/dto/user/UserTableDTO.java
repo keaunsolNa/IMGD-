@@ -1,4 +1,4 @@
-package com.nks.imgd.dto.userAndRole;
+package com.nks.imgd.dto.user;
 
 import com.nks.imgd.dto.Enum.SocialLoginType;
 

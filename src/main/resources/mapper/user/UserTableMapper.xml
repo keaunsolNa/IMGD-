@@ -5,7 +5,7 @@
 
 <mapper namespace="com.nks.imgd.mapper.user.UserTableMapper">
 
-    <select id="findAllUsers" resultType="com.nks.imgd.dto.userAndRole.UserTableDTO">
+    <select id="findAllUsers" resultType="com.nks.imgd.dto.user.UserTableDTO">
         SELECT USER_ID
              , NAME
              , EMAIL
@@ -20,7 +20,7 @@
           FROM USER_TABLE
     </select>
 
-    <select id="findById" resultType="com.nks.imgd.dto.userAndRole.UserTableDTO">
+    <select id="findById" resultType="com.nks.imgd.dto.user.UserTableDTO">
         SELECT USER_ID
              , NAME
              , EMAIL
@@ -33,19 +33,67 @@
              , MOD_DTM
              , MOD_ID
           FROM USER_TABLE
-         WHERE USER_ID = #{id}
+         WHERE USER_ID = #{userId}
     </select>
 
-    <select id="findHighestUserRole" resultType="com.nks.imgd.dto.userAndRole.RolesDTO">
+    <select id="findHighestUserRole" resultType="com.nks.imgd.dto.Role.RolesDTO">
         SELECT T3.ROLE_ID
              , T3.ROLE_NM
           FROM USER_TABLE T1
              , USER_ROLE T2
              , ROLES T3
-         WHERE T1.USER_ID = #{id}
+         WHERE T1.USER_ID = #{userId}
            AND T1.USER_ID = T2.USER_ID
            AND T2.ROLE_ID = T3.ROLE_ID
          ORDER BY T3.ROLE_ID DESC
+         LIMIT 1
+    </select>
+
+    <select id="findFriendEachOther" resultType="com.nks.imgd.dto.Role.RolesDTO">
+        SELECT T3.USER_ID
+             , F_GET_USER_NM(T3.USER_ID) NAME
+             , T3.REG_DTM
+             , T1.PICTURE_ID
+        FROM USER_TABLE T1
+           , FRIEND_TABLE T2
+           , USER_FRIEND_TABLE T3
+        WHERE T1.USER_ID = #{userId}
+          AND T1.USER_ID = T2.USER_ID
+          AND T2.FRIEND_ID = T3.FRIEND_ID
+          AND T1.USER_ID IN (SELECT A3.USER_ID
+                             FROM USER_TABLE A1
+                                , FRIEND_TABLE A2
+                                , USER_FRIEND_TABLE A3
+                             WHERE A1.USER_ID = T3.USER_ID
+                               AND A1.USER_ID = A2.USER_ID
+                               AND A2.FRIEND_ID = A3.FRIEND_ID)
+
+    </select>
+
+    <select id="findFriendWhoAddMeButImNot">
+        SELECT T3.USER_ID
+             , T3.NAME
+             , T1.REG_DTM
+             , T3.PICTURE_ID
+          FROM USER_FRIEND_TABLE T1
+             , FRIEND_TABLE T2
+             , USER_TABLE T3
+         WHERE T1.USER_ID = #{userId}
+           AND T1.FRIEND_ID = T2.FRIEND_ID
+           AND T2.USER_ID = T3.USER_ID
+           AND T3.USER_ID NOT IN (SELECT A3.USER_ID
+                                    FROM USER_TABLE A1
+                                       , FRIEND_TABLE A2
+                                       , USER_FRIEND_TABLE A3
+                                   WHERE A1.USER_ID = #{userId}
+                                     AND A1.USER_ID = A2.USER_ID
+                                     AND A2.FRIEND_ID = A3.FRIEND_ID)
+    </select>
+
+    <select id="findFriendTableIdByUserId">
+        SELECT T1.FRIEND_ID
+          FROM FRIEND_TABLE T1
+         WHERE T1.USER_ID = #{userId}
          LIMIT 1
     </select>
 
@@ -83,5 +131,25 @@
             MOD_ID  = #{userId}
         WHERE USER_ID = #{userId}
     </update>
+    
+    <insert id="insertUserFriendTable">
+        INSERT
+          INTO USER_FRIEND_TABLE
+        VALUES (
+                 #{user.friendId}
+               , #{user.userId}
+               , DATE_FORMAT(NOW(), '%Y%m%d')
+               , #{user.userId}
+               , DATE_FORMAT(NOW(), '%Y%m%d')
+               , #{user.userId}
+               )
+    </insert>
+
+    <delete id="deleteUserFriendTable">
+        DELETE
+          FROM USER_FRIEND_TABLE
+         WHERE FRIEND_ID = #{user.friendId}
+           AND USER_ID = #{user.userId}
+    </delete>
 
 </mapper>

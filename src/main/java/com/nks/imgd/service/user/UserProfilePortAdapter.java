@@ -2,7 +2,7 @@ package com.nks.imgd.service.user;
 
 import org.springframework.stereotype.Component;
 
-import com.nks.imgd.dto.userAndRole.UserTableDTO;
+import com.nks.imgd.dto.user.UserTableDTO;
 import com.nks.imgd.mapper.user.UserTableMapper;
 
 import lombok.RequiredArgsConstructor;

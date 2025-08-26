@@ -55,7 +55,7 @@ public class GroupService {
 	}
 
 	/**
-	 * 그룹에 속해 있는 유저의 아이디를 조회한다.
+	 * 그룹에 속해 있는 유저의 아이디를 조회 한다.
 	 *
 	 * @param groupId 대상 그룹 아이디
 	 * @return 그룹이 가지고 있는 유저 목록
@@ -71,9 +71,9 @@ public class GroupService {
 	}
 
 	/**
-	 * 그룹을 생성한다.
+	 * 그룹을 생성 한다.
 	 * GroupTable 테이블 생성 후
-	 * 생성 유저를 통해 GroupUser Table 도 생성한다.
+	 * 생성 유저를 통해 GroupUser Table 도 생성 한다.
 	 *
 	 * @param dto 그룹 생성 요청 DTO
 	 * @return 생성 성공 여부
@@ -114,12 +114,12 @@ public class GroupService {
 	 */
 	public int deleteGroupUser(GroupTableDTO dto, String userId) {
 
-		// 해당 그룹에 대상 유저가 존재하지 않을 경우
+		// 해당 그룹에 대상 유저가 존재 하지 않을 경우
 		if (groupTableMapper.isUserCheck(dto, userId) <= 0) return -1;
 
 		/*
-			삭제하려는 유저가 MST 유저일 경우,
-			그룹의 MST_USER_ID를 변경한 후 삭제해야 한다.
+			삭제 하려는 유저가 MST 유저일 경우,
+			그룹의 MST_USER_ID를 변경한 후 삭제 해야 한다.
 			단, 그룹의 구성원이 1명 뿐일 경우에는 그룹 자체를 삭제한다.
 		 */
 		if (dto.getGroupMstUserId().equals(userId)) {

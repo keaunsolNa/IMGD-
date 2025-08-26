@@ -12,7 +12,7 @@ import com.nks.imgd.dto.data.MakeDirDTO;
 import com.nks.imgd.dto.data.MakeFileDTO;
 import com.nks.imgd.dto.file.FileTableDTO;
 import com.nks.imgd.dto.group.GroupTableDTO;
-import com.nks.imgd.dto.userAndRole.UserTableDTO;
+import com.nks.imgd.dto.user.UserTableDTO;
 import com.nks.imgd.mapper.file.FileTableMapper;
 import com.nks.imgd.service.user.UserProfilePort;
 import com.sksamuel.scrimage.ImmutableImage;

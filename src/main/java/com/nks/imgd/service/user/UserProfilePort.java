@@ -1,6 +1,6 @@
 package com.nks.imgd.service.user;
 
-import com.nks.imgd.dto.userAndRole.UserTableDTO;
+import com.nks.imgd.dto.user.UserTableDTO;
 
 public interface UserProfilePort {
 	int updatePictureId(String userId, Long fileId);
