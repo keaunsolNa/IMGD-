@@ -18,7 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.nks.imgd.dto.data.MakeFileDTO;
 import com.nks.imgd.dto.group.GroupTableDTO;
 import com.nks.imgd.dto.data.MakeDirDTO;
-import com.nks.imgd.dto.userAndRole.UserTableDTO;
+import com.nks.imgd.dto.user.UserTableDTO;
 import com.nks.imgd.service.file.FileService;
 import com.nks.imgd.service.user.UserService;
 
