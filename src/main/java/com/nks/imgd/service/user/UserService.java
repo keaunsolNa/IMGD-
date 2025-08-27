@@ -57,6 +57,37 @@ public class UserService {
 	}
 
 	/**
+	 * 친구 신청을 했지만, 상대는 수락 하지 않은 유저 목록을 가져 온다.
+	 * @param userId 대상 유저 아이디
+	 * @return 대상 목록
+	 */
+	public List<UserTableDTO> findFriendWhoImAddButNot(@Param("userId") String userId) {
+		return postProcessingUserTables(userTableMapper.findFriendWhoImAddButNot(userId));
+	}
+
+	/**
+	 * 내가 등록한 친구 목록을 가져 온다.
+	 * @param userId 대상 유저 아이디
+	 * @return 대상 목록
+	 */
+	public List<UserTableDTO> findFriend(@Param("userId") String userId){
+		return postProcessingUserTables(userTableMapper.findFriend(userId));
+	}
+
+	/**
+	 * 해당 그룹에 소속 되지 않은 친구 목록을 가져 온다.
+	 * @param userId 대상 유자 아이디
+	 * @param groupId 대상 그룹 아이디
+	 * @return 대상 유저 목록
+	 */
+	public List<UserTableDTO> findFriendEachOtherAndNotInGroup(@Param("userId") String userId, @Param("groupId") Long groupId){
+
+		System.out.println(userTableMapper.findFriendEachOtherAndNotInGroup(userId, groupId));
+		System.out.println(userId);
+		System.out.println(groupId);
+		return postProcessingUserTables(userTableMapper.findFriendEachOtherAndNotInGroup(userId, groupId));
+	}
+	/**
 	 * 로그인 한 유저가 가지고 있는 회원 정보를 변경 한다.
 	 *
 	 * @param user 대상 유저 DTO
@@ -77,7 +108,7 @@ public class UserService {
 	public ResponseEntity<List<UserTableDTO>> insertUserFriendTable(@Param("userId") String userId, @Param("targetUserId") String targetUserId) {
 
 		Long friendId = userTableMapper.findFriendTableIdByUserId(userId).getFriendId();
-		return returnResultWhenTransaction(userTableMapper.insertUserFriendTable(targetUserId, friendId), () -> findFriendEachOther(userId));
+		return returnResultWhenTransaction(userTableMapper.insertUserFriendTable(targetUserId, friendId, userId), () -> findFriendEachOther(userId));
 	}
 
 	/**

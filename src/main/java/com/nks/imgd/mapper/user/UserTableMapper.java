@@ -22,6 +22,12 @@ public interface UserTableMapper {
 
 	FriendTableDTO findFriendTableIdByUserId(String userId);
 
+	List<UserTableDTO> findFriendWhoImAddButNot(String userId);
+
+	List<UserTableDTO> findFriend(String userId);
+
+	List<UserTableDTO> findFriendEachOtherAndNotInGroup(String userId, Long groupId);
+
 	void makeNewUser(@Param("user") UserTableDTO user);
 
 	int updateUser(@Param("user") UserTableDTO user);
@@ -29,8 +35,9 @@ public interface UserTableMapper {
 	int updatePictureId(@Param("userId") String userId,
 						@Param("fileId") Long fileId);
 
-	int insertUserFriendTable(@Param("userId") String userId,
-							  @Param("friendId") Long friendId);
+	int insertUserFriendTable(@Param("targetUserId") String targetUserId,
+							  @Param("friendId") Long friendId,
+							  @Param("userId") String userId);
 
 	int deleteUserFriendTable(@Param("userId") String userId,
 							  @Param("friendId") Long friendId);

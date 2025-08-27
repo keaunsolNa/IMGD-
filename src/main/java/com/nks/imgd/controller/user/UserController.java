@@ -61,6 +61,37 @@ public class UserController {
 	}
 
 	/**
+	 * 내가 추가 했지만, 상대는 추가 하지 않은 친구 목록
+	 * @param userId 대상 유저 아이디
+	 * @return 내가 추가한, 나를 추가 하지 않은 유저 목록
+	 */
+	@GetMapping("/findFriendWhoImAddButNot")
+	public ResponseEntity<List<UserTableDTO>> findFriendWhoImAddButNot(@RequestParam String userId) {
+		return ResponseEntity.ok(userService.findFriendWhoImAddButNot(userId));
+	}
+
+	/**
+	 * 전체 친구 목록을 반환 한다.
+	 * @param userId 대상 유저 아이디
+	 * @return 내가 추가한 모든 친구 유저 목록
+	 */
+	@GetMapping("/findFriend")
+	public ResponseEntity<List<UserTableDTO>> findFriend(@RequestParam String userId) {
+		return ResponseEntity.ok(userService.findFriend(userId));
+	}
+
+	/**
+	 * 그룹에 소속 되지 않은 친구 목록을 반환 한다.
+	 * @param userId 대상 유저 아이디
+	 * @param groupId 대상 그룹 아이디
+	 * @return 그룹에 소속 되지 않은 친구 목록
+	 */
+	@GetMapping("/findFriendEachOtherAndNotInGroup")
+	public ResponseEntity<List<UserTableDTO>> findFriendEachOtherAndNotInGroup(@RequestParam String userId, @RequestParam Long groupId) {
+		return ResponseEntity.ok(userService.findFriendEachOtherAndNotInGroup(userId, groupId));
+	}
+	
+	/**
 	 * 대상 유저의 정보를 변경 한다.
 	 *
 	 * @param user 유저 정보

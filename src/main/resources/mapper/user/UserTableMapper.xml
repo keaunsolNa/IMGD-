@@ -26,7 +26,7 @@
              , EMAIL
              , NICK_NAME
              , PICTURE_ID
-             , IF(PICTURE_ID = NULL, 'user_profile_default.png', (SELECT FILE_NM FROM FILE_TABLE WHERE FILE_ID = PICTURE_ID)) PICTURE_NM
+             , F_GET_PICTURE_NM(USER_ID) PICTURE_NM
              , LOGIN_TYPE
              , LAST_LOGIN_DATE
              , REG_DTM
@@ -50,7 +50,7 @@
          LIMIT 1
     </select>
 
-    <select id="findFriendEachOther">
+    <select id="findFriendEachOther" resultType="com.nks.imgd.dto.user.UserTableDTO">
         SELECT T3.USER_ID
              , F_GET_USER_NM(T3.USER_ID) NAME
              , T3.REG_DTM
@@ -72,7 +72,7 @@
 
     </select>
 
-    <select id="findFriendWhoAddMeButImNot">
+    <select id="findFriendWhoAddMeButImNot" resultType="com.nks.imgd.dto.user.UserTableDTO">
         SELECT T3.USER_ID
              , T3.NAME
              , T1.REG_DTM
@@ -93,6 +93,39 @@
                                      AND A2.FRIEND_ID = A3.FRIEND_ID)
     </select>
 
+    <select id="findFriendWhoImAddButNot" resultType="com.nks.imgd.dto.user.UserTableDTO">
+        SELECT T3.USER_ID
+             , F_GET_USER_NM(T3.USER_ID) NAME
+             , T1.REG_DTM
+             , F_GET_PICTURE_NM(T3.USER_ID) PICTURE_NM
+         FROM USER_TABLE T1
+            , FRIEND_TABLE T2
+            , USER_FRIEND_TABLE T3
+        WHERE T1.USER_ID = #{userId}
+          AND T1.USER_ID = T2.USER_ID
+          AND T2.FRIEND_ID = T3.FRIEND_ID
+          AND T3.USER_ID NOT IN ( SELECT A3.USER_ID
+                                    FROM USER_FRIEND_TABLE A1
+                                       , FRIEND_TABLE A2
+                                       , USER_TABLE A3
+                                   WHERE A1.USER_ID = #{userId}
+                                     AND A1.FRIEND_ID = A2.FRIEND_ID
+                                     AND A2.USER_ID = A3.USER_ID)
+    </select>
+
+    <select id="findFriend" resultType="com.nks.imgd.dto.user.UserTableDTO">
+        SELECT T3.USER_ID
+             , F_GET_USER_NM(T3.USER_ID) NAME
+             , T1.REG_DTM
+             , F_GET_PICTURE_NM(T3.USER_ID) PICTURE_NM
+        FROM USER_TABLE T1
+           , FRIEND_TABLE T2
+           , USER_FRIEND_TABLE T3
+        WHERE T1.USER_ID = #{userId}
+          AND T1.USER_ID = T2.USER_ID
+          AND T2.FRIEND_ID = T3.FRIEND_ID
+    </select>
+
     <select id="findFriendTableIdByUserId">
         SELECT T1.FRIEND_ID
           FROM FRIEND_TABLE T1
@@ -100,6 +133,33 @@
          LIMIT 1
     </select>
 
+    <select id="findFriendEachOtherAndNotInGroup" resultType="com.nks.imgd.dto.user.UserTableDTO">
+    SELECT T3.USER_ID
+         , F_GET_USER_NM(T3.USER_ID) NAME
+         , T3.REG_DTM
+         , T1.PICTURE_ID
+         , F_GET_PICTURE_NM(T3.USER_ID) PICTURE_NM
+      FROM USER_TABLE T1
+         , FRIEND_TABLE T2
+         , USER_FRIEND_TABLE T3
+     WHERE T1.USER_ID = #{userId}
+       AND T1.USER_ID = T2.USER_ID
+       AND T2.FRIEND_ID = T3.FRIEND_ID
+       AND T1.USER_ID IN (SELECT A3.USER_ID
+                           FROM USER_TABLE A1
+                              , FRIEND_TABLE A2
+                              , USER_FRIEND_TABLE A3
+                          WHERE A1.USER_ID = T3.USER_ID
+                            AND A1.USER_ID = A2.USER_ID
+                            AND A2.FRIEND_ID = A3.FRIEND_ID)
+       AND T3.USER_ID NOT IN (SELECT B2.USER_ID
+                                FROM GROUP_TABLE B1
+                                   , GROUP_USER B2
+                               WHERE B1.GROUP_ID = #{groupId}
+                                 AND B1.GROUP_ID = B2.GROUP_ID
+                                 AND B1.GROUP_MST_USER_ID = #{userId}
+                               )
+    </select>
     <insert id="makeNewUser">
         INSERT
           INTO USER_TABLE
@@ -139,7 +199,7 @@
           INTO USER_FRIEND_TABLE
         VALUES (
                  #{friendId}
-               , #{userId}
+               , #{targetUserId}
                , DATE_FORMAT(NOW(), '%Y%m%d')
                , #{userId}
                , DATE_FORMAT(NOW(), '%Y%m%d')
