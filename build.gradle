@@ -36,6 +36,9 @@ dependencies {
     // ✅ Security
     implementation 'org.springframework.boot:spring-boot-starter-security'
 
+    // ✅ AOP
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
+
     // ✅ MyBatis + DB
     implementation "org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.5"
     implementation("org.springframework.boot:spring-boot-starter-jdbc")   // JDBC 기본 지원
@@ -60,6 +63,9 @@ dependencies {
 
     // ✅ Devtools
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+    // ✅ Reflection
+    implementation 'org.reflections:reflections:0.9.12'
 
     implementation 'org.apache.httpcomponents.client5:httpclient5'
     // ✅ TEST
