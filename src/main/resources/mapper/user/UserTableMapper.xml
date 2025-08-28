@@ -26,7 +26,7 @@
              , EMAIL
              , NICK_NAME
              , PICTURE_ID
-             , F_GET_PICTURE_NM(USER_ID) PICTURE_NM
+             , F_GET_PICTURE_NM(USER_ID) AS PICTURE_NM
              , LOGIN_TYPE
              , LAST_LOGIN_DATE
              , REG_DTM
@@ -41,11 +41,11 @@
         SELECT T3.ROLE_ID
              , T3.ROLE_NM
           FROM USER_TABLE T1
-             , USER_ROLE T2
-             , ROLES T3
+          JOIN USER_ROLE T2
+            ON T1.USER_ID = T2.USER_ID
+          JOIN ROLES T3
+            ON T2.ROLE_ID = T3.ROLE_ID
          WHERE T1.USER_ID = #{userId}
-           AND T1.USER_ID = T2.USER_ID
-           AND T2.ROLE_ID = T3.ROLE_ID
          ORDER BY T3.ROLE_ID DESC
          LIMIT 1
     </select>
@@ -56,19 +56,21 @@
              , T3.REG_DTM
              , T1.PICTURE_ID
              , F_GET_PICTURE_NM(T3.USER_ID) PICTURE_NM
-        FROM USER_TABLE T1
-           , FRIEND_TABLE T2
-           , USER_FRIEND_TABLE T3
+         FROM USER_TABLE T1
+         JOIN FRIEND_TABLE T2
+           ON T1.USER_ID = T2.USER_ID
+         JOIN USER_FRIEND_TABLE T3
+           ON T2.FRIEND_ID = T3.FRIEND_ID
         WHERE T1.USER_ID = #{userId}
-          AND T1.USER_ID = T2.USER_ID
-          AND T2.FRIEND_ID = T3.FRIEND_ID
+          AND T3.RELATIONSHIP = 'F'
           AND T1.USER_ID IN (SELECT A3.USER_ID
-                             FROM USER_TABLE A1
-                                , FRIEND_TABLE A2
-                                , USER_FRIEND_TABLE A3
-                             WHERE A1.USER_ID = T3.USER_ID
-                               AND A1.USER_ID = A2.USER_ID
-                               AND A2.FRIEND_ID = A3.FRIEND_ID)
+                               FROM USER_TABLE A1
+                               JOIN FRIEND_TABLE A2
+                                 ON A1.USER_ID = A2.USER_ID
+                               JOIN USER_FRIEND_TABLE A3
+                                 ON A2.FRIEND_ID = A3.FRIEND_ID
+                              WHERE A1.USER_ID = T3.USER_ID
+                                AND A3.RELATIONSHIP = 'F')
 
     </select>
 
@@ -77,53 +79,106 @@
              , T3.NAME
              , T1.REG_DTM
              , T3.PICTURE_ID
-             , F_GET_PICTURE_NM(T3.USER_ID) PICTURE_NM
+             , F_GET_PICTURE_NM(T3.USER_ID) AS PICTURE_NM
           FROM USER_FRIEND_TABLE T1
-             , FRIEND_TABLE T2
-             , USER_TABLE T3
+          JOIN FRIEND_TABLE T2
+            ON T1.FRIEND_ID = T2.FRIEND_ID
+          JOIN USER_TABLE T3
+            ON T2.USER_ID = T3.USER_ID
          WHERE T1.USER_ID = #{userId}
-           AND T1.FRIEND_ID = T2.FRIEND_ID
-           AND T2.USER_ID = T3.USER_ID
+           AND T1.RELATIONSHIP = 'F'
            AND T3.USER_ID NOT IN (SELECT A3.USER_ID
                                     FROM USER_TABLE A1
-                                       , FRIEND_TABLE A2
-                                       , USER_FRIEND_TABLE A3
+                                    JOIN FRIEND_TABLE A2
+                                      ON A1.USER_ID = A2.USER_ID
+                                    JOIN USER_FRIEND_TABLE A3
+                                      ON A2.FRIEND_ID = A3.FRIEND_ID
                                    WHERE A1.USER_ID = #{userId}
-                                     AND A1.USER_ID = A2.USER_ID
-                                     AND A2.FRIEND_ID = A3.FRIEND_ID)
+                                  )
     </select>
 
     <select id="findFriendWhoImAddButNot" resultType="com.nks.imgd.dto.user.UserTableDTO">
         SELECT T3.USER_ID
-             , F_GET_USER_NM(T3.USER_ID) NAME
+             , F_GET_USER_NM(T3.USER_ID) AS NAME
              , T1.REG_DTM
-             , F_GET_PICTURE_NM(T3.USER_ID) PICTURE_NM
+             , F_GET_PICTURE_NM(T3.USER_ID) AS PICTURE_NM
          FROM USER_TABLE T1
-            , FRIEND_TABLE T2
-            , USER_FRIEND_TABLE T3
+         JOIN FRIEND_TABLE T2
+           ON T1.USER_ID = T2.USER_ID
+         JOIN USER_FRIEND_TABLE T3
+           ON T2.FRIEND_ID = T3.FRIEND_ID
         WHERE T1.USER_ID = #{userId}
-          AND T1.USER_ID = T2.USER_ID
-          AND T2.FRIEND_ID = T3.FRIEND_ID
+          AND T3.RELATIONSHIP = 'F'
           AND T3.USER_ID NOT IN ( SELECT A3.USER_ID
                                     FROM USER_FRIEND_TABLE A1
-                                       , FRIEND_TABLE A2
-                                       , USER_TABLE A3
-                                   WHERE A1.USER_ID = #{userId}
-                                     AND A1.FRIEND_ID = A2.FRIEND_ID
-                                     AND A2.USER_ID = A3.USER_ID)
+                                    JOIN FRIEND_TABLE A2
+                                      ON A1.FRIEND_ID = A2.FRIEND_ID
+                                    JOIN USER_TABLE A3
+                                      ON A2.USER_ID = A3.USER_ID
+                                   WHERE A1.USER_ID = #{userId} )
+    </select>
+
+    <select id="findFriendWhoImAddButReject" resultType="com.nks.imgd.dto.user.UserTableDTO">
+        SELECT T3.USER_ID
+             , F_GET_USER_NM(T3.USER_ID) AS NAME
+             , T1.REG_DTM
+             , F_GET_PICTURE_NM(T3.USER_ID) AS PICTURE_NM
+        FROM USER_TABLE T1
+        JOIN FRIEND_TABLE T2
+          ON T1.USER_ID = T2.USER_ID
+        JOIN USER_FRIEND_TABLE T3
+          ON T2.FRIEND_ID = T3.FRIEND_ID
+        WHERE T1.USER_ID = #{userId}
+          AND T3.RELATIONSHIP = 'F'
+          AND T3.USER_ID IN ( SELECT A3.USER_ID
+                                FROM USER_FRIEND_TABLE A1
+                                JOIN FRIEND_TABLE A2
+                                  ON A1.FRIEND_ID = A2.FRIEND_ID
+                                JOIN USER_TABLE A3
+                                  ON A2.USER_ID = A3.USER_ID
+                                WHERE A1.USER_ID = #{userId}
+                                  AND A1.RELATIONSHIP = 'R')
     </select>
 
     <select id="findFriend" resultType="com.nks.imgd.dto.user.UserTableDTO">
         SELECT T3.USER_ID
-             , F_GET_USER_NM(T3.USER_ID) NAME
+             , F_GET_USER_NM(T3.USER_ID) AS NAME
              , T1.REG_DTM
-             , F_GET_PICTURE_NM(T3.USER_ID) PICTURE_NM
+             , F_GET_PICTURE_NM(T3.USER_ID) AS PICTURE_NM
+             , T3.RELATIONSHIP
         FROM USER_TABLE T1
-           , FRIEND_TABLE T2
-           , USER_FRIEND_TABLE T3
+        JOIN FRIEND_TABLE T2
+          ON T1.USER_ID = T2.USER_ID
+        JOIN USER_FRIEND_TABLE T3
+          ON T2.FRIEND_ID = T3.FRIEND_ID
         WHERE T1.USER_ID = #{userId}
-          AND T1.USER_ID = T2.USER_ID
-          AND T2.FRIEND_ID = T3.FRIEND_ID
+          AND T3.RELATIONSHIP = 'F'
+    </select>
+
+    <select id="searchFriend" resultType="com.nks.imgd.dto.user.UserTableDTO">
+        SELECT T1.USER_ID
+             , F_GET_USER_NM(T1.USER_ID) AS NAME
+             , T1.REG_DTM
+             , F_GET_PICTURE_NM(T1.USER_ID) AS PICTURE_NM
+             , IFNULL(T3.RELATIONSHIP, 'X') AS RELATIONSHIP
+        FROM USER_TABLE T1
+        JOIN FRIEND_TABLE T2
+          ON T1.USER_ID = T2.USER_ID
+        JOIN USER_FRIEND_TABLE T3
+          ON T2.FRIEND_ID = T3.FRIEND_ID
+       WHERE T1.USER_ID = #{userId}
+       UNION
+       SELECT T1.USER_ID
+            , F_GET_USER_NM(T1.USER_ID) AS NAME
+            , T1.REG_DTM
+            , F_GET_PICTURE_NM(T1.USER_ID) AS PICTURE_NM
+            , IFNULL(T3.RELATIONSHIP, 'N') AS RELATIONSHIP
+        FROM USER_TABLE T1
+        JOIN FRIEND_TABLE T2
+          ON T1.USER_ID = T2.USER_ID
+        LEFT JOIN USER_FRIEND_TABLE T3
+          ON T2.FRIEND_ID = T3.FRIEND_ID
+       WHERE T1.USER_ID = #{userId}
     </select>
 
     <select id="findFriendTableIdByUserId">
@@ -140,23 +195,25 @@
          , T1.PICTURE_ID
          , F_GET_PICTURE_NM(T3.USER_ID) PICTURE_NM
       FROM USER_TABLE T1
-         , FRIEND_TABLE T2
-         , USER_FRIEND_TABLE T3
+      JOIN FRIEND_TABLE T2
+        ON T1.USER_ID = T2.USER_ID
+      JOIN USER_FRIEND_TABLE T3
+        ON T2.FRIEND_ID = T3.FRIEND_ID
      WHERE T1.USER_ID = #{userId}
-       AND T1.USER_ID = T2.USER_ID
-       AND T2.FRIEND_ID = T3.FRIEND_ID
+       AND T3.RELATIONSHIP = 'F'
        AND T1.USER_ID IN (SELECT A3.USER_ID
                            FROM USER_TABLE A1
-                              , FRIEND_TABLE A2
-                              , USER_FRIEND_TABLE A3
+                           JOIN FRIEND_TABLE A2
+                             ON A1.USER_ID = A2.USER_ID
+                           JOIN USER_FRIEND_TABLE A3
+                             ON A2.FRIEND_ID = A3.FRIEND_ID
                           WHERE A1.USER_ID = T3.USER_ID
-                            AND A1.USER_ID = A2.USER_ID
-                            AND A2.FRIEND_ID = A3.FRIEND_ID)
+                            AND A3.RELATIONSHIP = 'F')
        AND T3.USER_ID NOT IN (SELECT B2.USER_ID
                                 FROM GROUP_TABLE B1
-                                   , GROUP_USER B2
+                                JOIN GROUP_USER B2
+                                  ON B1.GROUP_ID = B2.GROUP_ID
                                WHERE B1.GROUP_ID = #{groupId}
-                                 AND B1.GROUP_ID = B2.GROUP_ID
                                  AND B1.GROUP_MST_USER_ID = #{userId}
                                )
     </select>
@@ -200,6 +257,7 @@
         VALUES (
                  #{friendId}
                , #{targetUserId}
+               , #{relationship}
                , DATE_FORMAT(NOW(), '%Y%m%d')
                , #{userId}
                , DATE_FORMAT(NOW(), '%Y%m%d')

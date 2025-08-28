@@ -71,6 +71,16 @@ public class UserController {
 	}
 
 	/**
+	 * 내가 추가 했지만, 상대는 추가 하지 않은 친구 목록
+	 * @param userId 대상 유저 아이디
+	 * @return 내가 추가한, 나를 추가 하지 않은 유저 목록
+	 */
+	@GetMapping("/findFriendWhoImAddButReject")
+	public ResponseEntity<List<UserTableDTO>> findFriendWhoImAddButReject(@RequestParam String userId) {
+		return ResponseEntity.ok(userService.findFriendWhoImAddButReject(userId));
+	}
+
+	/**
 	 * 전체 친구 목록을 반환 한다.
 	 * @param userId 대상 유저 아이디
 	 * @return 내가 추가한 모든 친구 유저 목록
@@ -78,6 +88,16 @@ public class UserController {
 	@GetMapping("/findFriend")
 	public ResponseEntity<List<UserTableDTO>> findFriend(@RequestParam String userId) {
 		return ResponseEntity.ok(userService.findFriend(userId));
+	}
+
+	/**
+	 * 대상과 나와의 관계를 검색한다.
+	 * @param userId 대상 유저 아이디
+	 * @return 내가 추가한 모든 친구 유저 목록
+	 */
+	@GetMapping("/searchFriend")
+	public ResponseEntity<UserTableDTO> searchFriend(@RequestParam String userId) {
+		return ResponseEntity.ok(userService.searchFriend(userId));
 	}
 
 	/**
@@ -106,11 +126,13 @@ public class UserController {
 	 * 친구를 추가 한다.
 	 * @param jwt 로그인 한 유저 토큰 정보
 	 * @param targetUserId 추가 하려는 유저 아이디
+	 * @param relationship F/B/R 세가지로, 친구의 F, 블록의 B, (친구) 거부의 R이 있다.
 	 * @return 상호 친구 목록
 	 */
 	@PostMapping("/insertUserFriendTable")
-	public ResponseEntity<List<UserTableDTO>> insertUserFriendTable(@AuthenticationPrincipal Jwt jwt, String targetUserId) {
-		return userService.insertUserFriendTable(jwt.getSubject(), targetUserId);
+	public ResponseEntity<List<UserTableDTO>> insertUserFriendTable(@AuthenticationPrincipal Jwt jwt, @RequestParam String targetUserId, @RequestParam String relationship) {
+		System.out.println(relationship);
+		return userService.insertUserFriendTable(jwt.getSubject(), targetUserId, relationship);
 	}
 
 	/**
@@ -120,7 +142,7 @@ public class UserController {
 	 * @return 상호 친구 목록
 	 */
 	@DeleteMapping("/deleteUserFriendTable")
-	public ResponseEntity<List<UserTableDTO>> deleteUserFriendTable(@AuthenticationPrincipal Jwt jwt, String targetUserId) {
+	public ResponseEntity<List<UserTableDTO>> deleteUserFriendTable(@AuthenticationPrincipal Jwt jwt, @RequestParam String targetUserId) {
 		return userService.deleteUserFriendTable(jwt.getSubject(), targetUserId);
 	}
 }

@@ -66,6 +66,15 @@ public class UserService {
 	}
 
 	/**
+	 * 친구 신청을 했지만, 상대가 거절한 유저 목록을 가져 온다.
+	 * @param userId 대상 유저 아이디
+	 * @return 대상 목록
+	 */
+	public List<UserTableDTO> findFriendWhoImAddButReject(@Param("userId") String userId) {
+		return postProcessingUserTables(userTableMapper.findFriendWhoImAddButReject(userId));
+	}
+
+	/**
 	 * 내가 등록한 친구 목록을 가져 온다.
 	 * @param userId 대상 유저 아이디
 	 * @return 대상 목록
@@ -75,6 +84,17 @@ public class UserService {
 	}
 
 	/**
+	 * 대상과 나와의 관계를 검색한다.
+	 * @param userId 대상 유저 아이디
+	 * @return 대상 목록
+	 */
+	public UserTableDTO searchFriend(@Param("userId") String userId){
+		System.out.println(postProcessingUserTable(userTableMapper.searchFriend(userId)));
+		return postProcessingUserTable(userTableMapper.searchFriend(userId));
+	}
+
+
+	/**
 	 * 해당 그룹에 소속 되지 않은 친구 목록을 가져 온다.
 	 * @param userId 대상 유자 아이디
 	 * @param groupId 대상 그룹 아이디
@@ -82,9 +102,6 @@ public class UserService {
 	 */
 	public List<UserTableDTO> findFriendEachOtherAndNotInGroup(@Param("userId") String userId, @Param("groupId") Long groupId){
 
-		System.out.println(userTableMapper.findFriendEachOtherAndNotInGroup(userId, groupId));
-		System.out.println(userId);
-		System.out.println(groupId);
 		return postProcessingUserTables(userTableMapper.findFriendEachOtherAndNotInGroup(userId, groupId));
 	}
 	/**
@@ -105,10 +122,11 @@ public class UserService {
 	 * @return 결과값 반환
 	 */
 	@Transactional(rollbackFor = Exception.class)
-	public ResponseEntity<List<UserTableDTO>> insertUserFriendTable(@Param("userId") String userId, @Param("targetUserId") String targetUserId) {
+	public ResponseEntity<List<UserTableDTO>> insertUserFriendTable(@Param("userId") String userId, @Param("targetUserId") String targetUserId, @Param("relationship") String relationship) {
 
 		Long friendId = userTableMapper.findFriendTableIdByUserId(userId).getFriendId();
-		return returnResultWhenTransaction(userTableMapper.insertUserFriendTable(targetUserId, friendId, userId), () -> findFriendEachOther(userId));
+
+		return returnResultWhenTransaction(userTableMapper.insertUserFriendTable(targetUserId, friendId, userId, relationship), () -> findFriendEachOther(userId));
 	}
 
 	/**
@@ -166,8 +184,6 @@ public class UserService {
 	 */
 	public <T> ResponseEntity<T> returnResultWhenTransaction(int result, Supplier<T> onSuccess)
 	{
-		log.info("result, {}", result);
-		log.info("onSuccess.get(), {}", onSuccess.get());
 		if (result == 1) return ResponseEntity.ok(onSuccess.get());
 		else if (result == 0) return ResponseEntity.notFound().build();
 		else return ResponseEntity.badRequest().build();

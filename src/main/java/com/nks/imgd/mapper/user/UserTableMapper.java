@@ -20,11 +20,15 @@ public interface UserTableMapper {
 
 	List<UserTableDTO> findFriendWhoAddMeButImNot(String userId);
 
+	List<UserTableDTO> findFriendWhoImAddButReject(String userId);
+
 	FriendTableDTO findFriendTableIdByUserId(String userId);
 
 	List<UserTableDTO> findFriendWhoImAddButNot(String userId);
 
 	List<UserTableDTO> findFriend(String userId);
+
+	UserTableDTO searchFriend(String userId);
 
 	List<UserTableDTO> findFriendEachOtherAndNotInGroup(String userId, Long groupId);
 
@@ -37,7 +41,8 @@ public interface UserTableMapper {
 
 	int insertUserFriendTable(@Param("targetUserId") String targetUserId,
 							  @Param("friendId") Long friendId,
-							  @Param("userId") String userId);
+							  @Param("userId") String userId,
+							  @Param("relationship") String relationship);
 
 	int deleteUserFriendTable(@Param("userId") String userId,
 							  @Param("friendId") Long friendId);
