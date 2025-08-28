@@ -52,6 +52,7 @@ public class OauthController {
 	public ResponseEntity<Map<String, String>> socialLoginType(
 		@PathVariable(name = "socialLoginType") SocialLoginType socialLoginType) {
 
+
 		return ResponseEntity.ok()
 			.body(authService.request(socialLoginType));
 	}

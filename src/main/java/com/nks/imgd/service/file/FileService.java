@@ -6,9 +6,11 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
 
+import com.nks.imgd.component.util.commonMethod.CommonMethod;
 import com.nks.imgd.dto.data.MakeDirDTO;
 import com.nks.imgd.dto.data.MakeFileDTO;
 import com.nks.imgd.dto.file.FileTableDTO;
@@ -19,6 +21,7 @@ import com.nks.imgd.service.user.UserProfilePort;
 import com.sksamuel.scrimage.ImmutableImage;
 import com.sksamuel.scrimage.webp.WebpWriter;
 
+import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -62,6 +65,7 @@ public class FileService {
 	private final FileTableMapper fileTableMapper;
 	private final UserProfilePort userProfilePort;
 	private final Path rootPath = Paths.get(resolveRootFromEnv()).toAbsolutePath().normalize();
+	private final CommonMethod commonMethod = new CommonMethod();
 
 	/** 운영 기본: 시스템 프로퍼티/환경변수에서 루트 경로 로드 */
 	@Autowired
@@ -81,6 +85,9 @@ public class FileService {
 		log.info("IMGD root path = {}", this.rootPath);
 	}
 
+	public List<FileTableDTO> findFileAndDirectory(@Param("parentId") Long parentId, @Param("groupId")  Long groupId) {
+		return postProcessingFileTables(fileTableMapper.findFileAndDirectory(parentId, groupId));
+	}
     /**
 	 * 그룹 생성시 그룹의 루트가 될 폴더를 만든다.
 	 * DB row 생성 → 물리 디렉터리 생성(실패 시 롤백)
@@ -449,6 +456,38 @@ public class FileService {
 			// 디렉터리 정리는 선택 사항이므로 조용히 패스
 			log.debug("Skip cleanup for {}: {}", dir, e.toString());
 		}
+	}
+
+	/**
+	 * 파일 목록 반환 시 후처리 진행 한다.
+	 * DTM(YYYYMMDD) -> YYYY년 MM월 DD일
+	 * PictureId 있을 경우 -> PictureUrl Setting
+	 * @param files 대상 파일 리스트
+	 * @return 후처리 후 대상 파일 리스트
+	 */
+	public List<FileTableDTO> postProcessingFileTables(List<FileTableDTO> files) {
+
+		for (FileTableDTO file : files) {
+			postProcessingFileTable(file);
+		}
+
+		return files;
+	}
+
+	/**
+	 * 파일 반환 시 후처리 진행 한다.
+	 * DTM(YYYYMMDD) -> YYYY년 MM월 DD일
+	 * PictureId 있을 경우 -> PictureUrl Setting
+	 * @param file 대상 파일
+	 * @return 후처리 후 대상 파일
+	 */
+	public FileTableDTO postProcessingFileTable(FileTableDTO file) {
+
+		if (null == file) return null;
+		file.setRegDtm(null != file.getRegDtm() ? commonMethod.translateDate(file.getRegDtm()) : null);
+		file.setModDtm(null != file.getModDtm() ? commonMethod.translateDate(file.getModDtm()) : null);
+
+		return file;
 	}
 
 	/**
