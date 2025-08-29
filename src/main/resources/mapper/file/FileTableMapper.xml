@@ -22,21 +22,21 @@
            AND GROUP_ID = #{groupId}
     </select>
 
-    <select id="selectRootPath" resultType="com.nks.imgd.dto.file.FileTableDTO">
+    <select id="findRootPath" resultType="com.nks.imgd.dto.file.FileTableDTO">
         SELECT FILE_PATH
              , PARENT_ID
           FROM FILE_TABLE
          WHERE FILE_ID = #{fileId}
     </select>
 
-    <select id="selectFileIdByFileOrgNmInDirCase" resultType="com.nks.imgd.dto.file.FileTableDTO">
+    <select id="findFileIdByFileOrgNmInDirCase" resultType="com.nks.imgd.dto.file.FileTableDTO">
         SELECT FILE_ID
           FROM FILE_TABLE
          WHERE FILE_ORG_NM = CONCAT(#{group.groupId}, '_', #{group.groupNm})
            AND TYPE = 'DIR'
     </select>
 
-    <select id="selectFileNmByDirId" resultType="com.nks.imgd.dto.file.FileTableDTO">
+    <select id="findFileNmByDirId" resultType="com.nks.imgd.dto.file.FileTableDTO">
         SELECT FILE_NM
              , FILE_NM
              , FILE_ORG_NM
@@ -48,7 +48,7 @@
          WHERE FILE_ID = #{dirId}
     </select>
     
-    <select id="selectFileById" resultType="com.nks.imgd.dto.file.FileTableDTO">
+    <select id="findFileById" resultType="com.nks.imgd.dto.file.FileTableDTO">
         SELECT FILE_ID
              , FILE_NM
              , FILE_ORG_NM

@@ -35,11 +35,33 @@ public class FileController {
 		this.fileService = fileService;
 	}
 
+	/**
+	 * 해당 위치에 존재 하는 파일 / 폴더 목록을 반환 한다.
+	 * @param parentId 현재 유저가 위치한 폴더 아이디
+	 * @param groupId 현재 유저가 사용 하는 그룹 아이디
+	 * @return 해당 위치에 존재 하는 파일 / 폴더 목록
+	 */
 	@GetMapping("/findFileAndDirectory")
 	public ResponseEntity<List<FileTableDTO>> findFileAndDirectory(@RequestParam Long parentId, @RequestParam Long groupId) {
 		return ResponseEntity.ok(fileService.findFileAndDirectory(parentId, groupId));
 	}
 
+	/**
+	 * 파일을 반환 한다.
+	 * @param fileId 대상 파일 아이디
+	 * @return 대상 파일 정보
+	 */
+	@GetMapping("findFileById")
+	public ResponseEntity<FileTableDTO> FileTableDTO(@RequestParam Long fileId) {
+		return ResponseEntity.ok(fileService.findFileById(fileId));
+	}
+
+	/**
+	 * 그룹의 Root Folder 생성 한다.
+	 * @param dto 유저가 선택한 그룹에 대한 정보
+	 * @param jwt 유저의 토큰
+	 * @return 해당 폴더 정보 목록
+	 */
 	@PostMapping("/makeGroupDir")
 	public ResponseEntity<FileTableDTO> makeGroupDir(@RequestBody GroupTableDTO dto, @AuthenticationPrincipal Jwt jwt) {
 		dto.setGroupMstUserId(jwt.getSubject());
@@ -47,11 +69,22 @@ public class FileController {
 
 	}
 
+	/**
+	 * 폴더를 생성 한다.
+	 * @param req 폴더 생성에 필요한 정보
+	 * @return 생성된 폴더가 위치한 곳의 파일 / 폴더 목록
+	 */
 	@PostMapping("/makeDir")
 	public ResponseEntity<List<FileTableDTO>> makeDir(@RequestBody MakeDirDTO req) {
 		return fileService.makeDir(req);
 	}
 
+	/**
+	 * 파일을 생성 한다
+	 * @param req 파일 생성에 필요한 정보
+	 * @return 생성한 파일 정보
+	 * @throws IOException 파일 생성 실패 시 IOException 반환
+	 */
 	@PostMapping(value = "/makeFile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<FileTableDTO> makeFile(@ModelAttribute MakeFileDTO req) throws IOException {
 
@@ -72,6 +105,12 @@ public class FileController {
 		}
 	}
 
+	/**
+	 * 유저의 프로필 사진을 변경 / 업로드 한다.
+	 * @param req 프로필 사진에 대한 정보
+	 * @return 유저의 정보
+	 * @throws IOException 파일 업로드 실패 시 IOException 반환
+	 */
 	@PostMapping(value = "/makeUserProfileImg", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<UserTableDTO> makeUserProfileImg(@ModelAttribute MakeFileDTO req) throws IOException {
 
@@ -83,7 +122,7 @@ public class FileController {
 		try {
 			return fileService.makeUserProfileImg(req, tmp.toFile());
 		} finally {
-			Files.deleteIfExists(tmp); // 임시파일 정리
+			Files.deleteIfExists(tmp); // 임시 파일 정리
 		}
 	}
 

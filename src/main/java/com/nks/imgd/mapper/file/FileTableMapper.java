@@ -12,13 +12,13 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface FileTableMapper {
 
-    FileTableDTO selectRootPath(@Param("fileId") Long fileId);
+    FileTableDTO findRootPath(@Param("fileId") Long fileId);
 
-    FileTableDTO selectFileIdByFileOrgNmInDirCase(@Param("group") GroupTableDTO groupTableDTO);
+    FileTableDTO findFileIdByFileOrgNmInDirCase(@Param("group") GroupTableDTO groupTableDTO);
 
-    FileTableDTO selectFileNmByDirId(@Param("dirId") Long dirId);
+    FileTableDTO findFileNmByDirId(@Param("dirId") Long dirId);
 
-	FileTableDTO selectFileById(@Param("fileId") Long fileId);
+	FileTableDTO findFileById(@Param("fileId") Long fileId);
 
 	List<FileTableDTO> findFileAndDirectory(@Param("parentId") Long parentId
 										  , @Param("groupId") Long groupId);
