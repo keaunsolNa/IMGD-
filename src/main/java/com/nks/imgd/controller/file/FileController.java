@@ -48,7 +48,7 @@ public class FileController {
 	}
 
 	@PostMapping("/makeDir")
-	public ResponseEntity<FileTableDTO> makeDir(@RequestBody MakeDirDTO req) {
+	public ResponseEntity<List<FileTableDTO>> makeDir(@RequestBody MakeDirDTO req) {
 		return fileService.makeDir(req);
 	}
 

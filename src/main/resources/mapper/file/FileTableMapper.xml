@@ -56,6 +56,10 @@
              , TYPE
              , PARENT_ID
              , GROUP_ID
+             , REG_DTM
+             , REG_ID
+             , MOD_DTM
+             , MOD_ID
           FROM FILE_TABLE
          WHERE FILE_ID = #{fileId}
     </select>
@@ -91,7 +95,7 @@
 
     <insert id="makeDir"
             useGeneratedKeys="true"
-            keyProperty="file.fileId"
+            keyProperty="dto.fileId"
             keyColumn="FILE_ID">
       INSERT
         INTO FILE_TABLE
@@ -123,7 +127,7 @@
 
     <insert id="makeFile"
             useGeneratedKeys="true"
-            keyProperty="file.fileId"
+            keyProperty="dto.fileId"
             keyColumn="FILE_ID">
       INSERT
         INTO FILE_TABLE
@@ -144,7 +148,7 @@
         , #{dto.fileOrgNm}
         , #{dto.path}
         , 'FILE'
-        , #{dto.parentId}
+        , #{dto.folderId}
         , #{dto.groupId}
         , DATE_FORMAT(NOW(), '%Y%m%d')
         , #{dto.userId}

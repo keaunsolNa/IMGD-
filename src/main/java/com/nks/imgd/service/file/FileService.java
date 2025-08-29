@@ -120,12 +120,14 @@ public class FileService {
 	 * @return 생성된 폴더 정보
 	 */
 	@Transactional(rollbackFor = Exception.class)
-    public ResponseEntity<FileTableDTO> makeDir(MakeDirDTO req)
+    public ResponseEntity<List<FileTableDTO>> makeDir(MakeDirDTO req)
     {
+
+		System.out.println("REQ : " + req);
 		if (fileTableMapper.makeDir(req) != 1) return ResponseEntity.badRequest().build();
 
-		return returnResultWhenTransaction(createDirectoriesOrThrow(makePathByFileIdAndFileNm(req.getParentId())),
-			() -> selectFileById(req.getFileId()));
+		return returnResultWhenTransaction(createDirectoriesOrThrow(Path.of(makePathByFileIdAndFileNm(req.getParentId()) + "\\" + req.getDirNm())),
+			() -> findFileAndDirectory(req.getParentId(), req.getGroupId()));
     }
 
 	/**
@@ -204,12 +206,14 @@ public class FileService {
 		String fileNm = UUID.randomUUID().toString();
 		String path = selectFileNmByDirId(folderId);
 
-		dto.setFileName(fileNm);
+
+		dto.setFileNm(fileNm);
 		dto.setFileOrgNm(fileOrgNm);
 		dto.setPath(path);
 		dto.setFolderId(folderId);
 		dto.setGroupId(groupId);
 		dto.setUserId(userId);
+		System.out.println("DTO : " + dto);
 
 		if (fileTableMapper.makeFile(dto) != 1)
 			return ResponseEntity.badRequest().build();
@@ -296,6 +300,9 @@ public class FileService {
 			fileNm + ".webp"
 		);
 
+		System.out.println("target : " + target);
+		System.out.println("originalFile : " + originalFile);
+		System.out.println("fileNm : " + fileNm);
 		createDirectoriesOrThrow(target.getParent());
 
 		try
@@ -380,6 +387,7 @@ public class FileService {
 	 */
 	private int createDirectoriesOrThrow(Path dir) {
 
+		System.out.println("DIR : " + dir);
 		try {
 			Files.createDirectories(dir);
 			return 1;
