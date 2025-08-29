@@ -1,10 +1,7 @@
 package com.nks.imgd.component.util.aop;
 
-import java.util.Arrays;
-
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.After;
-import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.slf4j.Logger;
@@ -15,12 +12,12 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author nks
- * @apiNote Layer 간 추적 위한 AOP
+ * @apiNote Method 실행 전 후 추적을 위한 AOP
  */
 @Aspect
 @Configuration
 @Slf4j
-public class LoggerAOP {
+public class MethodAOP {
 
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -30,7 +27,9 @@ public class LoggerAOP {
 	 */
 	@Before("execution(* com.nks.imgd..*(..))")
 	public void logBefore(JoinPoint joinPoint) {
+
 		logger.info("Before {}", joinPoint.getSignature().getName());
+
 	}
 
 	/**
@@ -42,19 +41,4 @@ public class LoggerAOP {
 		logger.info("After {}", joinPoint.getSignature().getName());
 	}
 
-	/**
-	 * Exception 발생 시 AOP
-	 * @param joinPoint 실행되는 메서드
-	 * @param ex Exception
-	 */
-	@AfterThrowing(
-		pointcut = "within(com.nks.imgd..*) || within(com.nks.imgd..*)",
-		throwing = "ex"
-	)
-	public void logException(JoinPoint joinPoint, Throwable ex) {
-		String method = joinPoint.getSignature().toShortString();
-		String args = Arrays.toString(joinPoint.getArgs());
-		logger.error("Exception in {} with args={} -> {}: {}",
-			method, args, ex.getClass().getSimpleName(), ex.getMessage(), ex);
-	}
 }
