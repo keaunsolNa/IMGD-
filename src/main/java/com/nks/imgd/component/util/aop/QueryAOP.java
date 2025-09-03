@@ -44,13 +44,13 @@ public class QueryAOP {
 
     private final SqlSessionFactory sqlSessionFactory;
 
-    @Value("${aop.query.enabled:true}")
+    @Value("${aop.query.enabled}")
     private boolean enabled;
 
-    @Value("${aop.query.print-result:true}")
+    @Value("${aop.query.print-result}")
     private boolean printResultSummary;
 
-    @Value("${aop.query.truncate-len:500}")
+    @Value("${aop.query.truncate-len}")
     private int truncateLen;
 
     /**

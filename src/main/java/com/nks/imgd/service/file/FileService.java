@@ -245,6 +245,22 @@ public class FileService {
 	}
 
 	/**
+	 * 파일 삭제
+	 * @param fileId 삭제할 파일 아이디
+	 * @return 삭제할 파일이 있는 곳 정보 (parentId)
+	 */
+	@Transactional(rollbackFor = Exception.class)
+	public ResponseEntity<FileTableDTO> deleteFile (Long fileId) {
+
+		FileTableDTO row = findFileById(fileId);
+		FileTableDTO parentDto = findFileById(row.getParentId());
+
+		if (!deleteFileById(fileId)) return ResponseEntity.badRequest().build();
+		return ResponseEntity.ok(postProcessingFileTable(parentDto));
+	}
+
+
+	/**
 	 * 파일 삭제 메서드
 	 *
 	 * @param fileId 삭제할 파일 아이디

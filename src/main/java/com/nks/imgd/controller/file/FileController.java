@@ -9,6 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -126,5 +127,14 @@ public class FileController {
 		}
 	}
 
+	/**
+	 * 파일을 삭제한다.
+	 * @param fileId 삭제할 파일 아이디
+	 * @return 삭제할 파일이 위치한 디렉터리 정보
+	 */
+	@DeleteMapping(value = "/deleteFile")
+	public ResponseEntity<FileTableDTO> deleteFile(@RequestParam Long fileId) {
+		return fileService.deleteFile(fileId);
+	}
 
 }
