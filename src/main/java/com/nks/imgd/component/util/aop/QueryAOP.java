@@ -56,7 +56,7 @@ public class QueryAOP {
     /**
      * Mapper Interface 전역 PointCut
      * @param pjp JoinPoint
-     * @return 쿼리 시행 결과
+     * @return 쿼리문
      * @throws Throwable Exception 발생 시 대응
      */
     @Around("execution(* com.nks.imgd.mapper..*.*(..))")
@@ -89,7 +89,7 @@ public class QueryAOP {
         Object paramObject = buildParameterObject(method, args);
         BoundSql boundSql = ms.getBoundSql(paramObject);
 
-        String finalSql = renderSqlWithParams(ms.getConfiguration(), boundSql, paramObject);
+        String finalSql = renderSqlWithParams(ms.getConfiguration(), boundSql);
 
         // 실행 전: XML의 줄바꿈/들여쓰기 유지해서 그대로 출력
         SQL_LOG.info("[SQL][{}]\n{}", statementId, finalSql);
@@ -114,10 +114,10 @@ public class QueryAOP {
     // ───────────────────────────────── helper methods ───────────────────────────────
 
     /**
-     * MyBatis ParamMap 유사 구성: @Param 이름 + param1..N 포함, 단일값은 value/param1 동시 제공
+     * MyBatis ParamMap 유사 구성: @Param 이름 + param1..N 포함, 단일 값은 value/param1 동시 제공
      * @param method 대상 메서드
      * @param args argument
-     * @return TODO:
+     * @return Parameter Map
      */
     private Object buildParameterObject(Method method, Object[] args) {
         if (args == null || args.length == 0) return null;
@@ -148,16 +148,24 @@ public class QueryAOP {
         return paramMap;
     }
 
-    /** BoundSql의 '?'를 실제 리터럴로 치환 (XML의 개행/들여쓰기 유지) */
-    private String renderSqlWithParams(Configuration cfg, BoundSql boundSql, Object originalParamObject) {
+    /**
+     * BoundSql의 '?'를 실제 리터럴로 치환 (XML의 개행/들여쓰기 유지)
+     * @param cfg 설정
+     * @param boundSql SQL 쿼리 문
+     * @return 치환된 쿼리문
+     */
+    private String renderSqlWithParams(Configuration cfg, BoundSql boundSql) {
+
         String sql = boundSql.getSql(); // ★ 공백 압축 금지 → XML 포맷 그대로
         List<ParameterMapping> mappings = boundSql.getParameterMappings();
+
         if (mappings == null || mappings.isEmpty()) return sql;
 
         TypeHandlerRegistry registry = cfg.getTypeHandlerRegistry();
 
         // MetaObject 준비
         Object paramObj = boundSql.getParameterObject();
+
         MetaObject metaObject;
         Map<String, Object> mapIfAny = null;
 
@@ -177,8 +185,10 @@ public class QueryAOP {
 
         // 치환 수행
         List<String> usedLiterals = new ArrayList<>();
+
         for (ParameterMapping pm : mappings) {
             String prop = pm.getProperty();
+
             Object value;
 
             if (boundSql.hasAdditionalParameter(prop)) {
@@ -194,15 +204,25 @@ public class QueryAOP {
                 } else {
                     value = null;
                 }
-            } else if (mapIfAny != null && mapIfAny.containsKey("value") && ("param1".equals(prop) || "value".equals(prop))) {
+            // MetaObject 생성 직후, 단일-단순 파라미터면 모든 매핑키에 alias 주입
+            } else if (mapIfAny != null && mapIfAny.containsKey("value")) {
+                // 단일 단순 파라미터: XML의 어떤 프로퍼티명이라도 동일 값으로 간주
+                Object singleVal = mapIfAny.get("value");
+                for (ParameterMapping pmg : mappings) {
+                    String p = pmg.getProperty();
+                    mapIfAny.putIfAbsent(p, singleVal);
+                }
+
                 value = mapIfAny.get("value");
-            } else {
+            }
+            else {
                 value = null;
             }
 
             String lit = toSqlLiteral(value);
             usedLiterals.add(lit);
             sql = sql.replaceFirst("\\?", Matcher.quoteReplacement(lit));
+
         }
 
         // 혹시 남았으면(매핑 누락/중복) 보수적으로 보정:
@@ -210,7 +230,7 @@ public class QueryAOP {
         if (sql.contains("?")) {
             Set<String> uniq = new HashSet<>(usedLiterals);
             if (uniq.size() == 1) {
-                String only = usedLiterals.isEmpty() ? "NULL" : usedLiterals.get(0);
+                String only = usedLiterals.isEmpty() ? "NULL" : usedLiterals.getFirst();
                 while (sql.contains("?")) {
                     sql = sql.replaceFirst("\\?", Matcher.quoteReplacement(only));
                 }
@@ -219,12 +239,21 @@ public class QueryAOP {
         return sql;
     }
 
+    /**
+     * 타입 확인
+     * @param v Parameter Type
+     * @return 단순 자료형인지 여부
+     */
     private boolean isSimpleType(Object v) {
         return v instanceof CharSequence || v instanceof Number || v instanceof Boolean
                 || v instanceof Date || v instanceof TemporalAccessor || v instanceof UUID;
     }
 
-    /** 값 → SQL 리터럴 문자열 */
+    /**
+     * 값 → SQL 리터럴 문자열
+     * @param v 값
+     * @return SQL 리터럴 문자열
+     */
     private String toSqlLiteral(Object v) {
         if (v == null) return "NULL";
         if (v instanceof Boolean || v instanceof Number) return String.valueOf(v);
@@ -233,7 +262,7 @@ public class QueryAOP {
             return "'" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format((Date) v) + "'";
         }
         if (v instanceof TemporalAccessor) {
-            return "'" + v.toString() + "'";
+            return "'" + v + "'";
         }
         if (v.getClass().isArray()) {
             int len = java.lang.reflect.Array.getLength(v);
@@ -252,6 +281,12 @@ public class QueryAOP {
         return "'" + s + "'";
     }
 
+    /**
+     * 결과 요약
+     * @param result Query Statement
+     * @return 요약된 Query
+     */
+
     private String summarizeResult(Object result) {
         if (result == null) return "[result=null]";
         if (result instanceof Collection<?>) return "[result=list size=" + ((Collection<?>) result).size() + "]";
@@ -261,14 +296,29 @@ public class QueryAOP {
         return "[result=" + result.getClass().getSimpleName() + "]";
     }
 
+    /**
+     * 수행 시간 확인 용 메서드
+     * @param nanos ms
+     * @return long ms
+     */
     private long toMs(long nanos) {
         return TimeUnit.NANOSECONDS.toMillis(nanos);
     }
 
+    /**
+     * 널 타입 확인
+     * @param s 대상 string
+     * @return null String "" 반환, 아니라면 원문 반환
+     */
     private String nullSafe(String s) {
-        return s == null ? "" : s;
+        return null == s ? "" : s;
     }
 
+    /**
+     * parameter key 문자열로 셋팅
+     * @param src 대상 map
+     * @return 타입 변환 Map
+     */
     private Map<String, Object> copyToStringObjectMap(Map<?, ?> src) {
         Map<String, Object> out = new LinkedHashMap<>();
         for (Map.Entry<?, ?> e : src.entrySet()) {
