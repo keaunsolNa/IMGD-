@@ -3,34 +3,16 @@
 
     <timestamp key="ToDay" datePattern="yyyyMMdd" />
 
-    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>
                 ${LOG_PATTERN}
             </pattern>
-            <charset>
-                ${CHARSET}
-            </charset>
         </encoder>
     </appender>
 
-    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <layout class="ch.qos.logback.classic.PatternLayout">
-            <pattern>
-                ${LOG_PATTERN}
-            </pattern>
-            <charset>
-                ${CHARSET}
-            </charset>
-        </layout>
-    </appender>
-
-    <appender name="FILE1" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <filter class="ch.qos.logback.classic.filter.LevelFilter">
-            <level>info</level>
-            <onMatch>ACCEPT</onMatch>
-            <onMismatch>DENY</onMismatch>
-        </filter>
+    <!-- 기본 파일 (기존 FILE1) : 분류 되지 않은 일반 로그 -->
+    <appender name="FILE_APP" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_PATH}/info/${ToDay}_${LOG_FILE_NAME}.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <fileNamePattern>
@@ -44,9 +26,91 @@
         </encoder>
     </appender>
 
-    <root level="INFO">
-        <appender-ref ref="STDOUT"/>
+    <!-- ▶ SQL 전용 파일 -->
+    <appender name="FILE_SQL" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/sql/${ToDay}_sql.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/sql/%d{yyyyMMdd}_sql_%i.log</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder><pattern>${LOG_PATTERN}</pattern></encoder>
+    </appender>
+
+    <!-- ▶ Layer 이동 전용 파일 -->
+    <appender name="FILE_METHOD" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/method/${ToDay}_method.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/method/%d{yyyyMMdd}_method_%i.log</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder><pattern>${LOG_PATTERN}</pattern></encoder>
+    </appender>
+
+    <!-- ▶ Exception 전용 파일 -->
+    <appender name="FILE_EXCEPTION" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/exception/${ToDay}_exception.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/exception/%d{yyyyMMdd}_exception_%i.log</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder><pattern>${LOG_PATTERN}</pattern></encoder>
+    </appender>
+
+
+    <!-- ▶ SERVICE 전용 파일 -->
+    <appender name="FILE_SERVICE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/service/${ToDay}_service.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/service/%d{yyyyMMdd}_service_%i.log</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder><pattern>${LOG_PATTERN}</pattern></encoder>
+    </appender>
+
+    <!-- ▶ CONTROLLER 전용 파일 -->
+    <appender name="FILE_CONTROLLER"  class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/controller/${ToDay}_controller.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/controller/%d{yyyyMMdd}_controller_%i.log</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder><pattern>${LOG_PATTERN}</pattern></encoder>
+    </appender>
+
+    <!-- ▶ 카테고리 별 로거: additivity=false 로 루트 전파 차단 -->
+    <logger name="SQL_LOG" level="INFO" additivity="false">
         <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE1"/>
+        <appender-ref ref="FILE_SQL"/>
+    </logger>
+
+    <logger name="com.nks.imgd.component.util.aop.MethodAOP" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE_METHOD"/>
+    </logger>
+
+    <logger name="com.nks.imgd.component.util.aop.ExceptionAOP" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE_EXCEPTION"/>
+    </logger>
+
+    <logger name="com.nks.imgd.service" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE_SERVICE"/>
+    </logger>
+
+    <logger name="com.nks.imgd.controller" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE_CONTROLLER"/>
+    </logger>
+
+    <!-- 루트: 분류 되지 않은 로그만 여기로 -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE_APP"/>
     </root>
 </configuration>
