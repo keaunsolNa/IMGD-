@@ -88,9 +88,11 @@ public class UserService {
 	 * @param userId 대상 유저 아이디
 	 * @return 대상 목록
 	 */
-	public UserTableDTO searchFriend(@Param("userId") String userId){
-		System.out.println(postProcessingUserTable(userTableMapper.searchFriend(userId)));
-		return postProcessingUserTable(userTableMapper.searchFriend(userId));
+	public UserTableDTO searchFriend(@Param("loginId") String loginId, @Param("userId") String userId){
+
+		System.out.println("loginId = " + loginId);
+		System.out.println("userId = " + userId);
+		return postProcessingUserTable(userTableMapper.searchFriend(loginId, userId));
 	}
 
 
@@ -101,7 +103,6 @@ public class UserService {
 	 * @return 대상 유저 목록
 	 */
 	public List<UserTableDTO> findFriendEachOtherAndNotInGroup(@Param("userId") String userId, @Param("groupId") Long groupId){
-
 		return postProcessingUserTables(userTableMapper.findFriendEachOtherAndNotInGroup(userId, groupId));
 	}
 	/**

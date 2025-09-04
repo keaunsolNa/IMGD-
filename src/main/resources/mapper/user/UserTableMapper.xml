@@ -166,7 +166,7 @@
           ON T1.USER_ID = T2.USER_ID
         JOIN USER_FRIEND_TABLE T3
           ON T2.FRIEND_ID = T3.FRIEND_ID
-       WHERE T1.USER_ID = #{userId}
+       WHERE T1.USER_ID = #{loginId}
        UNION
        SELECT T1.USER_ID
             , F_GET_USER_NM(T1.USER_ID) AS NAME

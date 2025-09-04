@@ -96,8 +96,8 @@ public class UserController {
 	 * @return 내가 추가한 모든 친구 유저 목록
 	 */
 	@GetMapping("/searchFriend")
-	public ResponseEntity<UserTableDTO> searchFriend(@RequestParam String userId) {
-		return ResponseEntity.ok(userService.searchFriend(userId));
+	public ResponseEntity<UserTableDTO> searchFriend(@AuthenticationPrincipal Jwt jwt, @RequestParam String userId) {
+ 		return ResponseEntity.ok(userService.searchFriend(jwt.getSubject(), userId));
 	}
 
 	/**
