@@ -160,25 +160,14 @@
              , F_GET_USER_NM(T1.USER_ID) AS NAME
              , T1.REG_DTM
              , F_GET_PICTURE_NM(T1.USER_ID) AS PICTURE_NM
-             , IFNULL(T3.RELATIONSHIP, 'X') AS RELATIONSHIP
-        FROM USER_TABLE T1
-        JOIN FRIEND_TABLE T2
-          ON T1.USER_ID = T2.USER_ID
-        JOIN USER_FRIEND_TABLE T3
-          ON T2.FRIEND_ID = T3.FRIEND_ID
-       WHERE T1.USER_ID = #{loginId}
-       UNION
-       SELECT T1.USER_ID
-            , F_GET_USER_NM(T1.USER_ID) AS NAME
-            , T1.REG_DTM
-            , F_GET_PICTURE_NM(T1.USER_ID) AS PICTURE_NM
-            , IFNULL(T3.RELATIONSHIP, 'N') AS RELATIONSHIP
-        FROM USER_TABLE T1
-        JOIN FRIEND_TABLE T2
-          ON T1.USER_ID = T2.USER_ID
-        LEFT JOIN USER_FRIEND_TABLE T3
-          ON T2.FRIEND_ID = T3.FRIEND_ID
-       WHERE T1.USER_ID = #{userId}
+             , COALESCE(T3.RELATIONSHIP, 'X') AS RELATIONSHIP
+          FROM USER_TABLE T1
+          JOIN FRIEND_TABLE T2
+            ON T1.USER_ID = T2.USER_ID
+          LEFT JOIN USER_FRIEND_TABLE T3
+            ON T2.FRIEND_ID = T3.FRIEND_ID
+           AND T3.USER_ID = #{loginId}
+         WHERE T1.USER_ID = #{userId}
     </select>
 
     <select id="findFriendTableIdByUserId">
