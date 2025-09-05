@@ -257,8 +257,8 @@
     <delete id="deleteUserFriendTable">
         DELETE
           FROM USER_FRIEND_TABLE
-         WHERE FRIEND_ID = #{user.friendId}
-           AND USER_ID = #{user.userId}
+         WHERE FRIEND_ID = #{friendId}
+           AND USER_ID = #{targetUserId}
     </delete>
 
 </mapper>

@@ -44,6 +44,6 @@ public interface UserTableMapper {
 							  @Param("userId") String userId,
 							  @Param("relationship") String relationship);
 
-	int deleteUserFriendTable(@Param("userId") String userId,
+	int deleteUserFriendTable(@Param("targetUserId") String targetUserId,
 							  @Param("friendId") Long friendId);
 }

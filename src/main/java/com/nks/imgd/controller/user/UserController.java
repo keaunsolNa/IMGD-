@@ -51,7 +51,7 @@ public class UserController {
 	}
 
 	/**
-	 * 대상 유저를 친구로 등록 했지만, 본인은 등록 하지 않은 유저 목록을 반환 한다.
+	 * 대상 유저는 친구로 등록 했지만, 본인은 등록 하지 않은 유저 목록을 반환 한다.
 	 * @param userId 대상 유저 아이디
 	 * @return 나를 추가한, 내가 추가 하지 않은 유저 목록
 	 */
@@ -71,9 +71,9 @@ public class UserController {
 	}
 
 	/**
-	 * 내가 추가 했지만, 상대는 추가 하지 않은 친구 목록
+	 * 내가 추가 했지만, 상대는 거절 한 친구 목록
 	 * @param userId 대상 유저 아이디
-	 * @return 내가 추가한, 나를 추가 하지 않은 유저 목록
+	 * @return 내가 추가한, 나를 거절 한 않은 유저 목록
 	 */
 	@GetMapping("/findFriendWhoImAddButReject")
 	public ResponseEntity<List<UserTableDTO>> findFriendWhoImAddButReject(@RequestParam String userId) {
