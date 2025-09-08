@@ -1,8 +1,8 @@
 // package com.nks.imgd.service.file;
 //
 // import com.nks.imgd.dto.data.MakeDirDTO;
-// import com.nks.imgd.dto.file.FileTableDTO;
-// import com.nks.imgd.dto.group.GroupTableDTO;
+// import com.nks.imgd.dto.Schema.FileTableDTO;
+// import com.nks.imgd.dto.dataDTO.GroupTableDTO;
 // import com.nks.imgd.mapper.file.FileTableMapper;
 // import com.nks.imgd.service.user.UserProfilePort;
 //

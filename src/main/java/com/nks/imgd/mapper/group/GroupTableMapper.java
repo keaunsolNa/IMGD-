@@ -4,37 +4,37 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
 
-import com.nks.imgd.dto.group.GroupTableDTO;
-import com.nks.imgd.dto.group.GroupUserDTO;
+import com.nks.imgd.dto.dataDTO.GroupTableWithMstUserNameDTO;
+import com.nks.imgd.dto.dataDTO.GroupUserWithNameDTO;
 
 import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface GroupTableMapper {
 
-	List<GroupTableDTO> findGroupName(@Param("userId") String userId);
+	List<GroupTableWithMstUserNameDTO> findGroupName(@Param("userId") String userId);
 
-	List<GroupTableDTO> findGroupWhatInside(@Param("userId") String userId);
+	List<GroupTableWithMstUserNameDTO> findGroupWhatInside(@Param("userId") String userId);
 
-	List<GroupUserDTO> findGroupUserWhatInside(@Param("groupId") Long groupId);
+	List<GroupUserWithNameDTO> findGroupUserWhatInside(@Param("groupId") Long groupId);
 
-	List<GroupTableDTO> findGroupByGroupId(@Param("groupId") Long groupId);
-	int makeNewGroup(@Param("group") GroupTableDTO dto);
+	List<GroupTableWithMstUserNameDTO> findGroupByGroupId(@Param("groupId") Long groupId);
+	int makeNewGroup(@Param("group") GroupTableWithMstUserNameDTO dto);
 
-	int makeNewGroupUserTable(@Param("group") GroupTableDTO dto,
+	int makeNewGroupUserTable(@Param("group") GroupTableWithMstUserNameDTO dto,
 							  @Param("userId") String userId);
 
-	int isUserCheck(@Param("group") GroupTableDTO dto,
+	int isUserCheck(@Param("group") GroupTableWithMstUserNameDTO dto,
 					   @Param("userId") String userId);
 
-	int deleteGroupUser(@Param("group") GroupTableDTO dto,
+	int deleteGroupUser(@Param("group") GroupTableWithMstUserNameDTO dto,
 					@Param("userId") String userId);
 
-	int changeMstUserGroup(@Param("group") GroupTableDTO dto,
+	int changeMstUserGroup(@Param("group") GroupTableWithMstUserNameDTO dto,
 					@Param("userId") String userId);
 
-	int countGroupUser(@Param("group") GroupTableDTO dto);
+	int countGroupUser(@Param("group") GroupTableWithMstUserNameDTO dto);
 
-	int deleteGroupTable(@Param("group") GroupTableDTO dto);
+	int deleteGroupTable(@Param("group") GroupTableWithMstUserNameDTO dto);
 
 }

@@ -1,4 +1,4 @@
-package com.nks.imgd.dto.file;
+package com.nks.imgd.dto.dataDTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,15 +7,12 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class FileTableDTO {
+public class GroupTableWithMstUserNameDTO {
 
-	private Long fileId;
-	private String fileNm;
-	private String fileOrgNm;
-	private String filePath;
-	private String type;
-	private Long parentId;
 	private Long groupId;
+	private String groupNm;
+	private String groupMstUserId;
+	private String groupMstUserNm;
 	private String regDtm;
 	private String regId;
 	private String modDtm;

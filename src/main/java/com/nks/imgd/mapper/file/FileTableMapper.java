@@ -2,10 +2,10 @@ package com.nks.imgd.mapper.file;
 
 import java.util.List;
 
-import com.nks.imgd.dto.data.MakeDirDTO;
-import com.nks.imgd.dto.data.MakeFileDTO;
-import com.nks.imgd.dto.file.FileTableDTO;
-import com.nks.imgd.dto.group.GroupTableDTO;
+import com.nks.imgd.dto.dataDTO.MakeDirDTO;
+import com.nks.imgd.dto.dataDTO.MakeFileDTO;
+import com.nks.imgd.dto.Schema.FileTableDTO;
+import com.nks.imgd.dto.dataDTO.GroupTableWithMstUserNameDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -14,7 +14,7 @@ public interface FileTableMapper {
 
     FileTableDTO findRootPath(@Param("fileId") Long fileId);
 
-    FileTableDTO findFileIdByFileOrgNmInDirCase(@Param("group") GroupTableDTO groupTableDTO);
+    FileTableDTO findFileIdByFileOrgNmInDirCase(@Param("group") GroupTableWithMstUserNameDTO groupTableWithMstUserNameDTO);
 
     FileTableDTO findFileNmByDirId(@Param("dirId") Long dirId);
 
@@ -23,7 +23,7 @@ public interface FileTableMapper {
 	List<FileTableDTO> findFileAndDirectory(@Param("parentId") Long parentId
 										  , @Param("groupId") Long groupId);
 
-    int makeGroupDir(@Param("group")GroupTableDTO groupTableDTO);
+    int makeGroupDir(@Param("group") GroupTableWithMstUserNameDTO groupTableWithMstUserNameDTO);
 
     int makeDir(@Param("dto") MakeDirDTO dto);
 

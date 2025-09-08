@@ -7,8 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.nks.imgd.component.util.commonMethod.CommonMethod;
-import com.nks.imgd.dto.group.GroupTableDTO;
-import com.nks.imgd.dto.group.GroupUserDTO;
+import com.nks.imgd.dto.dataDTO.GroupTableWithMstUserNameDTO;
+import com.nks.imgd.dto.dataDTO.GroupUserWithNameDTO;
 import com.nks.imgd.mapper.group.GroupTableMapper;
 
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +36,7 @@ public class GroupService {
 	 * @param userId 대상 유저 아이디
 	 * @return 대상이 가지고 있는 그룹 목록
 	 */
-	public List<GroupTableDTO> findGroupName(String userId)
+	public List<GroupTableWithMstUserNameDTO> findGroupName(String userId)
 	{
 		return groupTableMapper.findGroupName(userId);
 	}
@@ -47,7 +47,7 @@ public class GroupService {
 	 * @param userId 대상 유저 아이디
 	 * @return 대상이 가지고 있는 그룹 목록
 	 */
-	public List<GroupTableDTO> findGroupWhatInside(String userId)
+	public List<GroupTableWithMstUserNameDTO> findGroupWhatInside(String userId)
 	{
 		return postProcessingGroupTables(groupTableMapper.findGroupWhatInside(userId));
 	}
@@ -58,7 +58,7 @@ public class GroupService {
 	 * @param groupId 대상 그룹 아이디
 	 * @return 그룹이 가지고 있는 유저 목록
 	 */
-	public List<GroupUserDTO> findGroupUserWhatInside(Long groupId)
+	public List<GroupUserWithNameDTO> findGroupUserWhatInside(Long groupId)
 	{
 		return postProcessingGroupUserTables(groupTableMapper.findGroupUserWhatInside(groupId));
 	}
@@ -72,7 +72,7 @@ public class GroupService {
 	 * @return 생성 성공 여부
 	 */
 	@Transactional(rollbackFor = Exception.class)
-	public ResponseEntity<List<GroupTableDTO>> createGroup(GroupTableDTO dto) {
+	public ResponseEntity<List<GroupTableWithMstUserNameDTO>> createGroup(GroupTableWithMstUserNameDTO dto) {
 
 		if (groupTableMapper.makeNewGroup(dto) != 1) return ResponseEntity.badRequest().build();
 		return returnResultWhenTransaction(groupTableMapper.makeNewGroupUserTable(dto, dto.getGroupMstUserId()), () -> groupTableMapper.findGroupByGroupId(dto.getGroupId()));
@@ -85,7 +85,7 @@ public class GroupService {
 	 * @param userId 추가할 유저 ID
 	 * @return 생성 성공 여부
 	 */
-	public ResponseEntity<List<GroupUserDTO>> makeNewGroupUser(GroupTableDTO dto, String userId) {
+	public ResponseEntity<List<GroupUserWithNameDTO>> makeNewGroupUser(GroupTableWithMstUserNameDTO dto, String userId) {
 
 		if (groupTableMapper.isUserCheck(dto, userId) > 0) return ResponseEntity.badRequest().build();
 		return returnResultWhenTransaction(groupTableMapper.makeNewGroupUserTable(dto, userId), () -> findGroupUserWhatInside(dto.getGroupId()));
@@ -100,7 +100,7 @@ public class GroupService {
 	 * @param userId 삭제할 유저 ID
 	 * @return 삭제 성공 여부
 	 */
-	public ResponseEntity<List<GroupUserDTO>> deleteGroupUser(GroupTableDTO dto, String userId) {
+	public ResponseEntity<List<GroupUserWithNameDTO>> deleteGroupUser(GroupTableWithMstUserNameDTO dto, String userId) {
 
 		// 해당 그룹에 대상 유저가 존재 하지 않을 경우
 		if (groupTableMapper.isUserCheck(dto, userId) <= 0) return ResponseEntity.badRequest().build();
@@ -131,7 +131,7 @@ public class GroupService {
 	 * @param userId MST_USER 될 ID
 	 * @return 삭제 성공 여부
 	 */
-	public ResponseEntity<List<GroupUserDTO>> changeMstUserGroup(GroupTableDTO dto, String userId) {
+	public ResponseEntity<List<GroupUserWithNameDTO>> changeMstUserGroup(GroupTableWithMstUserNameDTO dto, String userId) {
 
 		// 해당 그룹에 대상 유저가 없을 경우
 		if (groupTableMapper.isUserCheck(dto, userId) > 0) return ResponseEntity.badRequest().build();
@@ -150,9 +150,9 @@ public class GroupService {
 	 * @param groups 대상 그룹 리스트
 	 * @return 후처리 후 대상 그룹 리스트
 	 */
-	public List<GroupTableDTO> postProcessingGroupTables(List<GroupTableDTO> groups) {
+	public List<GroupTableWithMstUserNameDTO> postProcessingGroupTables(List<GroupTableWithMstUserNameDTO> groups) {
 
-		for (GroupTableDTO group : groups) {
+		for (GroupTableWithMstUserNameDTO group : groups) {
 			postProcessingGroupTable(group);
 		}
 
@@ -166,7 +166,7 @@ public class GroupService {
 	 *
 	 * @param group 대상 그룹
 	 */
-	public void postProcessingGroupTable(GroupTableDTO group) {
+	public void postProcessingGroupTable(GroupTableWithMstUserNameDTO group) {
 
 		group.setRegDtm(null != group.getRegDtm() ? commonMethod.translateDate(group.getRegDtm()) : null);
 		group.setModDtm(null != group.getModDtm() ? commonMethod.translateDate(group.getModDtm()) : null);
@@ -180,9 +180,9 @@ public class GroupService {
 	 * @param groups 대상 그룹 유저 리스트
 	 * @return 후처리 후 대상 그룹 유저 리스트
 	 */
-	public List<GroupUserDTO> postProcessingGroupUserTables(List<GroupUserDTO> groups) {
+	public List<GroupUserWithNameDTO> postProcessingGroupUserTables(List<GroupUserWithNameDTO> groups) {
 
-		for (GroupUserDTO group : groups) {
+		for (GroupUserWithNameDTO group : groups) {
 			postProcessingGroupUserTable(group);
 		}
 
@@ -196,7 +196,7 @@ public class GroupService {
 	 *
 	 * @param group 대상 그룹
 	 */
-	public void postProcessingGroupUserTable(GroupUserDTO group) {
+	public void postProcessingGroupUserTable(GroupUserWithNameDTO group) {
 
 		group.setRegDtm(null != group.getRegDtm() ? commonMethod.translateDate(group.getRegDtm()) : null);
 		group.setModDtm(null != group.getModDtm() ? commonMethod.translateDate(group.getModDtm()) : null);

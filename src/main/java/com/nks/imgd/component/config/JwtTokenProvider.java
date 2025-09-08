@@ -13,8 +13,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 
-import com.nks.imgd.dto.Role.RolesDTO;
-import com.nks.imgd.dto.user.UserTableDTO;
+import com.nks.imgd.dto.Schema.RolesDTO;
+import com.nks.imgd.dto.dataDTO.UserTableWithRelationshipAndPictureNmDTO;
 import com.nks.imgd.mapper.user.UserTableMapper;
 
 import io.jsonwebtoken.Claims;
@@ -48,7 +48,7 @@ public class JwtTokenProvider {
 	 * @param user 매개변수로 받은 UserRoleDTO
 	 * @return 생성된 토큰
 	 */
-	public String generateAccessToken(UserTableDTO user) {
+	public String generateAccessToken(UserTableWithRelationshipAndPictureNmDTO user) {
 
 		long now = System.currentTimeMillis();
 		long ACCESS_EXPIRATION = 31 * 24 * 60 * 10000;
@@ -72,7 +72,7 @@ public class JwtTokenProvider {
 	 * @param user 매개변수로 받은 UserRoleDTO
 	 * @return 재생성된 토큰
 	 */
-	public String generateRefreshToken(UserTableDTO user) {
+	public String generateRefreshToken(UserTableWithRelationshipAndPictureNmDTO user) {
 
 		long now = System.currentTimeMillis();
 		long REFRESH_EXPIRATION = 7 * 24 * 60 * 10000;
@@ -95,7 +95,7 @@ public class JwtTokenProvider {
 	 * @param user 매개변수로 받은 UserRoleDTO
 	 * @return 생성된 Claims 타입
 	 */
-	private Map<String, Object> createClaims(UserTableDTO user) {
+	private Map<String, Object> createClaims(UserTableWithRelationshipAndPictureNmDTO user) {
 
 		RolesDTO roles = userTableMapper.findHighestUserRole(user.getUserId());
 		Map<String, Object> claims = new HashMap<>();
@@ -180,7 +180,7 @@ public class JwtTokenProvider {
 	 */
 	public Authentication getAuthentication(String token) {
 
-		UserTableDTO userDetails = userTableMapper.findById(this.getUserPk(token));
+		UserTableWithRelationshipAndPictureNmDTO userDetails = userTableMapper.findById(this.getUserPk(token));
 		return new UsernamePasswordAuthenticationToken(userDetails, "");
 	}
 
@@ -190,7 +190,7 @@ public class JwtTokenProvider {
 	 * @param token : 대상 refreshToken
 	 * @return 유저 정보
 	 */
-	public UserTableDTO getUserDetails(String token) {
+	public UserTableWithRelationshipAndPictureNmDTO getUserDetails(String token) {
 		return userTableMapper.findById(this.getUserPk(token));
 	}
 

@@ -11,11 +11,12 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 import com.nks.imgd.component.util.commonMethod.CommonMethod;
-import com.nks.imgd.dto.data.MakeDirDTO;
-import com.nks.imgd.dto.data.MakeFileDTO;
-import com.nks.imgd.dto.file.FileTableDTO;
-import com.nks.imgd.dto.group.GroupTableDTO;
-import com.nks.imgd.dto.user.UserTableDTO;
+import com.nks.imgd.dto.Enum.Role;
+import com.nks.imgd.dto.dataDTO.MakeDirDTO;
+import com.nks.imgd.dto.dataDTO.MakeFileDTO;
+import com.nks.imgd.dto.Schema.FileTableDTO;
+import com.nks.imgd.dto.dataDTO.GroupTableWithMstUserNameDTO;
+import com.nks.imgd.dto.dataDTO.UserTableWithRelationshipAndPictureNmDTO;
 import com.nks.imgd.mapper.file.FileTableMapper;
 import com.nks.imgd.service.user.UserProfilePort;
 import com.sksamuel.scrimage.ImmutableImage;
@@ -114,7 +115,7 @@ public class FileService {
 	 * @return 생성된 폴더의 정보
      */
 	@Transactional(rollbackFor = Exception.class)
-    public ResponseEntity<FileTableDTO> makeGroupDir(GroupTableDTO dto)
+    public ResponseEntity<FileTableDTO> makeGroupDir(GroupTableWithMstUserNameDTO dto)
     {
 
 		if (fileTableMapper.makeGroupDir(dto) != 1) return ResponseEntity.badRequest().build();
@@ -155,7 +156,7 @@ public class FileService {
 	 * @return insert 후 결과값
 	 */
 	@Transactional(rollbackFor = Exception.class)
-	public ResponseEntity<UserTableDTO> makeUserProfileImg(MakeFileDTO dto, File originalFile)
+	public ResponseEntity<UserTableWithRelationshipAndPictureNmDTO> makeUserProfileImg(MakeFileDTO dto, File originalFile)
 	{
 		String fileNm = UUID.randomUUID().toString();
 
@@ -172,36 +173,36 @@ public class FileService {
 		long fileId = fileDTO.getFileId();
 
 		// ✅ 유저 정보 확인
-		UserTableDTO userTableDTO = userProfilePort.findUserById(dto.getUserId());
+		UserTableWithRelationshipAndPictureNmDTO userTableWithRelationshipAndPictureNmDTO = userProfilePort.findUserById(dto.getUserId());
 
-		if (null == userTableDTO) return ResponseEntity.badRequest().build();
+		if (null == userTableWithRelationshipAndPictureNmDTO) return ResponseEntity.badRequest().build();
 
 		// 기존 유저 정보에 사진이 있다면 해당 파일을 삭제한다.
-		if (null != userTableDTO.getPictureId())
+		if (null != userTableWithRelationshipAndPictureNmDTO.getPictureId())
 		{
 			try {
 
-				boolean resultDeleteFile = deleteFileById(userTableDTO.getPictureId());
+				boolean resultDeleteFile = deleteFileById(userTableWithRelationshipAndPictureNmDTO.getPictureId());
 
 				if (resultDeleteFile) log.info("Deleted file ID: {}", fileId);
 				else log.info("Failed to delete file ID: {}", fileId);
 
 			} catch (Exception e) {
 				// 실패해도 신규 사용에는 영향 없음
-				log.warn("Best-effort delete of old profile image failed. oldPictureId={}", userTableDTO.getPictureId(), e);
+				log.warn("Best-effort delete of old profile image failed. oldPictureId={}", userTableWithRelationshipAndPictureNmDTO.getPictureId(), e);
 			}
 		}
 
 		// ✅ 유저 정보(사진 ID) 변경
-		userTableDTO.setPictureId(fileId);
-		int userResult = userProfilePort.updatePictureId(userTableDTO.getUserId(), fileId);
+		userTableWithRelationshipAndPictureNmDTO.setPictureId(fileId);
+		int userResult = userProfilePort.updatePictureId(userTableWithRelationshipAndPictureNmDTO.getUserId(), fileId);
 
 		if (userResult != 1) return ResponseEntity.badRequest().build();
 		Path targetNoExt = makePathByFileId(3L);
 
 		// ✅ 파일 Webp 형태로 변환 및 저장
 		if (null == convertToWebp(targetNoExt, originalFile, fileDTO.getFileNm())) return ResponseEntity.badRequest().build();
-		else return ResponseEntity.ok(userTableDTO);
+		else return ResponseEntity.ok(userTableWithRelationshipAndPictureNmDTO);
 
 	}
 
@@ -237,6 +238,9 @@ public class FileService {
 			return ResponseEntity.badRequest().build();
 
 		Path targetNoExt = makePathByFileId(folderId);
+
+		Role role = Role.valueOf(userProfilePort.findHighestUserRole(userId).getRoleNm());
+
 
 		if (null == convertToWebp(targetNoExt, originalFile, fileNm)) return ResponseEntity.badRequest().build();
 		else return ResponseEntity.ok(findFileById(dto.getFileId()));

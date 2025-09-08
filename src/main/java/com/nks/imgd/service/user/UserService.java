@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.nks.imgd.component.util.commonMethod.CommonMethod;
-import com.nks.imgd.dto.user.UserTableDTO;
+import com.nks.imgd.dto.dataDTO.UserTableWithRelationshipAndPictureNmDTO;
 import com.nks.imgd.mapper.user.UserTableMapper;
 
 import java.util.List;
@@ -32,7 +32,7 @@ public class UserService {
 	 * @param userId 대상 유저 ID
 	 * @return 대상 유저가 가지고 있는 정보
 	 */
-	public UserTableDTO findUserById(@Param("userId") String userId) {
+	public UserTableWithRelationshipAndPictureNmDTO findUserById(@Param("userId") String userId) {
 
 		return postProcessingUserTable(userTableMapper.findById(userId));
 	}
@@ -43,7 +43,7 @@ public class UserService {
 	 * @param userId 대상 유저 아이디
 	 * @return 친구 목록
 	 */
-	public List<UserTableDTO> findFriendEachOther(@Param("userId") String userId) {
+	public List<UserTableWithRelationshipAndPictureNmDTO> findFriendEachOther(@Param("userId") String userId) {
 		return postProcessingUserTables(userTableMapper.findFriendEachOther(userId));
 	}
 
@@ -52,7 +52,7 @@ public class UserService {
 	 * @param userId 대상 유저 아이디
 	 * @return 대상 목록
 	 */
-	public List<UserTableDTO> findFriendWhoAddMeButImNot(@Param("userId") String userId) {
+	public List<UserTableWithRelationshipAndPictureNmDTO> findFriendWhoAddMeButImNot(@Param("userId") String userId) {
 		return postProcessingUserTables(userTableMapper.findFriendWhoAddMeButImNot(userId));
 	}
 
@@ -61,7 +61,7 @@ public class UserService {
 	 * @param userId 대상 유저 아이디
 	 * @return 대상 목록
 	 */
-	public List<UserTableDTO> findFriendWhoImAddButNot(@Param("userId") String userId) {
+	public List<UserTableWithRelationshipAndPictureNmDTO> findFriendWhoImAddButNot(@Param("userId") String userId) {
 		return postProcessingUserTables(userTableMapper.findFriendWhoImAddButNot(userId));
 	}
 
@@ -70,7 +70,7 @@ public class UserService {
 	 * @param userId 대상 유저 아이디
 	 * @return 대상 목록
 	 */
-	public List<UserTableDTO> findFriendWhoImAddButReject(@Param("userId") String userId) {
+	public List<UserTableWithRelationshipAndPictureNmDTO> findFriendWhoImAddButReject(@Param("userId") String userId) {
 		return postProcessingUserTables(userTableMapper.findFriendWhoImAddButReject(userId));
 	}
 
@@ -79,7 +79,7 @@ public class UserService {
 	 * @param userId 대상 유저 아이디
 	 * @return 대상 목록
 	 */
-	public List<UserTableDTO> findFriend(@Param("userId") String userId){
+	public List<UserTableWithRelationshipAndPictureNmDTO> findFriend(@Param("userId") String userId){
 		return postProcessingUserTables(userTableMapper.findFriend(userId));
 	}
 
@@ -88,7 +88,7 @@ public class UserService {
 	 * @param userId 대상 유저 아이디
 	 * @return 대상 목록
 	 */
-	public UserTableDTO searchFriend(@Param("loginId") String loginId, @Param("userId") String userId){
+	public UserTableWithRelationshipAndPictureNmDTO searchFriend(@Param("loginId") String loginId, @Param("userId") String userId){
 		return postProcessingUserTable(userTableMapper.searchFriend(loginId, userId));
 	}
 
@@ -99,7 +99,7 @@ public class UserService {
 	 * @param groupId 대상 그룹 아이디
 	 * @return 대상 유저 목록
 	 */
-	public List<UserTableDTO> findFriendEachOtherAndNotInGroup(@Param("userId") String userId, @Param("groupId") Long groupId){
+	public List<UserTableWithRelationshipAndPictureNmDTO> findFriendEachOtherAndNotInGroup(@Param("userId") String userId, @Param("groupId") Long groupId){
 		return postProcessingUserTables(userTableMapper.findFriendEachOtherAndNotInGroup(userId, groupId));
 	}
 	/**
@@ -109,7 +109,7 @@ public class UserService {
 	 * @return 대상 유저가 가지고 있는 정보
 	 */
 	@Transactional(rollbackFor = Exception.class)
-	public ResponseEntity<UserTableDTO>  updateUser(@Param("user") UserTableDTO user) {
+	public ResponseEntity<UserTableWithRelationshipAndPictureNmDTO>  updateUser(@Param("user") UserTableWithRelationshipAndPictureNmDTO user) {
 		return returnResultWhenTransaction(userTableMapper.updateUser(user), () -> findUserById(user.getUserId()));
 	}
 
@@ -120,7 +120,7 @@ public class UserService {
 	 * @return 결과값 반환
 	 */
 	@Transactional(rollbackFor = Exception.class)
-	public ResponseEntity<List<UserTableDTO>> insertUserFriendTable(@Param("userId") String userId, @Param("targetUserId") String targetUserId, @Param("relationship") String relationship) {
+	public ResponseEntity<List<UserTableWithRelationshipAndPictureNmDTO>> insertUserFriendTable(@Param("userId") String userId, @Param("targetUserId") String targetUserId, @Param("relationship") String relationship) {
 
 		Long friendId = userTableMapper.findFriendTableIdByUserId(userId).getFriendId();
 
@@ -134,7 +134,7 @@ public class UserService {
 	 * @return 결과값 반환
 	 */
 	@Transactional(rollbackFor = Exception.class)
-	public ResponseEntity<List<UserTableDTO>> deleteUserFriendTable(@Param("userId") String userId, @Param("targetUserId") String targetUserId) {
+	public ResponseEntity<List<UserTableWithRelationshipAndPictureNmDTO>> deleteUserFriendTable(@Param("userId") String userId, @Param("targetUserId") String targetUserId) {
 
 		Long friendId = userTableMapper.findFriendTableIdByUserId(userId).getFriendId();
 		return returnResultWhenTransaction(userTableMapper.deleteUserFriendTable(targetUserId, friendId), () -> findFriendEachOther(userId));
@@ -149,9 +149,9 @@ public class UserService {
 	 * @param users 대상 유저 리스트
 	 * @return 후처리 후 대상 유저 리스트
 	 */
-	public List<UserTableDTO> postProcessingUserTables(List<UserTableDTO> users) {
+	public List<UserTableWithRelationshipAndPictureNmDTO> postProcessingUserTables(List<UserTableWithRelationshipAndPictureNmDTO> users) {
 
-		for (UserTableDTO user : users) {
+		for (UserTableWithRelationshipAndPictureNmDTO user : users) {
 			postProcessingUserTable(user);
 		}
 
@@ -165,7 +165,8 @@ public class UserService {
 	 * @param user 대상 유저
 	 * @return 후처리 후 대상 유저
 	 */
-	public UserTableDTO postProcessingUserTable(UserTableDTO user) {
+	public UserTableWithRelationshipAndPictureNmDTO postProcessingUserTable(
+		UserTableWithRelationshipAndPictureNmDTO user) {
 
 		if (null == user) return null;
 		user.setLastLoginDate(null != user.getLastLoginDate()  ? commonMethod.translateDate(user.getLastLoginDate()) : null);

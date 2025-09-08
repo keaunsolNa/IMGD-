@@ -1,4 +1,4 @@
-package com.nks.imgd.dto.user;
+package com.nks.imgd.dto.dataDTO;
 
 import com.nks.imgd.dto.Enum.SocialLoginType;
 
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserTableDTO {
+public class UserTableWithRelationshipAndPictureNmDTO {
 
 	private String userId;
 	private String name;

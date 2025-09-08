@@ -1,40 +1,40 @@
 package com.nks.imgd.mapper.user;
 
-import com.nks.imgd.dto.user.FriendTableDTO;
+import com.nks.imgd.dto.Schema.FriendTableDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import com.nks.imgd.dto.Role.RolesDTO;
-import com.nks.imgd.dto.user.UserTableDTO;
+import com.nks.imgd.dto.Schema.RolesDTO;
+import com.nks.imgd.dto.dataDTO.UserTableWithRelationshipAndPictureNmDTO;
 
 import java.util.List;
 
 @Mapper
 public interface UserTableMapper {
 
-	UserTableDTO findById(String userId);
+	UserTableWithRelationshipAndPictureNmDTO findById(String userId);
 
 	RolesDTO findHighestUserRole(String userId);
 
-	List<UserTableDTO> findFriendEachOther(String userId);
+	List<UserTableWithRelationshipAndPictureNmDTO> findFriendEachOther(String userId);
 
-	List<UserTableDTO> findFriendWhoAddMeButImNot(String userId);
+	List<UserTableWithRelationshipAndPictureNmDTO> findFriendWhoAddMeButImNot(String userId);
 
-	List<UserTableDTO> findFriendWhoImAddButReject(String userId);
+	List<UserTableWithRelationshipAndPictureNmDTO> findFriendWhoImAddButReject(String userId);
 
 	FriendTableDTO findFriendTableIdByUserId(String userId);
 
-	List<UserTableDTO> findFriendWhoImAddButNot(String userId);
+	List<UserTableWithRelationshipAndPictureNmDTO> findFriendWhoImAddButNot(String userId);
 
-	List<UserTableDTO> findFriend(String userId);
+	List<UserTableWithRelationshipAndPictureNmDTO> findFriend(String userId);
 
-	UserTableDTO searchFriend(@Param("loginId") String loginId, @Param("userId") String userId);
+	UserTableWithRelationshipAndPictureNmDTO searchFriend(@Param("loginId") String loginId, @Param("userId") String userId);
 
-	List<UserTableDTO> findFriendEachOtherAndNotInGroup(@Param("userId") String userId, @Param("groupId") Long groupId);
+	List<UserTableWithRelationshipAndPictureNmDTO> findFriendEachOtherAndNotInGroup(@Param("userId") String userId, @Param("groupId") Long groupId);
 
-	void makeNewUser(@Param("user") UserTableDTO user);
+	void makeNewUser(@Param("user") UserTableWithRelationshipAndPictureNmDTO user);
 
-	int updateUser(@Param("user") UserTableDTO user);
+	int updateUser(@Param("user") UserTableWithRelationshipAndPictureNmDTO user);
 
 	int updatePictureId(@Param("userId") String userId,
 						@Param("fileId") Long fileId);

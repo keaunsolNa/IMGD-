@@ -1,4 +1,4 @@
-package com.nks.imgd.dto.data;
+package com.nks.imgd.dto.dataDTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

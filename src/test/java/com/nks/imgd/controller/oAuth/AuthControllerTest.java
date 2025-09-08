@@ -3,7 +3,7 @@
 // import com.nks.imgd.component.config.JwtTokenProvider;
 // import com.nks.imgd.component.util.maker.TokenMaker;
 // import com.nks.imgd.dto.Enum.SocialLoginType;
-// import com.nks.imgd.dto.user.UserTableDTO;
+// import com.nks.imgd.dto.dataDTO.UserTableDTO;
 // import com.nks.imgd.service.oAuth.AuthService;
 // import jakarta.servlet.http.Cookie;
 // import jakarta.servlet.http.HttpServletResponse;

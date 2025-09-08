@@ -7,8 +7,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
-import com.nks.imgd.dto.group.GroupTableDTO;
-import com.nks.imgd.dto.group.GroupUserDTO;
+import com.nks.imgd.dto.dataDTO.GroupTableWithMstUserNameDTO;
+import com.nks.imgd.dto.dataDTO.GroupUserWithNameDTO;
 import com.nks.imgd.service.group.GroupService;
 
 @RestController
@@ -28,7 +28,7 @@ public class GroupController {
 	 * @return 대상 유저가 가지고 있는 그룹 목록
 	 */
 	@GetMapping("/findGroupName")
-	public ResponseEntity<List<GroupTableDTO>> findGroupName(@AuthenticationPrincipal Jwt jwt) {
+	public ResponseEntity<List<GroupTableWithMstUserNameDTO>> findGroupName(@AuthenticationPrincipal Jwt jwt) {
 		return ResponseEntity.ok(groupService.findGroupName(jwt.getSubject()));
 	}
 
@@ -39,7 +39,7 @@ public class GroupController {
 	 * @return 대상 유저가 가지고 있는 그룹 목록
 	 */
 	@GetMapping("/findGroupWhatInside")
-	public ResponseEntity<List<GroupTableDTO>> findGroupWhatInside(@AuthenticationPrincipal Jwt jwt) {
+	public ResponseEntity<List<GroupTableWithMstUserNameDTO>> findGroupWhatInside(@AuthenticationPrincipal Jwt jwt) {
 		return ResponseEntity.ok(groupService.findGroupWhatInside(jwt.getSubject()));
 	}
 
@@ -50,7 +50,7 @@ public class GroupController {
 	 * @return 대상 유저가 가지고 있는 그룹 목록
 	 */
 	@GetMapping("/findGroupUserWhatInside")
-	public ResponseEntity<List<GroupUserDTO>> findGroupUserWhatInside(@RequestParam Long groupId) {
+	public ResponseEntity<List<GroupUserWithNameDTO>> findGroupUserWhatInside(@RequestParam Long groupId) {
 		return ResponseEntity.ok(groupService.findGroupUserWhatInside(groupId));
 	}
 
@@ -64,7 +64,7 @@ public class GroupController {
 	 * @return 생성 된 그룹의 인원
 	 */
 	@PostMapping("/createGroup")
-	public ResponseEntity<List<GroupTableDTO>> createGroup(@RequestBody GroupTableDTO dto, @AuthenticationPrincipal Jwt jwt) {
+	public ResponseEntity<List<GroupTableWithMstUserNameDTO>> createGroup(@RequestBody GroupTableWithMstUserNameDTO dto, @AuthenticationPrincipal Jwt jwt) {
 
 		dto.setGroupMstUserId(jwt.getSubject());
 		return groupService.createGroup(dto);
@@ -80,7 +80,7 @@ public class GroupController {
 	 * @return 그룹 유저 목록
 	 */
 	@PostMapping(value = "/makeNewGroupUser")
-	public ResponseEntity<List<GroupUserDTO>> makeNewGroupUser(@RequestBody GroupTableDTO dto, @RequestParam String userId, @AuthenticationPrincipal Jwt jwt) {
+	public ResponseEntity<List<GroupUserWithNameDTO>> makeNewGroupUser(@RequestBody GroupTableWithMstUserNameDTO dto, @RequestParam String userId, @AuthenticationPrincipal Jwt jwt) {
 
 		dto.setGroupMstUserId(jwt.getSubject());
 		return groupService.makeNewGroupUser(dto, userId);
@@ -95,7 +95,7 @@ public class GroupController {
 	 * @return 삭제 성공 여부
 	 */
 	@DeleteMapping(value = "/deleteGroupUser")
-	public ResponseEntity<List<GroupUserDTO>> deleteGroupUser(@RequestBody GroupTableDTO dto, @RequestParam String userId, @AuthenticationPrincipal Jwt jwt) {
+	public ResponseEntity<List<GroupUserWithNameDTO>> deleteGroupUser(@RequestBody GroupTableWithMstUserNameDTO dto, @RequestParam String userId, @AuthenticationPrincipal Jwt jwt) {
 
 		dto.setGroupMstUserId(jwt.getSubject());
 		return groupService.deleteGroupUser(dto, userId);
@@ -109,7 +109,7 @@ public class GroupController {
 	 * @return 삭제 성공 여부
 	 */
 	@PostMapping(value = "/changeMstUserGroup")
-	public ResponseEntity<List<GroupUserDTO>> changeMstUserGroup(@RequestBody GroupTableDTO dto, @RequestParam String userId, @AuthenticationPrincipal Jwt jwt) {
+	public ResponseEntity<List<GroupUserWithNameDTO>> changeMstUserGroup(@RequestBody GroupTableWithMstUserNameDTO dto, @RequestParam String userId, @AuthenticationPrincipal Jwt jwt) {
 
 		dto.setGroupMstUserId(jwt.getSubject());
 		return groupService.changeMstUserGroup(dto, userId);

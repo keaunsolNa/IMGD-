@@ -19,11 +19,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.nks.imgd.dto.data.MakeFileDTO;
-import com.nks.imgd.dto.file.FileTableDTO;
-import com.nks.imgd.dto.group.GroupTableDTO;
-import com.nks.imgd.dto.data.MakeDirDTO;
-import com.nks.imgd.dto.user.UserTableDTO;
+import com.nks.imgd.dto.dataDTO.MakeFileDTO;
+import com.nks.imgd.dto.Schema.FileTableDTO;
+import com.nks.imgd.dto.dataDTO.GroupTableWithMstUserNameDTO;
+import com.nks.imgd.dto.dataDTO.MakeDirDTO;
+import com.nks.imgd.dto.dataDTO.UserTableWithRelationshipAndPictureNmDTO;
 import com.nks.imgd.service.file.FileService;
 
 @RestController
@@ -64,7 +64,7 @@ public class FileController {
 	 * @return 해당 폴더 정보 목록
 	 */
 	@PostMapping("/makeGroupDir")
-	public ResponseEntity<FileTableDTO> makeGroupDir(@RequestBody GroupTableDTO dto, @AuthenticationPrincipal Jwt jwt) {
+	public ResponseEntity<FileTableDTO> makeGroupDir(@RequestBody GroupTableWithMstUserNameDTO dto, @AuthenticationPrincipal Jwt jwt) {
 		dto.setGroupMstUserId(jwt.getSubject());
 		return fileService.makeGroupDir(dto);
 
@@ -113,7 +113,7 @@ public class FileController {
 	 * @throws IOException 파일 업로드 실패 시 IOException 반환
 	 */
 	@PostMapping(value = "/makeUserProfileImg", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<UserTableDTO> makeUserProfileImg(@ModelAttribute MakeFileDTO req) throws IOException {
+	public ResponseEntity<UserTableWithRelationshipAndPictureNmDTO> makeUserProfileImg(@ModelAttribute MakeFileDTO req) throws IOException {
 
 		Path tmp = Files.createTempFile("upload-", ".bin");
 

@@ -1,7 +1,7 @@
 // package com.nks.imgd.controller.group;
 //
 // import com.fasterxml.jackson.databind.ObjectMapper;
-// import com.nks.imgd.dto.group.GroupTableDTO;
+// import com.nks.imgd.dto.dataDTO.GroupTableDTO;
 // import com.nks.imgd.service.group.GroupService;
 //
 // import org.junit.jupiter.api.DisplayName;

@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.nks.imgd.component.config.JwtTokenProvider;
 import com.nks.imgd.component.util.maker.TokenMaker;
 import com.nks.imgd.dto.Enum.SocialLoginType;
-import com.nks.imgd.dto.user.UserTableDTO;
+import com.nks.imgd.dto.dataDTO.UserTableWithRelationshipAndPictureNmDTO;
 import com.nks.imgd.service.oAuth.AuthService;
 
 import jakarta.servlet.http.Cookie;
@@ -117,7 +117,7 @@ public class OauthController {
 		String token = jwtTokenProvider.resolveToken(request);
 
 		try {
-			UserTableDTO user = jwtTokenProvider.getUserDetails(token);
+			UserTableWithRelationshipAndPictureNmDTO user = jwtTokenProvider.getUserDetails(token);
 			String accessToken = jwtTokenProvider.generateAccessToken(user);
 
 			Cookie accessTokenForKnock = new Cookie("accessToken", accessToken);

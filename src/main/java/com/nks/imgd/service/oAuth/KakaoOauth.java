@@ -19,7 +19,7 @@ import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nks.imgd.dto.Enum.SocialLoginType;
-import com.nks.imgd.dto.user.UserTableDTO;
+import com.nks.imgd.dto.dataDTO.UserTableWithRelationshipAndPictureNmDTO;
 import com.nks.imgd.mapper.user.UserTableMapper;
 
 import lombok.RequiredArgsConstructor;
@@ -145,11 +145,11 @@ public class KakaoOauth implements SocialOauth {
 		assert jsonNode != null;
 		String id = jsonNode.get("id").asText();
 
-		UserTableDTO user = userTableMapper.findById(id);
+		UserTableWithRelationshipAndPictureNmDTO user = userTableMapper.findById(id);
 
 		if (null == user) {
 
-			user = new UserTableDTO();
+			user = new UserTableWithRelationshipAndPictureNmDTO();
 
 			user.setUserId(id);
 			user.setName(jsonNode.get("properties").get("nickname").asText());

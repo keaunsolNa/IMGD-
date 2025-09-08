@@ -1,4 +1,4 @@
-package com.nks.imgd.dto.data;
+package com.nks.imgd.dto.dataDTO;
 
 import org.springframework.web.multipart.MultipartFile;
 

@@ -19,7 +19,7 @@
 //
 // import com.fasterxml.jackson.databind.ObjectMapper;
 // import com.nks.imgd.dto.data.MakeDirDTO;
-// import com.nks.imgd.dto.group.GroupTableDTO;
+// import com.nks.imgd.dto.dataDTO.GroupTableDTO;
 // import com.nks.imgd.service.file.FileService;
 //
 // @WebMvcTest(FileController.class)

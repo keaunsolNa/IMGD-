@@ -1,4 +1,4 @@
-package com.nks.imgd.dto.group;
+package com.nks.imgd.dto.Schema;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,7 +11,6 @@ public class GroupUserDTO {
 
 	private Long groupId;
 	private String userId;
-	private String userNm;
 	private String regDtm;
 	private String regId;
 	private String modDtm;

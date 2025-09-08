@@ -5,7 +5,7 @@
 // import org.junit.jupiter.api.DisplayName;
 // import org.junit.jupiter.api.Test;
 //
-// import com.nks.imgd.dto.group.GroupTableDTO;
+// import com.nks.imgd.dto.dataDTO.GroupTableDTO;
 // import com.nks.imgd.mapper.group.GroupTableMapper;
 //
 // /**

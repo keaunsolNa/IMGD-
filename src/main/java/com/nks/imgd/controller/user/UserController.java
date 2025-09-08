@@ -5,7 +5,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
-import com.nks.imgd.dto.user.UserTableDTO;
+import com.nks.imgd.dto.dataDTO.UserTableWithRelationshipAndPictureNmDTO;
 import com.nks.imgd.service.user.UserService;
 
 import java.util.List;
@@ -25,7 +25,7 @@ public class UserController {
 	 * @return 대상 유저가 가지고 있는 정보
 	 */
 	@GetMapping("/findUserByToken")
-	public ResponseEntity<UserTableDTO> findUserByToken(@AuthenticationPrincipal Jwt jwt) {
+	public ResponseEntity<UserTableWithRelationshipAndPictureNmDTO> findUserByToken(@AuthenticationPrincipal Jwt jwt) {
 		return ResponseEntity.ok(userService.findUserById(jwt.getSubject()));
 	}
 
@@ -36,7 +36,7 @@ public class UserController {
 	 * @return 대상 유저가 가지고 있는 정보
 	 */
 	@GetMapping("/findUserById")
-	public ResponseEntity<UserTableDTO> findUserById(@RequestParam String userId) {
+	public ResponseEntity<UserTableWithRelationshipAndPictureNmDTO> findUserById(@RequestParam String userId) {
 		return ResponseEntity.ok(userService.findUserById(userId));
 	}
 
@@ -46,7 +46,7 @@ public class UserController {
 	 * @return 상호 친구 목록
 	 */
 	@GetMapping("/findFriendEachOther")
-	public ResponseEntity<List<UserTableDTO>> findFriendEachOther(@RequestParam String userId) {
+	public ResponseEntity<List<UserTableWithRelationshipAndPictureNmDTO>> findFriendEachOther(@RequestParam String userId) {
 		return ResponseEntity.ok(userService.findFriendEachOther(userId));
 	}
 
@@ -56,7 +56,7 @@ public class UserController {
 	 * @return 나를 추가한, 내가 추가 하지 않은 유저 목록
 	 */
 	@GetMapping("/findFriendWhoAddMeButImNot")
-	public ResponseEntity<List<UserTableDTO>> findFriendWhoAddMeButImNot(@RequestParam String userId) {
+	public ResponseEntity<List<UserTableWithRelationshipAndPictureNmDTO>> findFriendWhoAddMeButImNot(@RequestParam String userId) {
 		return ResponseEntity.ok(userService.findFriendWhoAddMeButImNot(userId));
 	}
 
@@ -66,7 +66,7 @@ public class UserController {
 	 * @return 내가 추가한, 나를 추가 하지 않은 유저 목록
 	 */
 	@GetMapping("/findFriendWhoImAddButNot")
-	public ResponseEntity<List<UserTableDTO>> findFriendWhoImAddButNot(@RequestParam String userId) {
+	public ResponseEntity<List<UserTableWithRelationshipAndPictureNmDTO>> findFriendWhoImAddButNot(@RequestParam String userId) {
 		return ResponseEntity.ok(userService.findFriendWhoImAddButNot(userId));
 	}
 
@@ -76,7 +76,7 @@ public class UserController {
 	 * @return 내가 추가한, 나를 거절 한 않은 유저 목록
 	 */
 	@GetMapping("/findFriendWhoImAddButReject")
-	public ResponseEntity<List<UserTableDTO>> findFriendWhoImAddButReject(@RequestParam String userId) {
+	public ResponseEntity<List<UserTableWithRelationshipAndPictureNmDTO>> findFriendWhoImAddButReject(@RequestParam String userId) {
 		return ResponseEntity.ok(userService.findFriendWhoImAddButReject(userId));
 	}
 
@@ -86,7 +86,7 @@ public class UserController {
 	 * @return 내가 추가한 모든 친구 유저 목록
 	 */
 	@GetMapping("/findFriend")
-	public ResponseEntity<List<UserTableDTO>> findFriend(@RequestParam String userId) {
+	public ResponseEntity<List<UserTableWithRelationshipAndPictureNmDTO>> findFriend(@RequestParam String userId) {
 		return ResponseEntity.ok(userService.findFriend(userId));
 	}
 
@@ -96,7 +96,7 @@ public class UserController {
 	 * @return 내가 추가한 모든 친구 유저 목록
 	 */
 	@GetMapping("/searchFriend")
-	public ResponseEntity<UserTableDTO> searchFriend(@AuthenticationPrincipal Jwt jwt, @RequestParam String userId) {
+	public ResponseEntity<UserTableWithRelationshipAndPictureNmDTO> searchFriend(@AuthenticationPrincipal Jwt jwt, @RequestParam String userId) {
  		return ResponseEntity.ok(userService.searchFriend(jwt.getSubject(), userId));
 	}
 
@@ -107,7 +107,7 @@ public class UserController {
 	 * @return 그룹에 소속 되지 않은 친구 목록
 	 */
 	@GetMapping("/findFriendEachOtherAndNotInGroup")
-	public ResponseEntity<List<UserTableDTO>> findFriendEachOtherAndNotInGroup(@RequestParam String userId, @RequestParam Long groupId) {
+	public ResponseEntity<List<UserTableWithRelationshipAndPictureNmDTO>> findFriendEachOtherAndNotInGroup(@RequestParam String userId, @RequestParam Long groupId) {
 		return ResponseEntity.ok(userService.findFriendEachOtherAndNotInGroup(userId, groupId));
 	}
 	
@@ -118,7 +118,7 @@ public class UserController {
 	 * @return 대상 유저가 가지고 있는 정보
 	 */
 	@PostMapping("/updateUser")
-	public ResponseEntity<UserTableDTO> updateUser(@RequestBody UserTableDTO user) {
+	public ResponseEntity<UserTableWithRelationshipAndPictureNmDTO> updateUser(@RequestBody UserTableWithRelationshipAndPictureNmDTO user) {
 		return userService.updateUser(user);
 	}
 
@@ -130,7 +130,7 @@ public class UserController {
 	 * @return 상호 친구 목록
 	 */
 	@PostMapping("/insertUserFriendTable")
-	public ResponseEntity<List<UserTableDTO>> insertUserFriendTable(@AuthenticationPrincipal Jwt jwt, @RequestParam String targetUserId, @RequestParam String relationship) {
+	public ResponseEntity<List<UserTableWithRelationshipAndPictureNmDTO>> insertUserFriendTable(@AuthenticationPrincipal Jwt jwt, @RequestParam String targetUserId, @RequestParam String relationship) {
 		return userService.insertUserFriendTable(jwt.getSubject(), targetUserId, relationship);
 	}
 
@@ -141,7 +141,7 @@ public class UserController {
 	 * @return 상호 친구 목록
 	 */
 	@DeleteMapping("/deleteUserFriendTable")
-	public ResponseEntity<List<UserTableDTO>> deleteUserFriendTable(@AuthenticationPrincipal Jwt jwt, @RequestParam String targetUserId) {
+	public ResponseEntity<List<UserTableWithRelationshipAndPictureNmDTO>> deleteUserFriendTable(@AuthenticationPrincipal Jwt jwt, @RequestParam String targetUserId) {
 		return userService.deleteUserFriendTable(jwt.getSubject(), targetUserId);
 	}
 }
