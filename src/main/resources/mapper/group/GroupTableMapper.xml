@@ -24,6 +24,7 @@
         SELECT T1.GROUP_ID
              , T1.GROUP_NM
              , F_GET_USER_NM(T1.GROUP_MST_USER_ID) AS `GROUP_MST_USER_NM`
+             , T1.GROUP_MST_USER_ID
              , T1.REG_DTM
           FROM GROUP_TABLE T1
           JOIN GROUP_USER T2

@@ -226,7 +226,6 @@ public class FileService {
 		String fileNm = UUID.randomUUID().toString();
 		String path = findFileNmByDirId(folderId);
 
-
 		dto.setFileNm(fileNm);
 		dto.setFileOrgNm(fileOrgNm);
 		dto.setPath(path);

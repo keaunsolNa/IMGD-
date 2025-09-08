@@ -89,9 +89,6 @@ public class UserService {
 	 * @return 대상 목록
 	 */
 	public UserTableDTO searchFriend(@Param("loginId") String loginId, @Param("userId") String userId){
-
-		System.out.println("loginId = " + loginId);
-		System.out.println("userId = " + userId);
 		return postProcessingUserTable(userTableMapper.searchFriend(loginId, userId));
 	}
 

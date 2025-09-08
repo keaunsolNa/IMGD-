@@ -131,7 +131,6 @@ public class UserController {
 	 */
 	@PostMapping("/insertUserFriendTable")
 	public ResponseEntity<List<UserTableDTO>> insertUserFriendTable(@AuthenticationPrincipal Jwt jwt, @RequestParam String targetUserId, @RequestParam String relationship) {
-		System.out.println(relationship);
 		return userService.insertUserFriendTable(jwt.getSubject(), targetUserId, relationship);
 	}
 

@@ -30,7 +30,7 @@ public interface UserTableMapper {
 
 	UserTableDTO searchFriend(@Param("loginId") String loginId, @Param("userId") String userId);
 
-	List<UserTableDTO> findFriendEachOtherAndNotInGroup(String userId, Long groupId);
+	List<UserTableDTO> findFriendEachOtherAndNotInGroup(@Param("userId") String userId, @Param("groupId") Long groupId);
 
 	void makeNewUser(@Param("user") UserTableDTO user);
 
