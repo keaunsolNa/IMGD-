@@ -11,7 +11,6 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 import com.nks.imgd.component.util.commonMethod.CommonMethod;
-import com.nks.imgd.dto.Enum.Role;
 import com.nks.imgd.dto.dataDTO.MakeDirDTO;
 import com.nks.imgd.dto.dataDTO.MakeFileDTO;
 import com.nks.imgd.dto.Schema.FileTableDTO;
@@ -201,14 +200,13 @@ public class FileService {
 		Path targetNoExt = makePathByFileId(3L);
 
 		// ✅ 파일 Webp 형태로 변환 및 저장
-		if (null == convertToWebp(targetNoExt, originalFile, fileDTO.getFileNm())) return ResponseEntity.badRequest().build();
+		if (null == convertToWebp(targetNoExt, originalFile, fileDTO.getFileNm(), WebpWriter.DEFAULT)) return ResponseEntity.badRequest().build();
 		else return ResponseEntity.ok(userTableWithRelationshipAndPictureNmDTO);
 
 	}
 
 	/**
 	 * 파일 생성
-	 * TODO : 그룹 계정의 과금 권한에 따른 파일 용량/압축률/최대크기 등 설정
 	 * DB row 생성 → 물리 폴더 생성(실패 시 롤백)
 	 *
 	 * @param folderId 파일이 생성될 부모 폴더 ID
@@ -239,10 +237,16 @@ public class FileService {
 
 		Path targetNoExt = makePathByFileId(folderId);
 
-		Role role = Role.valueOf(userProfilePort.findHighestUserRole(userId).getRoleNm());
+		int role = userProfilePort.findHighestUserRole(userId).getRoleId();
 
+		log.info("Role Number : [{}]", role);
+		int q = role == 1 ? 25 : role == 2 ? 50 : 75;
+		int m = 6;
+		int z = 9;
 
-		if (null == convertToWebp(targetNoExt, originalFile, fileNm)) return ResponseEntity.badRequest().build();
+		WebpWriter customWriter = WebpWriter.DEFAULT.withQ(q).withM(m).withZ(z);
+
+		if (null == convertToWebp(targetNoExt, originalFile, fileNm, customWriter)) return ResponseEntity.badRequest().build();
 		else return ResponseEntity.ok(findFileById(dto.getFileId()));
 
 	}
@@ -332,7 +336,7 @@ public class FileService {
 	 * @param originalFile 업로드 할 파일
 	 * @return 변환된 파일
 	 */
-	public File convertToWebp(Path path, File originalFile, String fileNm)
+	public File convertToWebp(Path path, File originalFile, String fileNm, WebpWriter customWriter)
 	{
 
 		// 최종 대상: uuid.webp
@@ -346,7 +350,7 @@ public class FileService {
 		{
 			ImmutableImage.loader()
 				.fromFile(originalFile)
-				.output(WebpWriter.DEFAULT, target.toFile()); // 여기서 실제 파일 생성
+				.output(customWriter, target.toFile()); // 여기서 실제 파일 생성
 			return target.toFile();
 
 		} catch (IOException e) {
