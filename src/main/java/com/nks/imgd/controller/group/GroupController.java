@@ -50,8 +50,8 @@ public class GroupController {
 	 * @return 대상 유저가 가지고 있는 그룹 목록
 	 */
 	@GetMapping("/findGroupUserWhatInside")
-	public ResponseEntity<List<GroupUserWithNameDTO>> findGroupUserWhatInside(@RequestParam Long groupId) {
-		return ResponseEntity.ok(groupService.findGroupUserWhatInside(groupId));
+	public ResponseEntity<List<GroupUserWithNameDTO>> findGroupUserWhatInside(@AuthenticationPrincipal Jwt jwt, @RequestParam Long groupId) {
+		return ResponseEntity.ok(groupService.findGroupUserWhatInside(jwt.getSubject(), groupId));
 	}
 
 	/**

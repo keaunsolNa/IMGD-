@@ -58,9 +58,9 @@ public class GroupService {
 	 * @param groupId 대상 그룹 아이디
 	 * @return 그룹이 가지고 있는 유저 목록
 	 */
-	public List<GroupUserWithNameDTO> findGroupUserWhatInside(Long groupId)
+	public List<GroupUserWithNameDTO> findGroupUserWhatInside(String userId, Long groupId)
 	{
-		return postProcessingGroupUserTables(groupTableMapper.findGroupUserWhatInside(groupId));
+		return postProcessingGroupUserTables(groupTableMapper.findGroupUserWhatInside(userId, groupId));
 	}
 
 	/**
@@ -88,7 +88,7 @@ public class GroupService {
 	public ResponseEntity<List<GroupUserWithNameDTO>> makeNewGroupUser(GroupTableWithMstUserNameDTO dto, String userId) {
 
 		if (groupTableMapper.isUserCheck(dto, userId) > 0) return ResponseEntity.badRequest().build();
-		return returnResultWhenTransaction(groupTableMapper.makeNewGroupUserTable(dto, userId), () -> findGroupUserWhatInside(dto.getGroupId()));
+		return returnResultWhenTransaction(groupTableMapper.makeNewGroupUserTable(dto, userId), () -> findGroupUserWhatInside(userId, dto.getGroupId()));
 
 	}
 
@@ -120,7 +120,7 @@ public class GroupService {
 		}
 
 		// 그 외 일반 유저 삭제는 MST_USER 라면 가능.
-		return returnResultWhenTransaction(groupTableMapper.deleteGroupUser(dto, userId), () -> findGroupUserWhatInside(dto.getGroupId()));
+		return returnResultWhenTransaction(groupTableMapper.deleteGroupUser(dto, userId), () -> findGroupUserWhatInside(userId, dto.getGroupId()));
 	}
 
 
@@ -137,7 +137,7 @@ public class GroupService {
 		if (groupTableMapper.isUserCheck(dto, userId) > 0) return ResponseEntity.badRequest().build();
 
 		// 마스터 유저 변경
-		return returnResultWhenTransaction(groupTableMapper.changeMstUserGroup(dto, userId), () -> findGroupUserWhatInside(dto.getGroupId()));
+		return returnResultWhenTransaction(groupTableMapper.changeMstUserGroup(dto, userId), () -> findGroupUserWhatInside(userId, dto.getGroupId()));
 	}
 
 	// ───────────────────────────────── helper methods ───────────────────────────────

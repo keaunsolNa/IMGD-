@@ -18,6 +18,7 @@
              , MOD_DTM
              , MOD_ID
           FROM USER_TABLE
+         ORDER BY USER_ID
     </select>
 
     <select id="findById" resultType="com.nks.imgd.dto.dataDTO.UserTableWithRelationshipAndPictureNmDTO">
@@ -35,6 +36,7 @@
              , MOD_ID
           FROM USER_TABLE
          WHERE USER_ID = #{userId}
+         LIMIT 1
     </select>
 
     <select id="findHighestUserRole" resultType="com.nks.imgd.dto.Schema.RolesDTO">
@@ -71,6 +73,7 @@
                                  ON A2.FRIEND_ID = A3.FRIEND_ID
                               WHERE A1.USER_ID = T3.USER_ID
                                 AND A3.RELATIONSHIP = 'F')
+        ORDER BY T3.REG_DTM, T3.USER_ID
 
     </select>
 
@@ -95,6 +98,7 @@
                                       ON A2.FRIEND_ID = A3.FRIEND_ID
                                    WHERE A1.USER_ID = #{userId}
                                   )
+        ORDER BY T3.REG_DTM, T3.USER_ID
     </select>
 
     <select id="findFriendWhoImAddButNot" resultType="com.nks.imgd.dto.dataDTO.UserTableWithRelationshipAndPictureNmDTO">
@@ -116,6 +120,7 @@
                                     JOIN USER_TABLE A3
                                       ON A2.USER_ID = A3.USER_ID
                                    WHERE A1.USER_ID = #{userId} )
+        ORDER BY T3.REG_DTM, T3.USER_ID
     </select>
 
     <select id="findFriendWhoImAddButReject" resultType="com.nks.imgd.dto.dataDTO.UserTableWithRelationshipAndPictureNmDTO">
@@ -138,6 +143,7 @@
                                   ON A2.USER_ID = A3.USER_ID
                                 WHERE A1.USER_ID = #{userId}
                                   AND A1.RELATIONSHIP = 'R')
+        ORDER BY T3.REG_DTM, T3.USER_ID
     </select>
 
     <select id="findFriend" resultType="com.nks.imgd.dto.dataDTO.UserTableWithRelationshipAndPictureNmDTO">
@@ -153,6 +159,7 @@
           ON T2.FRIEND_ID = T3.FRIEND_ID
         WHERE T1.USER_ID = #{userId}
           AND T3.RELATIONSHIP = 'F'
+        ORDER BY T3.REG_DTM, T3.USER_ID
     </select>
 
     <select id="searchFriend" resultType="com.nks.imgd.dto.dataDTO.UserTableWithRelationshipAndPictureNmDTO">
@@ -168,6 +175,7 @@
             ON T2.FRIEND_ID = T3.FRIEND_ID
            AND T3.USER_ID = #{loginId}
          WHERE T1.USER_ID = #{userId}
+        ORDER BY T3.REG_DTM, T3.USER_ID
     </select>
 
     <select id="findFriendTableIdByUserId">
@@ -205,6 +213,7 @@
                                WHERE B1.GROUP_ID = #{groupId}
                                  AND B1.GROUP_MST_USER_ID = #{userId}
                                )
+    ORDER BY T3.REG_DTM, T3.USER_ID
     </select>
     <insert id="makeNewUser">
         INSERT

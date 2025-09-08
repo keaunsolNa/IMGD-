@@ -20,6 +20,7 @@
           FROM FILE_TABLE
          WHERE PARENT_ID = #{parentId}
            AND GROUP_ID = #{groupId}
+         ORDER BY TYPE, REG_DTM DESC, FILE_ORG_NM
     </select>
 
     <select id="findRootPath" resultType="com.nks.imgd.dto.Schema.FileTableDTO">

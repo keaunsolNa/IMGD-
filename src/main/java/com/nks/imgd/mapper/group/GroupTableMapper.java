@@ -16,7 +16,7 @@ public interface GroupTableMapper {
 
 	List<GroupTableWithMstUserNameDTO> findGroupWhatInside(@Param("userId") String userId);
 
-	List<GroupUserWithNameDTO> findGroupUserWhatInside(@Param("groupId") Long groupId);
+	List<GroupUserWithNameDTO> findGroupUserWhatInside(@Param("userId") String userId, @Param("groupId") Long groupId);
 
 	List<GroupTableWithMstUserNameDTO> findGroupByGroupId(@Param("groupId") Long groupId);
 	int makeNewGroup(@Param("group") GroupTableWithMstUserNameDTO dto);
