@@ -1,7 +1,8 @@
 package com.nks.imgd.service.user;
 
+import com.nks.imgd.component.util.maker.ServiceResult;
+import com.nks.imgd.dto.Enum.ResponseMsg;
 import org.apache.ibatis.annotations.Param;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -10,7 +11,6 @@ import com.nks.imgd.dto.dataDTO.UserTableWithRelationshipAndPictureNmDTO;
 import com.nks.imgd.mapper.user.UserTableMapper;
 
 import java.util.List;
-import java.util.function.Supplier;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -109,8 +109,17 @@ public class UserService {
 	 * @return 대상 유저가 가지고 있는 정보
 	 */
 	@Transactional(rollbackFor = Exception.class)
-	public ResponseEntity<UserTableWithRelationshipAndPictureNmDTO>  updateUser(@Param("user") UserTableWithRelationshipAndPictureNmDTO user) {
-		return returnResultWhenTransaction(userTableMapper.updateUser(user), () -> findUserById(user.getUserId()));
+	public ServiceResult<UserTableWithRelationshipAndPictureNmDTO> updateUser(@Param("user") UserTableWithRelationshipAndPictureNmDTO user) {
+
+        ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
+                userTableMapper.updateUser(user)
+        );
+
+        if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
+            return ServiceResult.failure(fsMsg);
+        }
+
+        return ServiceResult.success(() -> findUserById(user.getUserId()));
 	}
 
 	/**
@@ -120,11 +129,19 @@ public class UserService {
 	 * @return 결과값 반환
 	 */
 	@Transactional(rollbackFor = Exception.class)
-	public ResponseEntity<List<UserTableWithRelationshipAndPictureNmDTO>> insertUserFriendTable(@Param("userId") String userId, @Param("targetUserId") String targetUserId, @Param("relationship") String relationship) {
+	public ServiceResult<List<UserTableWithRelationshipAndPictureNmDTO>>  insertUserFriendTable(@Param("userId") String userId, @Param("targetUserId") String targetUserId, @Param("relationship") String relationship) {
 
 		Long friendId = userTableMapper.findFriendTableIdByUserId(userId).getFriendId();
 
-		return returnResultWhenTransaction(userTableMapper.insertUserFriendTable(targetUserId, friendId, userId, relationship), () -> findFriendEachOther(userId));
+        ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
+                userTableMapper.insertUserFriendTable(targetUserId, friendId, userId, relationship)
+        );
+
+        if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
+            return ServiceResult.failure(fsMsg);
+        }
+
+        return ServiceResult.success(() -> findFriendEachOther(userId));
 	}
 
 	/**
@@ -134,10 +151,19 @@ public class UserService {
 	 * @return 결과값 반환
 	 */
 	@Transactional(rollbackFor = Exception.class)
-	public ResponseEntity<List<UserTableWithRelationshipAndPictureNmDTO>> deleteUserFriendTable(@Param("userId") String userId, @Param("targetUserId") String targetUserId) {
+	public ServiceResult<List<UserTableWithRelationshipAndPictureNmDTO>> deleteUserFriendTable(@Param("userId") String userId, @Param("targetUserId") String targetUserId) {
 
 		Long friendId = userTableMapper.findFriendTableIdByUserId(userId).getFriendId();
-		return returnResultWhenTransaction(userTableMapper.deleteUserFriendTable(targetUserId, friendId), () -> findFriendEachOther(userId));
+
+        ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
+                userTableMapper.deleteUserFriendTable(targetUserId, friendId)
+        );
+
+        if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
+            return ServiceResult.failure(fsMsg);
+        }
+
+        return ServiceResult.success(() -> findFriendEachOther(userId));
 
 	}
 	// ───────────────────────────────── helper methods ───────────────────────────────
@@ -175,18 +201,5 @@ public class UserService {
 
 		return user;
 	}
-
-	/**
-	 * Transaction 결과 값을 반환 한다.
-	 * @param result 결과값
-	 * @return 결과값
-	 */
-	public <T> ResponseEntity<T> returnResultWhenTransaction(int result, Supplier<T> onSuccess)
-	{
-		if (result == 1) return ResponseEntity.ok(onSuccess.get());
-		else if (result == 0) return ResponseEntity.notFound().build();
-		else return ResponseEntity.badRequest().build();
-	}
-
 
 }

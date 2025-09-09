@@ -60,6 +60,11 @@
          ORDER BY REG_DTM, GROUP_NM
     </select>
 
+    <select id="findAllGroupWhatUserMake">
+        SELECT COUNT(GROUP_ID)
+          FROM GROUP_TABLE
+         WHERE GROUP_MST_USER_ID = #{userId}
+    </select>
 
     <insert id="makeNewGroup"
             useGeneratedKeys="true"

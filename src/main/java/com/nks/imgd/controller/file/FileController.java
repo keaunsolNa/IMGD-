@@ -5,6 +5,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
+import com.nks.imgd.component.util.commonMethod.CommonMethod;
+import com.nks.imgd.component.util.maker.ApiResponse;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -31,6 +33,7 @@ import com.nks.imgd.service.file.FileService;
 public class FileController {
 
 	private final FileService fileService;
+    private static final CommonMethod commonMethod = new CommonMethod();
 
 	public FileController(FileService fileService) {
 		this.fileService = fileService;
@@ -64,10 +67,9 @@ public class FileController {
 	 * @return 해당 폴더 정보 목록
 	 */
 	@PostMapping("/makeGroupDir")
-	public ResponseEntity<FileTableDTO> makeGroupDir(@RequestBody GroupTableWithMstUserNameDTO dto, @AuthenticationPrincipal Jwt jwt) {
+	public ResponseEntity<ApiResponse<FileTableDTO>> makeGroupDir(@RequestBody GroupTableWithMstUserNameDTO dto, @AuthenticationPrincipal Jwt jwt) {
 		dto.setGroupMstUserId(jwt.getSubject());
-		return fileService.makeGroupDir(dto);
-
+        return commonMethod.responseTransaction(fileService.makeGroupDir(dto));
 	}
 
 	/**
@@ -76,8 +78,8 @@ public class FileController {
 	 * @return 생성된 폴더가 위치한 곳의 파일 / 폴더 목록
 	 */
 	@PostMapping("/makeDir")
-	public ResponseEntity<List<FileTableDTO>> makeDir(@RequestBody MakeDirDTO req) {
-		return fileService.makeDir(req);
+	public ResponseEntity<ApiResponse<List<FileTableDTO>>> makeDir(@RequestBody MakeDirDTO req) {
+		return commonMethod.responseTransaction(fileService.makeDir(req));
 	}
 
 	/**
@@ -87,20 +89,20 @@ public class FileController {
 	 * @throws IOException 파일 생성 실패 시 IOException 반환
 	 */
 	@PostMapping(value = "/makeFile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<FileTableDTO> makeFile(@ModelAttribute MakeFileDTO req) throws IOException {
+	public ResponseEntity<ApiResponse<FileTableDTO>> makeFile(@ModelAttribute MakeFileDTO req) throws IOException {
 
 		Path tmp = Files.createTempFile("upload-", ".bin");
 		MultipartFile mf = req.getOriginalFile();
 		mf.transferTo(tmp);
 
 		try {
-			return fileService.makeFile(
+			return commonMethod.responseTransaction(fileService.makeFile(
 				req.getFolderId(),
 				req.getUserId(),
 				req.getGroupId(),
 				mf.getOriginalFilename(),     // DB의 원본명 컬럼에는 실제 업로드 파일명 사용
 				tmp.toFile()
-			);
+			));
 		} finally {
 			Files.deleteIfExists(tmp); // 임시파일 정리
 		}
@@ -113,7 +115,7 @@ public class FileController {
 	 * @throws IOException 파일 업로드 실패 시 IOException 반환
 	 */
 	@PostMapping(value = "/makeUserProfileImg", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<UserTableWithRelationshipAndPictureNmDTO> makeUserProfileImg(@ModelAttribute MakeFileDTO req) throws IOException {
+	public ResponseEntity<ApiResponse<UserTableWithRelationshipAndPictureNmDTO>> makeUserProfileImg(@ModelAttribute MakeFileDTO req) throws IOException {
 
 		Path tmp = Files.createTempFile("upload-", ".bin");
 
@@ -121,7 +123,7 @@ public class FileController {
 		mf.transferTo(tmp);
 
 		try {
-			return fileService.makeUserProfileImg(req, tmp.toFile());
+			return commonMethod.responseTransaction(fileService.makeUserProfileImg(req, tmp.toFile()));
 		} finally {
 			Files.deleteIfExists(tmp); // 임시 파일 정리
 		}
@@ -133,8 +135,8 @@ public class FileController {
 	 * @return 삭제할 파일이 위치한 디렉터리 정보
 	 */
 	@DeleteMapping(value = "/deleteFile")
-	public ResponseEntity<FileTableDTO> deleteFile(@RequestParam Long fileId) {
-		return fileService.deleteFile(fileId);
+	public ResponseEntity<ApiResponse<FileTableDTO>> deleteFile(@RequestParam Long fileId) {
+		return commonMethod.responseTransaction(fileService.deleteFile(fileId));
 	}
 
 }

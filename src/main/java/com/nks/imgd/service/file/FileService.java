@@ -11,6 +11,9 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 import com.nks.imgd.component.util.commonMethod.CommonMethod;
+import com.nks.imgd.component.util.maker.ServiceResult;
+import com.nks.imgd.dto.Enum.ResponseMsg;
+import com.nks.imgd.dto.Enum.Role;
 import com.nks.imgd.dto.dataDTO.MakeDirDTO;
 import com.nks.imgd.dto.dataDTO.MakeFileDTO;
 import com.nks.imgd.dto.Schema.FileTableDTO;
@@ -114,19 +117,28 @@ public class FileService {
 	 * @return 생성된 폴더의 정보
      */
 	@Transactional(rollbackFor = Exception.class)
-    public ResponseEntity<FileTableDTO> makeGroupDir(GroupTableWithMstUserNameDTO dto)
+    public ServiceResult<FileTableDTO> makeGroupDir(GroupTableWithMstUserNameDTO dto)
     {
 
-		if (fileTableMapper.makeGroupDir(dto) != 1) return ResponseEntity.badRequest().build();
+        ResponseMsg returnMsg = commonMethod.returnResultByResponseMsg(fileTableMapper.makeGroupDir(dto));
 
-		FileTableDTO fileDTO = fileTableMapper.findFileIdByFileOrgNmInDirCase(dto);
+		if (!returnMsg.equals(ResponseMsg.ON_SUCCESS)) return ServiceResult.failure(returnMsg);
+
+        FileTableDTO fileDTO = fileTableMapper.findFileIdByFileOrgNmInDirCase(dto);
 
 		if (null == fileDTO  || null == fileDTO.getFileId()) {
-			return ResponseEntity.badRequest().build();
-		}
+            return ServiceResult.failure(ResponseMsg.BAD_REQUEST);
+        }
 
-		return returnResultWhenTransaction(createDirectoriesOrThrow(makePathByFileId(fileDTO.getFileId())),
-			() -> findFileById(fileDTO.getFileId()));
+        // 물리 폴더 생성 (실패 시 예외 -> 트랜잭션 롤백)
+        ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
+                createDirectoriesOrThrow(makePathByFileId(fileDTO.getFileId()))
+        );
+        if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
+            return ServiceResult.failure(fsMsg);
+        }
+
+        return ServiceResult.success(() -> findFileById(fileDTO.getFileId()));
 
 	}
 
@@ -138,13 +150,63 @@ public class FileService {
 	 * @return 생성된 폴더 정보
 	 */
 	@Transactional(rollbackFor = Exception.class)
-    public ResponseEntity<List<FileTableDTO>> makeDir(MakeDirDTO req)
+    public ServiceResult<List<FileTableDTO>> makeDir(MakeDirDTO req)
     {
 
-		if (fileTableMapper.makeDir(req) != 1) return ResponseEntity.badRequest().build();
+		if (fileTableMapper.makeDir(req) != 1) return ServiceResult.failure(ResponseMsg.BAD_REQUEST);
 
-		return returnResultWhenTransaction(createDirectoriesOrThrow(Path.of(makePathByFileId(req.getParentId()) + "\\" + req.getDirNm())),
-			() -> findFileAndDirectory(req.getParentId(), req.getGroupId()));
+        ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
+                createDirectoriesOrThrow(Path.of(makePathByFileId(req.getParentId()) + "\\" + req.getDirNm()))
+        );
+        if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
+            return ServiceResult.failure(fsMsg);
+        }
+
+        return ServiceResult.success(() -> findFileAndDirectory(req.getParentId(), req.getGroupId()));
+    }
+
+
+    /**
+     * 파일 생성
+     * DB row 생성 → 물리 폴더 생성(실패 시 롤백)
+     *
+     * @param folderId 파일이 생성될 부모 폴더 ID
+     * @param userId 파일을 생성 하는 그룹의 MST_USER_ID
+     * @param groupId 파일이 생성될 그룹 ID
+     * @param fileOrgNm 생성할 파일 원본 이름
+     * @param originalFile 생성할 파일
+     * @return int 결과 값
+     *
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServiceResult<FileTableDTO> makeFile(Long folderId, String userId, Long groupId, String fileOrgNm, File originalFile)
+    {
+
+        MakeFileDTO dto =  new MakeFileDTO();
+        String fileNm = UUID.randomUUID().toString();
+        String path = findFileNmByDirId(folderId);
+
+        dto.setFileNm(fileNm);
+        dto.setFileOrgNm(fileOrgNm);
+        dto.setPath(path);
+        dto.setFolderId(folderId);
+        dto.setGroupId(groupId);
+        dto.setUserId(userId);
+
+        if (fileTableMapper.makeFile(dto) != 1)
+            return ServiceResult.failure(ResponseMsg.BAD_REQUEST);
+
+        Path targetNoExt = makePathByFileId(folderId);
+
+        Role role = Role.valueOf(userProfilePort.findHighestUserRole(userId).getRoleNm());
+        int q = role.getPermissionOfWebpWriter()[0];
+        int m = role.getPermissionOfWebpWriter()[1];
+        int z = role.getPermissionOfWebpWriter()[2];
+
+        WebpWriter customWriter = WebpWriter.DEFAULT.withQ(q).withM(m).withZ(z);
+
+        if (null == convertToWebp(targetNoExt, originalFile, fileNm, customWriter)) return ServiceResult.failure(ResponseMsg.BAD_REQUEST);
+        else return ServiceResult.success(() -> findFileById(dto.getFileId()));
     }
 
 	/**
@@ -155,7 +217,7 @@ public class FileService {
 	 * @return insert 후 결과값
 	 */
 	@Transactional(rollbackFor = Exception.class)
-	public ResponseEntity<UserTableWithRelationshipAndPictureNmDTO> makeUserProfileImg(MakeFileDTO dto, File originalFile)
+	public ServiceResult<UserTableWithRelationshipAndPictureNmDTO> makeUserProfileImg(MakeFileDTO dto, File originalFile)
 	{
 		String fileNm = UUID.randomUUID().toString();
 
@@ -166,7 +228,7 @@ public class FileService {
 		// ✅ 파일 테이블에 ROW 생성
 		int result = fileTableMapper.makeUserProfileImg(fileDTO, dto.getUserId());
 
-		if (result != 1) return ResponseEntity.badRequest().build();
+		if (result != 1) return ServiceResult.failure(ResponseMsg.BAD_REQUEST);
 
 		// 성공 했다면 user 정보 변경한다.
 		long fileId = fileDTO.getFileId();
@@ -174,10 +236,11 @@ public class FileService {
 		// ✅ 유저 정보 확인
 		UserTableWithRelationshipAndPictureNmDTO userTableWithRelationshipAndPictureNmDTO = userProfilePort.findUserById(dto.getUserId());
 
-		if (null == userTableWithRelationshipAndPictureNmDTO) return ResponseEntity.badRequest().build();
+		if (null == userTableWithRelationshipAndPictureNmDTO) ServiceResult.failure(ResponseMsg.BAD_REQUEST);
 
 		// 기존 유저 정보에 사진이 있다면 해당 파일을 삭제한다.
-		if (null != userTableWithRelationshipAndPictureNmDTO.getPictureId())
+        assert userTableWithRelationshipAndPictureNmDTO != null;
+        if (null != userTableWithRelationshipAndPictureNmDTO.getPictureId())
 		{
 			try {
 
@@ -196,60 +259,14 @@ public class FileService {
 		userTableWithRelationshipAndPictureNmDTO.setPictureId(fileId);
 		int userResult = userProfilePort.updatePictureId(userTableWithRelationshipAndPictureNmDTO.getUserId(), fileId);
 
-		if (userResult != 1) return ResponseEntity.badRequest().build();
+		if (userResult != 1) return ServiceResult.failure(ResponseMsg.BAD_REQUEST);
 		Path targetNoExt = makePathByFileId(3L);
 
 		// ✅ 파일 Webp 형태로 변환 및 저장
-		if (null == convertToWebp(targetNoExt, originalFile, fileDTO.getFileNm(), WebpWriter.DEFAULT)) return ResponseEntity.badRequest().build();
-		else return ResponseEntity.ok(userTableWithRelationshipAndPictureNmDTO);
-
+		if (null == convertToWebp(targetNoExt, originalFile, fileDTO.getFileNm(), WebpWriter.DEFAULT)) return ServiceResult.failure(ResponseMsg.BAD_REQUEST);
+		else return ServiceResult.success(() -> userProfilePort.findUserById(dto.getUserId()));
 	}
 
-	/**
-	 * 파일 생성
-	 * DB row 생성 → 물리 폴더 생성(실패 시 롤백)
-	 *
-	 * @param folderId 파일이 생성될 부모 폴더 ID
-	 * @param userId 파일을 생성 하는 그룹의 MST_USER_ID
-	 * @param groupId 파일이 생성될 그룹 ID
-	 * @param fileOrgNm 생성할 파일 원본 이름
-	 * @param originalFile 생성할 파일
-	 * @return int 결과 값
-	 *
-	 */
-	@Transactional(rollbackFor = Exception.class)
-	public ResponseEntity<FileTableDTO> makeFile(Long folderId, String userId, Long groupId, String fileOrgNm, File originalFile)
-	{
-
-		MakeFileDTO dto =  new MakeFileDTO();
-		String fileNm = UUID.randomUUID().toString();
-		String path = findFileNmByDirId(folderId);
-
-		dto.setFileNm(fileNm);
-		dto.setFileOrgNm(fileOrgNm);
-		dto.setPath(path);
-		dto.setFolderId(folderId);
-		dto.setGroupId(groupId);
-		dto.setUserId(userId);
-
-		if (fileTableMapper.makeFile(dto) != 1)
-			return ResponseEntity.badRequest().build();
-
-		Path targetNoExt = makePathByFileId(folderId);
-
-		int role = userProfilePort.findHighestUserRole(userId).getRoleId();
-
-		log.info("Role Number : [{}]", role);
-		int q = role == 1 ? 25 : role == 2 ? 50 : 75;
-		int m = 6;
-		int z = 9;
-
-		WebpWriter customWriter = WebpWriter.DEFAULT.withQ(q).withM(m).withZ(z);
-
-		if (null == convertToWebp(targetNoExt, originalFile, fileNm, customWriter)) return ResponseEntity.badRequest().build();
-		else return ResponseEntity.ok(findFileById(dto.getFileId()));
-
-	}
 
 	/**
 	 * 파일 삭제
@@ -257,13 +274,12 @@ public class FileService {
 	 * @return 삭제할 파일이 있는 곳 정보 (parentId)
 	 */
 	@Transactional(rollbackFor = Exception.class)
-	public ResponseEntity<FileTableDTO> deleteFile (Long fileId) {
+	public ServiceResult<FileTableDTO> deleteFile (Long fileId) {
 
 		FileTableDTO row = findFileById(fileId);
-		FileTableDTO parentDto = findFileById(row.getParentId());
 
-		if (!deleteFileById(fileId)) return ResponseEntity.badRequest().build();
-		return ResponseEntity.ok(postProcessingFileTable(parentDto));
+		if (!deleteFileById(fileId)) return ServiceResult.failure(ResponseMsg.BAD_REQUEST);
+		return ServiceResult.success(() -> findFileById(row.getParentId()));
 	}
 
 

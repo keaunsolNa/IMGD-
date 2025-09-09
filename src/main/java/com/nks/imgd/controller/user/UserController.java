@@ -1,5 +1,7 @@
 package com.nks.imgd.controller.user;
 
+import com.nks.imgd.component.util.commonMethod.CommonMethod;
+import com.nks.imgd.component.util.maker.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -15,6 +17,7 @@ import java.util.List;
 public class UserController {
 
 	private final UserService userService;
+    private static final CommonMethod commonMethod = new CommonMethod();
 
 	public UserController(UserService userService) { this.userService = userService; }
 
@@ -118,8 +121,8 @@ public class UserController {
 	 * @return 대상 유저가 가지고 있는 정보
 	 */
 	@PostMapping("/updateUser")
-	public ResponseEntity<UserTableWithRelationshipAndPictureNmDTO> updateUser(@RequestBody UserTableWithRelationshipAndPictureNmDTO user) {
-		return userService.updateUser(user);
+	public ResponseEntity<ApiResponse<UserTableWithRelationshipAndPictureNmDTO>> updateUser(@RequestBody UserTableWithRelationshipAndPictureNmDTO user) {
+		return commonMethod.responseTransaction(userService.updateUser(user));
 	}
 
 	/**
@@ -130,8 +133,8 @@ public class UserController {
 	 * @return 상호 친구 목록
 	 */
 	@PostMapping("/insertUserFriendTable")
-	public ResponseEntity<List<UserTableWithRelationshipAndPictureNmDTO>> insertUserFriendTable(@AuthenticationPrincipal Jwt jwt, @RequestParam String targetUserId, @RequestParam String relationship) {
-		return userService.insertUserFriendTable(jwt.getSubject(), targetUserId, relationship);
+	public ResponseEntity<ApiResponse<List<UserTableWithRelationshipAndPictureNmDTO>>> insertUserFriendTable(@AuthenticationPrincipal Jwt jwt, @RequestParam String targetUserId, @RequestParam String relationship) {
+		return commonMethod.responseTransaction(userService.insertUserFriendTable(jwt.getSubject(), targetUserId, relationship));
 	}
 
 	/**
@@ -141,7 +144,8 @@ public class UserController {
 	 * @return 상호 친구 목록
 	 */
 	@DeleteMapping("/deleteUserFriendTable")
-	public ResponseEntity<List<UserTableWithRelationshipAndPictureNmDTO>> deleteUserFriendTable(@AuthenticationPrincipal Jwt jwt, @RequestParam String targetUserId) {
-		return userService.deleteUserFriendTable(jwt.getSubject(), targetUserId);
+	public ResponseEntity<ApiResponse<List<UserTableWithRelationshipAndPictureNmDTO>>> deleteUserFriendTable(@AuthenticationPrincipal Jwt jwt, @RequestParam String targetUserId) {
+		return commonMethod.responseTransaction(userService.deleteUserFriendTable(jwt.getSubject(), targetUserId));
 	}
+
 }

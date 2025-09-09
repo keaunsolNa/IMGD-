@@ -2,6 +2,8 @@ package com.nks.imgd.controller.group;
 
 import java.util.List;
 
+import com.nks.imgd.component.util.commonMethod.CommonMethod;
+import com.nks.imgd.component.util.maker.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -16,6 +18,7 @@ import com.nks.imgd.service.group.GroupService;
 public class GroupController {
 
 	private final GroupService groupService;
+    private static final CommonMethod commonMethod = new CommonMethod();
 
 	public GroupController(GroupService groupService) {
 		this.groupService = groupService;
@@ -64,10 +67,10 @@ public class GroupController {
 	 * @return 생성 된 그룹의 인원
 	 */
 	@PostMapping("/createGroup")
-	public ResponseEntity<List<GroupTableWithMstUserNameDTO>> createGroup(@RequestBody GroupTableWithMstUserNameDTO dto, @AuthenticationPrincipal Jwt jwt) {
+	public ResponseEntity<ApiResponse<GroupTableWithMstUserNameDTO>> createGroup(@RequestBody GroupTableWithMstUserNameDTO dto, @AuthenticationPrincipal Jwt jwt) {
 
 		dto.setGroupMstUserId(jwt.getSubject());
-		return groupService.createGroup(dto);
+		return commonMethod.responseTransaction(groupService.createGroup(dto));
 	}
 
 	/**
@@ -80,11 +83,10 @@ public class GroupController {
 	 * @return 그룹 유저 목록
 	 */
 	@PostMapping(value = "/makeNewGroupUser")
-	public ResponseEntity<List<GroupUserWithNameDTO>> makeNewGroupUser(@RequestBody GroupTableWithMstUserNameDTO dto, @RequestParam String userId, @AuthenticationPrincipal Jwt jwt) {
+	public ResponseEntity<ApiResponse<List<GroupUserWithNameDTO>>> makeNewGroupUser(@RequestBody GroupTableWithMstUserNameDTO dto, @RequestParam String userId, @AuthenticationPrincipal Jwt jwt) {
 
 		dto.setGroupMstUserId(jwt.getSubject());
-		return groupService.makeNewGroupUser(dto, userId);
-
+		return commonMethod.responseTransaction(groupService.makeNewGroupUser(dto, userId));
 	}
 
 	/**
@@ -95,10 +97,10 @@ public class GroupController {
 	 * @return 삭제 성공 여부
 	 */
 	@DeleteMapping(value = "/deleteGroupUser")
-	public ResponseEntity<List<GroupUserWithNameDTO>> deleteGroupUser(@RequestBody GroupTableWithMstUserNameDTO dto, @RequestParam String userId, @AuthenticationPrincipal Jwt jwt) {
+	public ResponseEntity<ApiResponse<List<GroupUserWithNameDTO>>> deleteGroupUser(@RequestBody GroupTableWithMstUserNameDTO dto, @RequestParam String userId, @AuthenticationPrincipal Jwt jwt) {
 
 		dto.setGroupMstUserId(jwt.getSubject());
-		return groupService.deleteGroupUser(dto, userId);
+		return commonMethod.responseTransaction(groupService.deleteGroupUser(dto, userId));
 	}
 
 	/**
@@ -109,9 +111,10 @@ public class GroupController {
 	 * @return 삭제 성공 여부
 	 */
 	@PostMapping(value = "/changeMstUserGroup")
-	public ResponseEntity<List<GroupUserWithNameDTO>> changeMstUserGroup(@RequestBody GroupTableWithMstUserNameDTO dto, @RequestParam String userId, @AuthenticationPrincipal Jwt jwt) {
+	public ResponseEntity<ApiResponse<List<GroupUserWithNameDTO>>> changeMstUserGroup(@RequestBody GroupTableWithMstUserNameDTO dto, @RequestParam String userId, @AuthenticationPrincipal Jwt jwt) {
 
 		dto.setGroupMstUserId(jwt.getSubject());
-		return groupService.changeMstUserGroup(dto, userId);
+        return commonMethod.responseTransaction(groupService.changeMstUserGroup(dto, userId));
 	}
+
 }
