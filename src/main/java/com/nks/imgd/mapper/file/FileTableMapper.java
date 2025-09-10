@@ -23,6 +23,10 @@ public interface FileTableMapper {
 	List<FileTableDTO> findFileAndDirectory(@Param("parentId") Long parentId
 										  , @Param("groupId") Long groupId);
 
+    List<FileTableDTO> findFileByGroupId(@Param("groupId") Long groupId);
+
+    List<FileTableDTO> findFileByParentId(@Param("fileId") Long fileId);
+
     int makeGroupDir(@Param("group") GroupTableWithMstUserNameDTO groupTableWithMstUserNameDTO);
 
     int makeDir(@Param("dto") MakeDirDTO dto);
@@ -33,4 +37,6 @@ public interface FileTableMapper {
 						 , @Param("userId") String userId);
 
 	int deleteById(@Param("fileId") Long fileId);
+
+    int deleteFilesByGroupId(@Param("groupId") Long groupId);
 }

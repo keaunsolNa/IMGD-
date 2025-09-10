@@ -139,7 +139,6 @@
          WHERE GROUP_ID = #{group.groupId}
     </delete>
 
-
     <update id="changeMstUserGroup">
         UPDATE GROUP_TABLE
            SET GROUP_MST_USER_ID = #{userId}

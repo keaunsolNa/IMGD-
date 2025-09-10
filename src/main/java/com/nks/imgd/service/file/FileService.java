@@ -8,7 +8,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Supplier;
 
 import com.nks.imgd.component.util.commonMethod.CommonMethod;
 import com.nks.imgd.component.util.maker.ServiceResult;
@@ -20,13 +19,12 @@ import com.nks.imgd.dto.Schema.FileTableDTO;
 import com.nks.imgd.dto.dataDTO.GroupTableWithMstUserNameDTO;
 import com.nks.imgd.dto.dataDTO.UserTableWithRelationshipAndPictureNmDTO;
 import com.nks.imgd.mapper.file.FileTableMapper;
+import com.nks.imgd.service.group.GroupService;
 import com.nks.imgd.service.user.UserProfilePort;
 import com.sksamuel.scrimage.ImmutableImage;
 import com.sksamuel.scrimage.webp.WebpWriter;
 
 import org.apache.ibatis.annotations.Param;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -69,15 +67,9 @@ public class FileService {
 	private final UserProfilePort userProfilePort;
 	private final Path rootPath = Paths.get(resolveRootFromEnv()).toAbsolutePath().normalize();
 	private final CommonMethod commonMethod = new CommonMethod();
+    private final GroupService groupService;
 
-	/** 운영 기본: 시스템 프로퍼티/환경변수에서 루트 경로 로드 */
-	@Autowired
-	public FileService(FileTableMapper fileTableMapper, UserProfilePort userProfilePort) {
-		this(fileTableMapper, resolveRootFromEnv(), userProfilePort);
-	}
-
-	/** 테스트/특수 상황용: 직접 루트 경로 주입 */
-	public FileService(FileTableMapper fileTableMapper, String root, UserProfilePort userProfilePort) {
+    public FileService(FileTableMapper fileTableMapper, UserProfilePort userProfilePort, GroupService groupService) {
 		this.fileTableMapper = fileTableMapper;
 		this.userProfilePort = userProfilePort;
 		try {
@@ -86,7 +78,8 @@ public class FileService {
 			throw new IllegalStateException("Cannot create root directory: " + this.rootPath, e);
 		}
 		log.info("IMGD root path = {}", this.rootPath);
-	}
+        this.groupService = groupService;
+    }
 
 	/**
 	 * 해당 위치에 존재 하는 파일 / 폴더를 반환 한다.
@@ -267,9 +260,9 @@ public class FileService {
 		else return ServiceResult.success(() -> userProfilePort.findUserById(dto.getUserId()));
 	}
 
-
 	/**
 	 * 파일 삭제
+     *
 	 * @param fileId 삭제할 파일 아이디
 	 * @return 삭제할 파일이 있는 곳 정보 (parentId)
 	 */
@@ -282,55 +275,191 @@ public class FileService {
 		return ServiceResult.success(() -> findFileById(row.getParentId()));
 	}
 
+    /**
+     * 디렉터리 삭제
+     *
+     * @param fileId 삭제할 디렉터리 아이디
+     * @return 삭제할 디렉터리가 있는 곳 정보 (parentId)
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServiceResult<FileTableDTO> deleteDir (long fileId) {
 
-	/**
-	 * 파일 삭제 메서드
-	 *
-	 * @param fileId 삭제할 파일 아이디
-	 * @return 삭제 성공/실패
-	 */
-	@Transactional(rollbackFor = Exception.class)
-	public boolean deleteFileById(Long fileId) {
-		// 1) 파일 메타 조회
-		FileTableDTO row = findFileById(fileId);
-		if (null == row) {
-			log.warn("deleteFileById: file row not found, fileId={}", fileId);
-			return false;
-		}
+        // 빈 객체 선언
+        List<FileTableDTO> childFiles;
+        Long parentId = findFileById(fileId).getParentId();
 
-		// 폴더인 경우 별도 API 처리 하도록 가드
-		if ("DIR".equalsIgnoreCase(row.getType())) {
-			throw new IllegalArgumentException("Directory deletion is not supported here. Use deleteDirRecursively: " + fileId);
-		}
+        // 해당 id를 부모로 가지고 있는 객체가 없을 때 까지 순환
+        do {
 
-		// 2) 물리 경로 계산
-		//    파일은 "부모 폴더 경로" + "fileNm + 확장자"
-		Path parentDir = makePathByFileId(row.getParentId());
-		// 기본 저장 포맷이 webp:
-		Path main = parentDir.resolve(row.getFileNm() + ".webp");
+            childFiles = findFileByParentId(fileId);
 
-		boolean deletedAny = deleteQuietly(main);
-		// 2-1) 같은 baseName 파생 파일들(.jpg, .png, *_thumb.webp 등)도 함께 제거
-		deletedAny |= deleteSiblingsByBaseName(parentDir, row.getFileNm());
+            for (FileTableDTO childFile : childFiles) {
+                deleteDir(childFile.getFileId());
+            }
 
-		if (deletedAny) log.info("deleted physical file ID: {}", fileId);
-		else log.info("failed deleted physical file ID: {}", fileId);
+        } while (!childFiles.isEmpty());
 
-		// 3) DB Row 삭제 (파일 삭제가 일부 실패 해도 DB는 맞춰 주는 편/또는 soft delete 전환 가능)
-		int db = fileTableMapper.deleteById(fileId);
-		if (db != 1) {
-			log.warn("deleteFileById: DB row delete failed, fileId={}", fileId);
-		}
+        // 부모 객체가 없다면 객체 가져오기
+        FileTableDTO fileTableSchema = findFileById(fileId);
 
-		// 4) (선택) 빈 폴더 정리
-		cleanupIfEmpty(parentDir);
+        // 유형 별 삭제
+        if (fileTableSchema.getType().equals("DIR"))
+        {
+            if(!deleteDirByFileId(fileTableSchema.getFileId())) return ServiceResult.failure(ResponseMsg.BAD_REQUEST);
+        }
+        else
+        {
+            if(deleteFileById(fileTableSchema.getFileId())) return ServiceResult.failure(ResponseMsg.BAD_REQUEST);
+        }
 
-		return (db == 1);
-	}
+        return ServiceResult.success(() -> findFileById(parentId));
+    }
 
-	// ───────────────────────────────── helper methods ───────────────────────────────
-	
-	/**
+    @Transactional(rollbackFor = Exception.class)
+    public ServiceResult<List<GroupTableWithMstUserNameDTO>> deleteFilesByGroupId(String userid, Long groupId)
+    {
+
+        List<FileTableDTO> filesInGroup = fileTableMapper.findFileByGroupId(groupId);
+
+        // 물리 파일 삭제, 파일을 모두 삭제 후 디렉터리도 삭제한다.
+        for (FileTableDTO file : filesInGroup)
+        {
+            if(!deleteFileById(file.getFileId())) return ServiceResult.failure(ResponseMsg.BAD_REQUEST);
+        }
+
+        // DB 삭제
+        ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
+                fileTableMapper.deleteFilesByGroupId(groupId)
+        );
+
+        if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
+            return ServiceResult.failure(fsMsg);
+        }
+
+        return ServiceResult.success(() -> groupService.findGroupWhatInside(userid));
+
+    }
+    // ───────────────────────────────── helper methods ───────────────────────────────
+
+    /**
+     * 파일 삭제 메서드
+     *
+     * @param fileId 삭제할 파일 아이디
+     * @return 삭제 성공/실패
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public boolean deleteFileById(Long fileId) {
+        // 1) 파일 메타 조회
+        FileTableDTO row = findFileById(fileId);
+        if (null == row) {
+            log.warn("deleteFileById: file row not found, fileId={}", fileId);
+            return false;
+        }
+
+        // 폴더인 경우 별도 API 처리 하도록 가드
+        if ("DIR".equalsIgnoreCase(row.getType())) {
+            throw new IllegalArgumentException("Directory deletion is not supported here. Use deleteDirRecursively: " + fileId);
+        }
+
+        // 2) 물리 경로 계산
+        //    파일은 "부모 폴더 경로" + "fileNm + 확장자"
+        Path parentDir = makePathByFileId(row.getParentId());
+        // 기본 저장 포맷이 webp:
+        Path main = parentDir.resolve(row.getFileNm() + ".webp");
+
+        boolean deletedAny = deleteQuietly(main);
+        // 2-1) 같은 baseName 파생 파일들(.jpg, .png, *_thumb.webp 등)도 함께 제거
+        deletedAny |= deleteSiblingsByBaseName(parentDir, row.getFileNm());
+
+        if (deletedAny) log.info("deleted physical file ID: {}", fileId);
+        else log.info("failed deleted physical file ID: {}", fileId);
+
+        // 3) DB Row 삭제 (파일 삭제가 일부 실패 해도 DB는 맞춰 준다)
+        int db = fileTableMapper.deleteById(fileId);
+
+        return (db == 1);
+    }
+
+    /**
+     * 폴더 삭제 메서드
+     *
+     * @param fileId 삭제할 폴더의 id
+     * @return 삭제 결과
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public boolean deleteDirByFileId(Long fileId)
+    {
+        FileTableDTO row = findFileById(fileId);
+        if (null == row) {
+            log.warn("deleteDirByFileId: file row not found, fileId={}", fileId);
+            return false;
+        }
+
+        // 2) 물리 경로 계산
+        //    디렉터리는 "부모 폴더 경로" + "fileNm"
+        Path parentDir = makePathByFileId(row.getParentId());
+        Path main = parentDir.resolve(row.getFileNm());
+
+        boolean deletedAny = deleteQuietly(main);
+
+        if (deletedAny) log.info("deleted physical Dir ID: {}", fileId);
+        else log.info("failed deleted physical Dir ID: {}", fileId);
+
+        // 3) DB Row 삭제 (파일 삭제가 일부 실패 해도 DB는 맞춰 준다)
+        int db = fileTableMapper.deleteById(fileId);
+
+        // 4) 빈 폴더 정리
+        cleanupIfEmpty(parentDir);
+
+        return (db == 1);
+    }
+
+    /**
+     * 경로 아이디로 파일 이름 반환
+     *
+     * @param dirId 경로 ID
+     * @return 파일 이름
+     */
+    public String findFileNmByDirId(Long dirId) {
+
+        return fileTableMapper.findFileNmByDirId(dirId).getFileNm();
+    }
+
+    /**
+     * FILE_TABLE 역추적 하여 상대 경로 체인을 반환 한다.
+     *
+     * @param fileId 대상 파일 ID
+     * @return 상대 경로 체인
+     */
+    public String findRootPath(Long fileId) {
+
+        StringBuilder sb = new StringBuilder();
+
+        Long cur = fileId;
+
+        while (null != cur) {
+            FileTableDTO r = fileTableMapper.findRootPath(cur);
+            if (r == null) break;
+            if (null != r.getFilePath()) {
+                sb.insert(0, "/" + r.getFilePath());
+            }
+            cur = r.getParentId();
+        }
+        return sb.toString();
+
+    }
+
+    /**
+     * 파일 아이디를 부모 아이디로 가지고 있는 객체들을 반환한다.
+     * @param fileId 대상 파일 아이디
+     * @return 파일 테이블 객체들
+     */
+    public List<FileTableDTO> findFileByParentId(Long fileId)
+    {
+        return fileTableMapper.findFileByParentId(fileId);
+    }
+
+    /**
 	 * 파일의 ID로 경로 찾아 오기
 	 *
 	 * @param fileId 파일의 ID
@@ -372,41 +501,6 @@ public class FileService {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-	}
-
-	/**
-	 * FILE_TABLE 역추적 하여 상대 경로 체인을 반환 한다.
-	 *
-	 * @param fileId 대상 파일 ID
-	 * @return 상대 경로 체인
-	 */
-	public String findRootPath(Long fileId) {
-
-		StringBuilder sb = new StringBuilder();
-
-		Long cur = fileId;
-
-		while (null != cur) {
-			FileTableDTO r = fileTableMapper.findRootPath(cur);
-			if (r == null) break;
-			if (null != r.getFilePath()) {
-				sb.insert(0, "/" + r.getFilePath());
-			}
-			cur = r.getParentId();
-		}
-		return sb.toString();
-
-	}
-
-	/**
-	 * 경로 아이디로 파일 이름 반환
-	 *
-	 * @param dirId 경로 ID
-	 * @return 파일 이름
-	 */
-	public String findFileNmByDirId(Long dirId) {
-
-		return fileTableMapper.findFileNmByDirId(dirId).getFileNm();
 	}
 
 	/**
@@ -528,7 +622,7 @@ public class FileService {
 
 	/**
 	 * 파일 목록 반환 시 후처리 진행 한다.
-	 * DTM(YYYYMMDD) -> YYYY년 MM월 DD일
+	 * DTM(YYYYmmDD) -> YYYY년 MM월 DD일
 	 * PictureId 있을 경우 -> PictureUrl Setting
 	 *
 	 * @param files 대상 파일 리스트
@@ -545,7 +639,7 @@ public class FileService {
 
 	/**
 	 * 파일 반환 시 후처리 진행 한다.
-	 * DTM(YYYYMMDD) -> YYYY년 MM월 DD일
+	 * DTM(YYYYmmDD) -> YYYY년 MM월 DD일
 	 * PictureId 있을 경우 -> PictureUrl Setting
 	 *
 	 * @param file 대상 파일
@@ -561,21 +655,6 @@ public class FileService {
 			file.setFilePath(makePathByFileId(file.getFileId()) + ".webp");
 		}
 		return file;
-	}
-
-	/**
-	 * Transaction 결과 값을 반환 한다.
-	 *
-	 * @param result 결과값
-	 * @return 결과값
-	 */
-	public <T> ResponseEntity<T> returnResultWhenTransaction(int result, Supplier<T> onSuccess) {
-
-		log.info("result, {}", result);
-		log.info("onSuccess.get(), {}", onSuccess.get());
-		if (result == 1) return ResponseEntity.ok(onSuccess.get());
-		else if (result == 0) return ResponseEntity.notFound().build();
-		else return ResponseEntity.badRequest().build();
 	}
 
 }

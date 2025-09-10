@@ -13,7 +13,8 @@ public enum ResponseMsg {
     BAD_REQUEST("BAD_REQUEST", "잘못 된 요청입니다.", null),
     ON_SUCCESS("ON_SUCCESS", "요청이 성공했습니다", null),
     GROUP_LIMIT_EXCEEDED("GROUP_LIMIT_EXCEEDED", "그룹 생성 한도를 초과했습니다.", null),
-    GROUP_CREATE_FAILED("GROUP_CREATE_FAILED", "그룹 생성에 실패했습니다.", null);
+    GROUP_CREATE_FAILED("GROUP_CREATE_FAILED", "그룹 생성에 실패했습니다.", null),
+    GROUP_MST_USER_CANT_DELETE("GROUP_MST_USER_CANT_DELETE", "마스터 유저는 그룹에서 제거할 수 없습니다. \n 그룹 마스터 권한을 다른 유저에게 넘기세요", null);
 
     private final String key;
     private final String msg;

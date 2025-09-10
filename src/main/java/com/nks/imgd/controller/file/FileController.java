@@ -139,4 +139,14 @@ public class FileController {
 		return commonMethod.responseTransaction(fileService.deleteFile(fileId));
 	}
 
+    /**
+     * 디렉터리를 삭제한다. 
+     * 이 때 하위 파일/폴더가 있다면 같이 삭제한다.
+     * @param fileId 삭제할 디렉터리 아이디
+     * @return 삭제된 디렉터리의 부모 객체 정보
+     */
+    @DeleteMapping(value ="/deleteDir")
+    public ResponseEntity<ApiResponse<FileTableDTO>> deleteDir(@RequestParam Long fileId) {
+        return commonMethod.responseTransaction(fileService.deleteDir(fileId));
+    }
 }

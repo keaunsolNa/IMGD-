@@ -65,6 +65,40 @@
          WHERE FILE_ID = #{fileId}
     </select>
 
+    <select id="findFileByGroupId" resultType="com.nks.imgd.dto.Schema.FileTableDTO">
+        SELECT FILE_ID
+             , FILE_NM
+             , FILE_ORG_NM
+             , FILE_PATH
+             , TYPE
+             , PARENT_ID
+             , GROUP_ID
+             , REG_DTM
+             , REG_ID
+             , MOD_DTM
+             , MOD_ID
+          FROM FILE_TABLE
+         WHERE GROUP_ID = #{groupId}
+         ORDER BY TYPE DESC
+    </select>
+    
+    <select id="findFileByParentId" resultType="com.nks.imgd.dto.Schema.FileTableDTO">
+        SELECT FILE_ID
+             , FILE_NM
+             , FILE_ORG_NM
+             , FILE_PATH
+             , TYPE
+             , PARENT_ID
+             , GROUP_ID
+             , REG_DTM
+             , REG_ID
+             , MOD_DTM
+             , MOD_ID
+          FROM FILE_TABLE
+         WHERE PARENT_ID = #{fileId}
+         ORDER BY TYPE DESC, FILE_ID
+    </select>
+
     <insert id="makeGroupDir" >
         INSERT
           INTO FILE_TABLE
@@ -193,6 +227,12 @@
         DELETE
           FROM FILE_TABLE
          WHERE FILE_ID = #{fileId}
+    </delete>
+
+    <delete id="deleteFilesByGroupId">
+        DELETE
+          FROM FILE_TABLE
+         WHERE GROOUP_ID = #{groupId}
     </delete>
 
 

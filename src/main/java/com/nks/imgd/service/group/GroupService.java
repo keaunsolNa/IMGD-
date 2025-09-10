@@ -154,9 +154,11 @@ public class GroupService {
 
 			if (groupTableMapper.countGroupUser(dto) == 1 && groupTableMapper.deleteGroupTable(dto) == 1) {
                 // TODO 파일 테이블 내 파일 삭제 로직 추가
+
+
 //				return ResponseEntity.ok().body(null);
 			}
-			else return ServiceResult.failure(ResponseMsg.BAD_REQUEST);
+			else return ServiceResult.failure(ResponseMsg.GROUP_MST_USER_CANT_DELETE);
 		}
 
         ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
@@ -200,7 +202,7 @@ public class GroupService {
 
 	/**
 	 * 그릅 목록 반환 시 후처리 진행 한다.
-	 * DTM(YYYYMMDD) -> YYYY년 MM월 DD일
+	 * DTM(YYYYmmDD) -> YYYY년 MM월 DD일
 	 * PictureId 있을 경우 -> PictureUrl Setting
 	 *
 	 * @param groups 대상 그룹 리스트
@@ -217,7 +219,7 @@ public class GroupService {
 
 	/**
 	 * 그룹 반환 시 후처리 진행 한다.
-	 * DTM(YYYYMMDD) -> YYYY년 MM월 DD일
+	 * DTM(YYYYmmDD) -> YYYY년 MM월 DD일
 	 * PictureId 있을 경우 -> PictureUrl Setting
 	 *
 	 * @param group 대상 그룹
@@ -230,7 +232,7 @@ public class GroupService {
 
 	/**
 	 * 그릅 유저 목록 반환 시 후처리 진행 한다.
-	 * DTM(YYYYMMDD) -> YYYY년 MM월 DD일
+	 * DTM(YYYYmmDD) -> YYYY년 MM월 DD일
 	 * PictureId 있을 경우 -> PictureUrl Setting
 	 *
 	 * @param groups 대상 그룹 유저 리스트
@@ -247,7 +249,7 @@ public class GroupService {
 
 	/**
 	 * 그룹 반환 시 후처리 진행 한다.
-	 * DTM(YYYYMMDD) -> YYYY년 MM월 DD일
+	 * DTM(YYYYmmDD) -> YYYY년 MM월 DD일
 	 * PictureId 있을 경우 -> PictureUrl Setting
 	 *
 	 * @param group 대상 그룹
