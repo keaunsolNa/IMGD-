@@ -26,8 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class GroupService {
 
 	private final GroupTableMapper groupTableMapper;
-	private static final CommonMethod commonMethod = new CommonMethod();
     private final UserProfilePort userProfilePort;
+	private static final CommonMethod commonMethod = new CommonMethod();
 
 	public GroupService(GroupTableMapper groupTableMapper, UserProfilePort userProfilePort) {
 		this.groupTableMapper = groupTableMapper;
