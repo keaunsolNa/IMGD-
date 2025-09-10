@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
-import java.util.Map;
 
 /**
  * @author nks
@@ -38,7 +37,7 @@ public class ApiResponse<T> {
     public static <T> ApiResponse<T> error(ResponseMsg responseMsg) {
         ApiResponse<T> r = new ApiResponse<>();
         r.success = false;
-        r.error = new ApiError(responseMsg.getKey(), responseMsg.getMsg(), null != responseMsg.getDetails() ? responseMsg.getDetails() : null);
+        r.error = new ApiError(responseMsg.getKey(), responseMsg.getMsg());
         r.timestamp = Instant.now();
         return r;
     }
@@ -48,7 +47,6 @@ public class ApiResponse<T> {
     public static class ApiError {
         private String code;
         private String message;
-        private Map<String, Object> details;
     }
 
 }
