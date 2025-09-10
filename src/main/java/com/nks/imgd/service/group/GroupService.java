@@ -5,6 +5,8 @@ import java.util.List;
 import com.nks.imgd.component.util.maker.ServiceResult;
 import com.nks.imgd.dto.Enum.ResponseMsg;
 import com.nks.imgd.dto.Enum.Role;
+import com.nks.imgd.mapper.file.FileTableMapper;
+import com.nks.imgd.service.file.FileService;
 import com.nks.imgd.service.user.UserProfilePort;
 import org.springframework.stereotype.Service;
 
@@ -28,10 +30,13 @@ public class GroupService {
 	private final GroupTableMapper groupTableMapper;
     private final UserProfilePort userProfilePort;
 	private static final CommonMethod commonMethod = new CommonMethod();
+    private final FileTableMapper fileTableMapper;
+    private final FileService fileService;
 
-	public GroupService(GroupTableMapper groupTableMapper, UserProfilePort userProfilePort) {
+    public GroupService(GroupTableMapper groupTableMapper, UserProfilePort userProfilePort, FileTableMapper fileTableMapper, FileService fileService) {
 		this.groupTableMapper = groupTableMapper;
         this.userProfilePort = userProfilePort;
+        this.fileTableMapper = fileTableMapper;
     }
 
 	/**
@@ -152,11 +157,21 @@ public class GroupService {
 		 */
 		if (dto.getGroupMstUserId().equals(userId)) {
 
-			if (groupTableMapper.countGroupUser(dto) == 1 && groupTableMapper.deleteGroupTable(dto) == 1) {
-                // TODO 파일 테이블 내 파일 삭제 로직 추가
+            // 그룹 구성원이 한 명이고, 시행 유저가 그룹의 MST_USER 라면
+			if (groupTableMapper.countGroupUser(dto) == 1 && groupTableMapper.deleteGroupTable(dto.getGroupId()) == 1) {
 
+                // 그룹 유저를 삭제한 뒤
+                ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
+                        groupTableMapper.deleteGroupUser(dto, userId)
+                );
 
-//				return ResponseEntity.ok().body(null);
+                if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
+                    return ServiceResult.failure(fsMsg);
+                }
+
+                // 그룹에 속한 모든 폴더 / 파일을 삭제한다.
+                return deleteGroup(userId, dto.getGroupId());
+
 			}
 			else return ServiceResult.failure(ResponseMsg.GROUP_MST_USER_CANT_DELETE);
 		}
@@ -197,6 +212,37 @@ public class GroupService {
 
         return ServiceResult.success(() -> findGroupUserWhatInside(userId, dto.getGroupId()));
 	}
+
+    /**
+     * 그룹을 삭제한다.
+     * @param userId 삭제하려는 유저의 아이디
+     * @param groupId 삭제하려는 그룹의 아이디
+     * @return 그룹과 그 안의 폴더 / 파일을 모두 삭제한 후 대상 유저가 가진 그룹 목록을 반환
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServiceResult<List<GroupUserWithNameDTO>> deleteGroup(String userId, Long groupId) {
+
+        ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
+            groupTableMapper.deleteGroupTable(groupId)
+        );
+
+        if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
+            return ServiceResult.failure(fsMsg);
+        }
+
+        // 해당 그룹 아이디를 가진 모든 파일 / 폴더의 물리 / DB 내용 삭제
+        ServiceResult<List<GroupTableWithMstUserNameDTO>> result = fileService.deleteFilesByGroupId(userId, groupId);
+
+        fsMsg = commonMethod.returnResultByResponseMsg(
+                fileTableMapper.deleteFilesByGroupId(groupId)
+        );
+
+//        if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
+//            return ServiceResult.failure(fsMsg);
+//        }
+
+        return ServiceResult.success(() -> findGroupUserWhatInside(userId, groupId));
+    }
 
 	// ───────────────────────────────── helper methods ───────────────────────────────
 

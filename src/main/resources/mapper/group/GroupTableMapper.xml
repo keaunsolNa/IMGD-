@@ -136,7 +136,7 @@
     <delete id="deleteGroupTable">
         DELETE
           FROM GROUP_TABLE
-         WHERE GROUP_ID = #{group.groupId}
+         WHERE GROUP_ID = #{groupId}
     </delete>
 
     <update id="changeMstUserGroup">

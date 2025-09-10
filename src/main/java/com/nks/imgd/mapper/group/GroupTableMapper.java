@@ -38,6 +38,6 @@ public interface GroupTableMapper {
 
 	int countGroupUser(@Param("group") GroupTableWithMstUserNameDTO dto);
 
-	int deleteGroupTable(@Param("group") GroupTableWithMstUserNameDTO dto);
+	int deleteGroupTable(@Param("groupId") Long groupId);
 
 }

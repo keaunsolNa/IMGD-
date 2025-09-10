@@ -315,6 +315,13 @@ public class FileService {
         return ServiceResult.success(() -> findFileById(parentId));
     }
 
+    /**
+     * 특정 그룹 아이디를 가진 모든 파일을 삭제한다
+     * .
+     * @param userid 시행하는 대상 유저 아이디
+     * @param groupId 대상 그룹 아이디
+     * @return 삭제 후 유저가 가진 그룹 목록 반환
+     */
     @Transactional(rollbackFor = Exception.class)
     public ServiceResult<List<GroupTableWithMstUserNameDTO>> deleteFilesByGroupId(String userid, Long groupId)
     {
