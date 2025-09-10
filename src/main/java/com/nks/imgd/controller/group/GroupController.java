@@ -94,7 +94,7 @@ public class GroupController {
 	 * @param dto 대상 그룹 테이블
 	 * @param userId 제거할 유저의 ID
 	 * @param jwt JWT 로그인 되어 있는 권한
-	 * @return 삭제 성공 여부
+	 * @return 해당 그룹 정보
 	 */
 	@DeleteMapping(value = "/deleteGroupUser")
 	public ResponseEntity<ApiResponse<List<GroupUserWithNameDTO>>> deleteGroupUser(@RequestBody GroupTableWithMstUserNameDTO dto, @RequestParam String userId, @AuthenticationPrincipal Jwt jwt) {
@@ -108,13 +108,25 @@ public class GroupController {
 	 * @param dto 대상 그룹 테이블
 	 * @param userId 제거할 유저의 ID
 	 * @param jwt JWT 로그인 되어 있는 권한
-	 * @return 삭제 성공 여부
+	 * @return 해당 그룹 정보
 	 */
 	@PostMapping(value = "/changeMstUserGroup")
 	public ResponseEntity<ApiResponse<List<GroupUserWithNameDTO>>> changeMstUserGroup(@RequestBody GroupTableWithMstUserNameDTO dto, @RequestParam String userId, @AuthenticationPrincipal Jwt jwt) {
 
 		dto.setGroupMstUserId(jwt.getSubject());
         return commonMethod.responseTransaction(groupService.changeMstUserGroup(dto, userId));
+	}
+
+	/**
+	 * 그룹을 삭제한다. 
+	 * 그룹 삭제 시 해당 그룹에 있는 모든 파일 / 폴더가 다 삭제된다.
+	 * @param jwt 토큰 정보
+	 * @param groupId 대상 그룹 정보
+	 * @return 삭제 후 해당 유저가 가진 그룹 목록
+	 */
+	@DeleteMapping("/deleteGroup")
+	public ResponseEntity<ApiResponse<List<GroupUserWithNameDTO>>> deleteGroup(@AuthenticationPrincipal Jwt jwt, @RequestParam Long groupId) {
+		return commonMethod.responseTransaction(groupService.deleteGroup(jwt.getSubject(), groupId));
 	}
 
 }

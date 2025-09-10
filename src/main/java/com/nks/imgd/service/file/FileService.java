@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import com.nks.imgd.component.util.commonMethod.CommonMethod;
@@ -198,7 +199,7 @@ public class FileService {
 
         WebpWriter customWriter = WebpWriter.DEFAULT.withQ(q).withM(m).withZ(z);
 
-        if (null == convertToWebp(targetNoExt, originalFile, fileNm, customWriter)) return ServiceResult.failure(ResponseMsg.BAD_REQUEST);
+        if (null == convertToWebp(targetNoExt, originalFile, fileNm, customWriter)) return ServiceResult.failure(ResponseMsg.FILE_CREATE_FAILED);
         else return ServiceResult.success(() -> findFileById(dto.getFileId()));
     }
 
@@ -227,32 +228,32 @@ public class FileService {
 		long fileId = fileDTO.getFileId();
 
 		// ✅ 유저 정보 확인
-		UserTableWithRelationshipAndPictureNmDTO userTableWithRelationshipAndPictureNmDTO = userProfilePort.findUserById(dto.getUserId());
+		UserTableWithRelationshipAndPictureNmDTO userProfile = userProfilePort.findUserById(dto.getUserId());
 
-		if (null == userTableWithRelationshipAndPictureNmDTO) ServiceResult.failure(ResponseMsg.BAD_REQUEST);
+		if (null == userProfile) ServiceResult.failure(ResponseMsg.CAN_NOT_FIND_USER, Map.of("userId", dto.getUserId()));
 
 		// 기존 유저 정보에 사진이 있다면 해당 파일을 삭제한다.
-        assert userTableWithRelationshipAndPictureNmDTO != null;
-        if (null != userTableWithRelationshipAndPictureNmDTO.getPictureId())
+        assert userProfile != null;
+        if (null != userProfile.getPictureId())
 		{
 			try {
 
-				boolean resultDeleteFile = deleteFileById(userTableWithRelationshipAndPictureNmDTO.getPictureId());
+				boolean resultDeleteFile = deleteFileById(userProfile.getPictureId());
 
 				if (resultDeleteFile) log.info("Deleted file ID: {}", fileId);
 				else log.info("Failed to delete file ID: {}", fileId);
 
 			} catch (Exception e) {
 				// 실패해도 신규 사용에는 영향 없음
-				log.warn("Best-effort delete of old profile image failed. oldPictureId={}", userTableWithRelationshipAndPictureNmDTO.getPictureId(), e);
+				log.warn("Best-effort delete of old profile image failed. oldPictureId={}", userProfile.getPictureId(), e);
 			}
 		}
 
 		// ✅ 유저 정보(사진 ID) 변경
-		userTableWithRelationshipAndPictureNmDTO.setPictureId(fileId);
-		int userResult = userProfilePort.updatePictureId(userTableWithRelationshipAndPictureNmDTO.getUserId(), fileId);
+		userProfile.setPictureId(fileId);
+		int userResult = userProfilePort.updatePictureId(userProfile.getUserId(), fileId);
 
-		if (userResult != 1) return ServiceResult.failure(ResponseMsg.BAD_REQUEST);
+		if (userResult != 1) return ServiceResult.failure(ResponseMsg.FILE_UPDATE_FAILED);
 		Path targetNoExt = makePathByFileId(3L);
 
 		// ✅ 파일 Webp 형태로 변환 및 저장
@@ -271,7 +272,7 @@ public class FileService {
 
 		FileTableDTO row = findFileById(fileId);
 
-		if (!deleteFileById(fileId)) return ServiceResult.failure(ResponseMsg.BAD_REQUEST);
+		if (!deleteFileById(fileId)) return ServiceResult.failure(ResponseMsg.FILE_DELETE_FAILED);
 		return ServiceResult.success(() -> findFileById(row.getParentId()));
 	}
 
@@ -305,11 +306,11 @@ public class FileService {
         // 유형 별 삭제
         if (fileTableSchema.getType().equals("DIR"))
         {
-            if(!deleteDirByFileId(fileTableSchema.getFileId())) return ServiceResult.failure(ResponseMsg.BAD_REQUEST);
+            if(!deleteDirByFileId(fileTableSchema.getFileId())) return ServiceResult.failure(ResponseMsg.FILE_DELETE_FAILED);
         }
         else
         {
-            if(deleteFileById(fileTableSchema.getFileId())) return ServiceResult.failure(ResponseMsg.BAD_REQUEST);
+            if(deleteFileById(fileTableSchema.getFileId())) return ServiceResult.failure(ResponseMsg.FILE_DELETE_FAILED);
         }
 
         return ServiceResult.success(() -> findFileById(parentId));
@@ -331,7 +332,7 @@ public class FileService {
         // 물리 파일 삭제, 파일을 모두 삭제 후 디렉터리도 삭제한다.
         for (FileTableDTO file : filesInGroup)
         {
-            if(!deleteFileById(file.getFileId())) return ServiceResult.failure(ResponseMsg.BAD_REQUEST);
+            if(!deleteFileById(file.getFileId())) return ServiceResult.failure(ResponseMsg.FILE_DELETE_FAILED);
         }
 
         // DB 삭제
@@ -363,9 +364,9 @@ public class FileService {
             return false;
         }
 
-        // 폴더인 경우 별도 API 처리 하도록 가드
+        // 폴더인 경우 디렉터리 삭제로 보낸다.
         if ("DIR".equalsIgnoreCase(row.getType())) {
-            throw new IllegalArgumentException("Directory deletion is not supported here. Use deleteDirRecursively: " + fileId);
+			deleteDirByFileId(fileId);
         }
 
         // 2) 물리 경로 계산

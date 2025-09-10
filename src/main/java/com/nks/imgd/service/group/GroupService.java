@@ -1,11 +1,11 @@
 package com.nks.imgd.service.group;
 
 import java.util.List;
+import java.util.Map;
 
 import com.nks.imgd.component.util.maker.ServiceResult;
 import com.nks.imgd.dto.Enum.ResponseMsg;
 import com.nks.imgd.dto.Enum.Role;
-import com.nks.imgd.mapper.file.FileTableMapper;
 import com.nks.imgd.service.file.FileService;
 import com.nks.imgd.service.user.UserProfilePort;
 import org.springframework.stereotype.Service;
@@ -30,14 +30,13 @@ public class GroupService {
 	private final GroupTableMapper groupTableMapper;
     private final UserProfilePort userProfilePort;
 	private static final CommonMethod commonMethod = new CommonMethod();
-    private final FileTableMapper fileTableMapper;
     private final FileService fileService;
 
-    public GroupService(GroupTableMapper groupTableMapper, UserProfilePort userProfilePort, FileTableMapper fileTableMapper, FileService fileService) {
+    public GroupService(GroupTableMapper groupTableMapper, UserProfilePort userProfilePort, FileService fileService) {
 		this.groupTableMapper = groupTableMapper;
         this.userProfilePort = userProfilePort;
-        this.fileTableMapper = fileTableMapper;
-    }
+		this.fileService = fileService;
+	}
 
 	/**
 	 * 유저가 가지고 있는 루트 폴더가 생성 되지 않은 그룹 목록을 반환 한다.
@@ -123,7 +122,7 @@ public class GroupService {
 	public ServiceResult<List<GroupUserWithNameDTO>> makeNewGroupUser(GroupTableWithMstUserNameDTO dto, String userId) {
 
         // 이미 가입 된 인원 추가 요청 시
-		if (groupTableMapper.isUserCheck(dto, userId) > 0) return ServiceResult.failure(ResponseMsg.BAD_REQUEST);
+		if (groupTableMapper.isUserCheck(dto, userId) > 0) return ServiceResult.failure(ResponseMsg.ALREADY_JOIN_USER);
 
         ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
                 groupTableMapper.makeNewGroupUserTable(dto, userId)
@@ -148,7 +147,8 @@ public class GroupService {
 	public ServiceResult<List<GroupUserWithNameDTO>> deleteGroupUser(GroupTableWithMstUserNameDTO dto, String userId) {
 
 		// 해당 그룹에 대상 유저가 존재 하지 않을 경우
-		if (groupTableMapper.isUserCheck(dto, userId) <= 0) return ServiceResult.failure(ResponseMsg.BAD_REQUEST);
+		if (groupTableMapper.isUserCheck(dto, userId) <= 0) return ServiceResult.failure(ResponseMsg.CAN_NOT_FIND_USER,
+			Map.of("userId", userId));
 
 		/*
 			삭제 하려는 유저가 MST 유저일 경우,
@@ -200,7 +200,7 @@ public class GroupService {
 	public ServiceResult<List<GroupUserWithNameDTO>>  changeMstUserGroup(GroupTableWithMstUserNameDTO dto, String userId) {
 
 		// 해당 그룹에 대상 유저가 없을 경우
-		if (groupTableMapper.isUserCheck(dto, userId) > 0) return ServiceResult.failure(ResponseMsg.BAD_REQUEST);
+		if (groupTableMapper.isUserCheck(dto, userId) > 0) return ServiceResult.failure(ResponseMsg.CAN_NOT_FIND_USER, Map.of("userId", userId));
 
         ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
                 groupTableMapper.changeMstUserGroup(dto, userId)
@@ -222,24 +222,20 @@ public class GroupService {
     @Transactional(rollbackFor = Exception.class)
     public ServiceResult<List<GroupUserWithNameDTO>> deleteGroup(String userId, Long groupId) {
 
-        ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
-            groupTableMapper.deleteGroupTable(groupId)
-        );
-
-        if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
-            return ServiceResult.failure(fsMsg);
-        }
-
         // 해당 그룹 아이디를 가진 모든 파일 / 폴더의 물리 / DB 내용 삭제
         ServiceResult<List<GroupTableWithMstUserNameDTO>> result = fileService.deleteFilesByGroupId(userId, groupId);
 
-        fsMsg = commonMethod.returnResultByResponseMsg(
-                fileTableMapper.deleteFilesByGroupId(groupId)
-        );
+       if (!result.status().equals(ResponseMsg.ON_SUCCESS)) {
+           return ServiceResult.failure(ResponseMsg.FILE_DELETE_FAILED);
+       }
 
-//        if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
-//            return ServiceResult.failure(fsMsg);
-//        }
+		ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
+			groupTableMapper.deleteGroupTable(groupId)
+		);
+
+		if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
+			return ServiceResult.failure(fsMsg);
+		}
 
         return ServiceResult.success(() -> findGroupUserWhatInside(userId, groupId));
     }
