@@ -20,7 +20,7 @@ import com.nks.imgd.dto.Schema.FileTableDTO;
 import com.nks.imgd.dto.dataDTO.GroupTableWithMstUserNameDTO;
 import com.nks.imgd.dto.dataDTO.UserTableWithRelationshipAndPictureNmDTO;
 import com.nks.imgd.mapper.file.FileTableMapper;
-import com.nks.imgd.service.group.GroupService;
+import com.nks.imgd.service.group.GroupPort;
 import com.nks.imgd.service.user.UserProfilePort;
 import com.sksamuel.scrimage.ImmutableImage;
 import com.sksamuel.scrimage.webp.WebpWriter;
@@ -66,20 +66,20 @@ public class FileService {
 
 	private final FileTableMapper fileTableMapper;
 	private final UserProfilePort userProfilePort;
+	private final GroupPort groupPort;
 	private final Path rootPath = Paths.get(resolveRootFromEnv()).toAbsolutePath().normalize();
 	private final CommonMethod commonMethod = new CommonMethod();
-    private final GroupService groupService;
 
-    public FileService(FileTableMapper fileTableMapper, UserProfilePort userProfilePort, GroupService groupService) {
+    public FileService(FileTableMapper fileTableMapper, UserProfilePort userProfilePort, GroupPort groupPort) {
 		this.fileTableMapper = fileTableMapper;
 		this.userProfilePort = userProfilePort;
+		this.groupPort = groupPort;
 		try {
 			Files.createDirectories(this.rootPath); // 존재 보장
 		} catch (IOException e) {
 			throw new IllegalStateException("Cannot create root directory: " + this.rootPath, e);
 		}
 		log.info("IMGD root path = {}", this.rootPath);
-        this.groupService = groupService;
     }
 
 	/**
@@ -344,7 +344,7 @@ public class FileService {
             return ServiceResult.failure(fsMsg);
         }
 
-        return ServiceResult.success(() -> groupService.findGroupWhatInside(userid));
+        return ServiceResult.success(() -> groupPort.findGroupWhatInside(userid));
 
     }
     // ───────────────────────────────── helper methods ───────────────────────────────

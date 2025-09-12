@@ -29,8 +29,8 @@ public class GroupService {
 
 	private final GroupTableMapper groupTableMapper;
     private final UserProfilePort userProfilePort;
+	private final FileService fileService;
 	private static final CommonMethod commonMethod = new CommonMethod();
-    private final FileService fileService;
 
     public GroupService(GroupTableMapper groupTableMapper, UserProfilePort userProfilePort, FileService fileService) {
 		this.groupTableMapper = groupTableMapper;
