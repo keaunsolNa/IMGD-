@@ -39,7 +39,7 @@
          LIMIT 1
     </select>
 
-    <select id="findHighestUserRole" resultType="com.nks.imgd.dto.Schema.RolesDTO">
+    <select id="findHighestUserRole" resultType="com.nks.imgd.dto.Schema.Roles">
         SELECT T3.ROLE_ID
              , T3.ROLE_NM
           FROM USER_TABLE T1

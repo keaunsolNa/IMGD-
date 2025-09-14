@@ -16,7 +16,7 @@ import com.nks.imgd.dto.Enum.ResponseMsg;
 import com.nks.imgd.dto.Enum.Role;
 import com.nks.imgd.dto.dataDTO.MakeDirDTO;
 import com.nks.imgd.dto.dataDTO.MakeFileDTO;
-import com.nks.imgd.dto.Schema.FileTableDTO;
+import com.nks.imgd.dto.Schema.FileTable;
 import com.nks.imgd.dto.dataDTO.GroupTableWithMstUserNameDTO;
 import com.nks.imgd.dto.dataDTO.UserTableWithRelationshipAndPictureNmDTO;
 import com.nks.imgd.mapper.file.FileTableMapper;
@@ -89,7 +89,7 @@ public class FileService {
 	 * @param groupId 현재 유저가 위치한 그룹의 ID
 	 * @return 해당 위치에 존재 하는 파일 / 폴더 목록
 	 */
-	public List<FileTableDTO> findFileAndDirectory(@Param("parentId") Long parentId, @Param("groupId")  Long groupId) {
+	public List<FileTable> findFileAndDirectory(@Param("parentId") Long parentId, @Param("groupId")  Long groupId) {
 		return postProcessingFileTables(fileTableMapper.findFileAndDirectory(parentId, groupId));
 	}
 
@@ -99,7 +99,7 @@ public class FileService {
 	 * @param fileId 파일의 아이디
 	 * @return 파일에 대한 정보
 	 */
-	public FileTableDTO findFileById(@Param("fildId") Long fileId) {
+	public FileTable findFileById(@Param("fildId") Long fileId) {
 		return postProcessingFileTable(fileTableMapper.findFileById(fileId));
 	}
 
@@ -111,14 +111,14 @@ public class FileService {
 	 * @return 생성된 폴더의 정보
      */
 	@Transactional(rollbackFor = Exception.class)
-    public ServiceResult<FileTableDTO> makeGroupDir(GroupTableWithMstUserNameDTO dto)
+    public ServiceResult<FileTable> makeGroupDir(GroupTableWithMstUserNameDTO dto)
     {
 
         ResponseMsg returnMsg = commonMethod.returnResultByResponseMsg(fileTableMapper.makeGroupDir(dto));
 
 		if (!returnMsg.equals(ResponseMsg.ON_SUCCESS)) return ServiceResult.failure(returnMsg);
 
-        FileTableDTO fileDTO = fileTableMapper.findFileIdByFileOrgNmInDirCase(dto);
+        FileTable fileDTO = fileTableMapper.findFileIdByFileOrgNmInDirCase(dto);
 
 		if (null == fileDTO  || null == fileDTO.getFileId()) {
             return ServiceResult.failure(ResponseMsg.BAD_REQUEST);
@@ -144,7 +144,7 @@ public class FileService {
 	 * @return 생성된 폴더 정보
 	 */
 	@Transactional(rollbackFor = Exception.class)
-    public ServiceResult<List<FileTableDTO>> makeDir(MakeDirDTO req)
+    public ServiceResult<List<FileTable>> makeDir(MakeDirDTO req)
     {
 
 		if (fileTableMapper.makeDir(req) != 1) return ServiceResult.failure(ResponseMsg.BAD_REQUEST);
@@ -173,7 +173,7 @@ public class FileService {
      *
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServiceResult<FileTableDTO> makeFile(Long folderId, String userId, Long groupId, String fileOrgNm, File originalFile)
+    public ServiceResult<FileTable> makeFile(Long folderId, String userId, Long groupId, String fileOrgNm, File originalFile)
     {
 
         MakeFileDTO dto =  new MakeFileDTO();
@@ -215,7 +215,7 @@ public class FileService {
 	{
 		String fileNm = UUID.randomUUID().toString();
 
-		FileTableDTO fileDTO = new FileTableDTO();
+		FileTable fileDTO = new FileTable();
 		fileDTO.setFileNm(fileNm);
 		fileDTO.setFileOrgNm(dto.getFileName());
 
@@ -268,9 +268,9 @@ public class FileService {
 	 * @return 삭제할 파일이 있는 곳 정보 (parentId)
 	 */
 	@Transactional(rollbackFor = Exception.class)
-	public ServiceResult<FileTableDTO> deleteFile (Long fileId) {
+	public ServiceResult<FileTable> deleteFile (Long fileId) {
 
-		FileTableDTO row = findFileById(fileId);
+		FileTable row = findFileById(fileId);
 
 		if (!deleteFileById(fileId)) return ServiceResult.failure(ResponseMsg.FILE_DELETE_FAILED);
 		return ServiceResult.success(() -> findFileById(row.getParentId()));
@@ -283,10 +283,10 @@ public class FileService {
      * @return 삭제할 디렉터리가 있는 곳 정보 (parentId)
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServiceResult<FileTableDTO> deleteDir (long fileId) {
+    public ServiceResult<FileTable> deleteDir (long fileId) {
 
         // 빈 객체 선언
-        List<FileTableDTO> childFiles;
+        List<FileTable> childFiles;
         Long parentId = findFileById(fileId).getParentId();
 
         // 해당 id를 부모로 가지고 있는 객체가 없을 때 까지 순환
@@ -294,14 +294,14 @@ public class FileService {
 
             childFiles = findFileByParentId(fileId);
 
-            for (FileTableDTO childFile : childFiles) {
+            for (FileTable childFile : childFiles) {
                 deleteDir(childFile.getFileId());
             }
 
         } while (!childFiles.isEmpty());
 
         // 부모 객체가 없다면 객체 가져오기
-        FileTableDTO fileTableSchema = findFileById(fileId);
+        FileTable fileTableSchema = findFileById(fileId);
 
         // 유형 별 삭제
         if (fileTableSchema.getType().equals("DIR"))
@@ -327,10 +327,10 @@ public class FileService {
     public ServiceResult<List<GroupTableWithMstUserNameDTO>> deleteFilesByGroupId(String userid, Long groupId)
     {
 
-        List<FileTableDTO> filesInGroup = fileTableMapper.findFileByGroupId(groupId);
+        List<FileTable> filesInGroup = fileTableMapper.findFileByGroupId(groupId);
 
         // 물리 파일 삭제, 파일을 모두 삭제 후 디렉터리도 삭제한다.
-        for (FileTableDTO file : filesInGroup)
+        for (FileTable file : filesInGroup)
         {
             if(!deleteFileById(file.getFileId())) return ServiceResult.failure(ResponseMsg.FILE_DELETE_FAILED);
         }
@@ -358,7 +358,7 @@ public class FileService {
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteFileById(Long fileId) {
         // 1) 파일 메타 조회
-        FileTableDTO row = findFileById(fileId);
+        FileTable row = findFileById(fileId);
         if (null == row) {
             log.warn("deleteFileById: file row not found, fileId={}", fileId);
             return false;
@@ -397,7 +397,7 @@ public class FileService {
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteDirByFileId(Long fileId)
     {
-        FileTableDTO row = findFileById(fileId);
+        FileTable row = findFileById(fileId);
         if (null == row) {
             log.warn("deleteDirByFileId: file row not found, fileId={}", fileId);
             return false;
@@ -446,7 +446,7 @@ public class FileService {
         Long cur = fileId;
 
         while (null != cur) {
-            FileTableDTO r = fileTableMapper.findRootPath(cur);
+            FileTable r = fileTableMapper.findRootPath(cur);
             if (r == null) break;
             if (null != r.getFilePath()) {
                 sb.insert(0, "/" + r.getFilePath());
@@ -462,7 +462,7 @@ public class FileService {
      * @param fileId 대상 파일 아이디
      * @return 파일 테이블 객체들
      */
-    public List<FileTableDTO> findFileByParentId(Long fileId)
+    public List<FileTable> findFileByParentId(Long fileId)
     {
         return fileTableMapper.findFileByParentId(fileId);
     }
@@ -636,9 +636,9 @@ public class FileService {
 	 * @param files 대상 파일 리스트
 	 * @return 후처리 후 대상 파일 리스트
 	 */
-	public List<FileTableDTO> postProcessingFileTables(List<FileTableDTO> files) {
+	public List<FileTable> postProcessingFileTables(List<FileTable> files) {
 
-		for (FileTableDTO file : files) {
+		for (FileTable file : files) {
 			postProcessingFileTable(file);
 		}
 
@@ -653,7 +653,7 @@ public class FileService {
 	 * @param file 대상 파일
 	 * @return 후처리 후 대상 파일
 	 */
-	public FileTableDTO postProcessingFileTable(FileTableDTO file) {
+	public FileTable postProcessingFileTable(FileTable file) {
 
 		if (null == file) return null;
 		file.setRegDtm(null != file.getRegDtm() ? commonMethod.translateDate(file.getRegDtm()) : null);

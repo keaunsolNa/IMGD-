@@ -1,10 +1,10 @@
 package com.nks.imgd.mapper.user;
 
-import com.nks.imgd.dto.Schema.FriendTableDTO;
+import com.nks.imgd.dto.Schema.FriendTable;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import com.nks.imgd.dto.Schema.RolesDTO;
+import com.nks.imgd.dto.Schema.Roles;
 import com.nks.imgd.dto.dataDTO.UserTableWithRelationshipAndPictureNmDTO;
 
 import java.util.List;
@@ -14,7 +14,7 @@ public interface UserTableMapper {
 
 	UserTableWithRelationshipAndPictureNmDTO findById(String userId);
 
-	RolesDTO findHighestUserRole(String userId);
+	Roles findHighestUserRole(String userId);
 
 	List<UserTableWithRelationshipAndPictureNmDTO> findFriendEachOther(String userId);
 
@@ -22,7 +22,7 @@ public interface UserTableMapper {
 
 	List<UserTableWithRelationshipAndPictureNmDTO> findFriendWhoImAddButReject(String userId);
 
-	FriendTableDTO findFriendTableIdByUserId(String userId);
+	FriendTable findFriendTableIdByUserId(String userId);
 
 	List<UserTableWithRelationshipAndPictureNmDTO> findFriendWhoImAddButNot(String userId);
 

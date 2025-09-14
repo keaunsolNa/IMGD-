@@ -7,11 +7,15 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class RolesDTO {
+public class FileTable {
 
-	private Integer roleId;
-	private String roleNm;
-	private String roleDesc;
+	private Long fileId;
+	private String fileNm;
+	private String fileOrgNm;
+	private String filePath;
+	private String type;
+	private Long parentId;
+	private Long groupId;
 	private String regDtm;
 	private String regId;
 	private String modDtm;

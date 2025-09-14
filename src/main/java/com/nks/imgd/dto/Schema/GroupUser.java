@@ -7,13 +7,12 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserRoleDTO {
+public class GroupUser {
 
+	private Long groupId;
 	private String userId;
-	private String roleId;
 	private String regDtm;
 	private String regId;
 	private String modDtm;
 	private String modId;
-
 }

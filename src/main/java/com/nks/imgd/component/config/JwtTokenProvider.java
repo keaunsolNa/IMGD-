@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 
-import com.nks.imgd.dto.Schema.RolesDTO;
+import com.nks.imgd.dto.Schema.Roles;
 import com.nks.imgd.dto.dataDTO.UserTableWithRelationshipAndPictureNmDTO;
 import com.nks.imgd.mapper.user.UserTableMapper;
 
@@ -97,7 +97,7 @@ public class JwtTokenProvider {
 	 */
 	private Map<String, Object> createClaims(UserTableWithRelationshipAndPictureNmDTO user) {
 
-		RolesDTO roles = userTableMapper.findHighestUserRole(user.getUserId());
+		Roles roles = userTableMapper.findHighestUserRole(user.getUserId());
 		Map<String, Object> claims = new HashMap<>();
 		claims.put("Identifier", roles.getRoleId());
 		claims.put("Role", roles.getRoleNm());

@@ -7,13 +7,13 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class GroupTableDTO {
+public class UserRole {
 
-	private Long groupId;
-	private String groupNm;
-	private String groupMstUserId;
+	private String userId;
+	private String roleId;
 	private String regDtm;
 	private String regId;
 	private String modDtm;
 	private String modId;
+
 }
