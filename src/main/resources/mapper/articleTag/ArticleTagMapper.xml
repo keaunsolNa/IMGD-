@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nks.imgd.mapper.articleTag.ArticleTagMapper">
+
+    <select id="findArticleTagById" resultType="com.nks.imgd.dto.Schema.ArticleTag">
+        SELECT ARTICLE_ID
+             , TAG_ID
+          FROM ARTICLE_TAG
+         WHERE ARTICLE_ID = #{articleId}
+           AND TAG_ID = #{tagId}
+    </select>
+
+    <insert id="makeNewArticleTag">
+        INSERT
+          INTO ARTICLE_TAG
+          ( ARTICLE_ID
+          , TAG_ID
+          )
+          VALUES
+          (
+            #{articleTag.articleId}
+          , #{articleTag.tagId}
+          )
+    </insert>
+
+</mapper>

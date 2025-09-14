@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nks.imgd.mapper.tag.TagMapper">
+
+    <select id="findAllTag" resultType="com.nks.imgd.dto.Schema.Tag">
+        SELECT T1.TAG_ID
+             , T1.NAME
+             , T1.DESCRIPTION
+             , T1.COLOR
+             , COUNT(T2.TAG_ID)
+          FROM TAG T1
+          LEFT JOIN ARTICLE_TAG T2
+            ON T1.TAG_ID = T2.TAG_ID
+         GROUP BY T1.TAG_ID
+             , T1.NAME
+             , T1.DESCRIPTION
+             , T1.COLOR
+         ORDER BY COUNT(T2.TAG_ID) DESC, TAG_ID
+        LIMIT 10
+    </select>
+
+    <select id="selectTagById" resultType="com.nks.imgd.dto.Schema.Tag">
+        SELECT TAG_ID
+          FROM TAG
+         WHERE TAG_ID = #{tagId};
+    </select>
+
+    <select id="selectTagByLikeName" resultType="com.nks.imgd.dto.Schema.Tag">
+        SELECT TAG_ID
+             , NAME
+             , DESCRIPTION
+             , COLOR
+             , REG_DTM
+             , REG_ID
+             , MOD_DTM
+             , MOD_ID
+          FROM TAG
+         WHERE NAME LIKE #{name}
+         ORDER BY NAME;
+    </select>
+
+    <select id="selectTagWhatInTarget" resultType="com.nks.imgd.dto.Schema.Tag">
+        SELECT TAG_ID
+             , NAME
+             , DESCRIPTION
+             , COLOR
+             , REG_DTM
+             , REG_ID
+             , MOD_DTM
+             , MOD_ID
+          FROM TAG
+         WHERE TAG_ID IN ( #{tagId} );
+    </select>
+
+    <insert id="makeNewTag">
+      INSERT
+        INTO TAG
+        ( NAME
+        , DESCRIPTION
+        , COLOR
+        , REG_DTM
+        , REG_ID
+        , MOD_DTM
+        , MOD_ID
+        )
+      VALUES
+        (
+          #{tag.name}
+        , #{tag.description}
+        , #{tag.color}
+        , DATE_FORMAT(NOW(), '%Y%m%d')
+        , #{userId}
+        , DATE_FORMAT(NOW(), '%Y%m%d')
+        , #{userId}
+        )
+      ON DUPLICATE KEY UPDATE
+        MOD_DTM = DATE_FORMAT(NOW(), '%Y%m%d')
+      , MOD_ID = #{userId}
+
+    </insert>
+</mapper>

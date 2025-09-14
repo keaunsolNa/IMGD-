@@ -47,11 +47,13 @@ public class SecurityConfig {
                 // 엔드포인트별 접근 권한 설정
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
-                                .requestMatchers("/auth/**").permitAll()            // 로그인, 토큰 인증 관련
-                                .requestMatchers("/user/**").authenticated()            // 사용자 관련
-                                .requestMatchers("/group/**").authenticated()           // 그룹 관련
-                                .requestMatchers("/file/**").authenticated()             // API 관련
-                                .requestMatchers("/favicon.ico").permitAll()        // favicon
+                                .requestMatchers("/auth/**").permitAll()            	// 로그인, 토큰 인증 관련
+                                .requestMatchers("/user/**").authenticated()			// 사용자 관련
+                                .requestMatchers("/group/**").authenticated()			// 그룹 관련
+                                .requestMatchers("/file/**").authenticated()			// API 관련
+								.requestMatchers("/article/**").authenticated()		// 커뮤니티 게시글 관련
+								.requestMatchers("/tag/**").authenticated()			// 커뮤니티 태그 관련
+                                .requestMatchers("/favicon.ico").permitAll()        	// favicon
                                 .anyRequest().authenticated()
                 )
 				// OAuth2 리소스 서버 설정 (JWT 인증 방식 사용)

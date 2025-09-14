@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nks.imgd.mapper.article.ArticleMapper">
+    
+    <select id="findAllArticle" resultType="com.nks.imgd.dto.dataDTO.ArticleWithTags">
+        SELECT ARTICLE_ID
+             , TYPE
+             , F_GET_TAG_NM(ARTICLE_ID) TAG_IDS
+             , USER_ID
+             , TITLE
+             , ARTICLE
+             , LIKE_CNT
+             , WATCH_CNT
+             , REG_DTM
+             , REG_ID
+             , MOD_DTM
+             , MOD_ID
+          FROM ARTICLE
+    </select>
+
+    <insert id="makeNewArticle"
+            useGeneratedKeys="true"
+            keyProperty="article.articleId"
+            keyColumn="ARTICLE_ID">
+        INSERT
+          INTO ARTICLE
+          (
+            POST_PWD
+          , TYPE
+          , USER_ID
+          , TITLE
+          , ARTICLE
+          , LIKE_CNT
+          , WATCH_CNT
+          , REG_DTM
+          , REG_ID
+          , MOD_DTM
+          , MOD_ID
+          )
+        VALUES
+          (
+            #{article.postPwd}
+          , #{article.type}
+          , #{article.userId}
+          , #{article.title}
+          , #{article.article}
+          ,0
+          ,0
+          , DATE_FORMAT(NOW(), '%Y%m%d')
+          , #{article.userId}
+          , DATE_FORMAT(NOW(), '%Y%m%d')
+          , #{article.userId}
+          )
+    </insert>
+</mapper>

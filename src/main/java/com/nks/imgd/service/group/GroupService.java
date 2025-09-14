@@ -15,7 +15,6 @@ import com.nks.imgd.dto.dataDTO.GroupTableWithMstUserNameDTO;
 import com.nks.imgd.dto.dataDTO.GroupUserWithNameDTO;
 import com.nks.imgd.mapper.group.GroupTableMapper;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -23,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
  * @apiNote Group 관련 작업을 하는 서비스
  * 			접근 제한 :  Group MST_USER
  */
-@Slf4j
 @Service
 public class GroupService {
 
