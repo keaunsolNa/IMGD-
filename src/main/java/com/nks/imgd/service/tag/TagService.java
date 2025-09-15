@@ -36,7 +36,7 @@ public class TagService {
 	 * @return 태그 목록 반환
 	 */
 	public Tag findTagById(Long tagId) {
-		return postProcessingTagTable(tagMapper.selectTagById(tagId));
+		return postProcessingTagTable(tagMapper.findTagById(tagId));
 	}
 	
 	/**

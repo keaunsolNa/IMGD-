@@ -22,9 +22,16 @@
         LIMIT 10
     </select>
 
-    <select id="selectTagById" resultType="com.nks.imgd.dto.Schema.Tag">
-        SELECT TAG_ID
-          FROM TAG
+    <select id="findTagById" resultType="com.nks.imgd.dto.Schema.Tag">
+        SELECT T1.TAG_ID
+             , T1.NAME
+             , T1.DESCRIPTION
+             , T1.COLOR
+             , T1.REG_DTM
+             , T1.REG_ID
+             , T1.MOD_DTM
+             , T1.MOD_ID
+          FROM TAG T1
          WHERE TAG_ID = #{tagId};
     </select>
 

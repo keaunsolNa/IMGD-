@@ -12,7 +12,7 @@ public interface TagMapper {
 
 	List<Tag> findAllTag();
 
-	Tag selectTagById(@Param("tagId") Long tagId);
+	Tag findTagById(@Param("tagId") Long tagId);
 
 	List<Tag> selectTagByLikeName(@Param("name") String name);
 

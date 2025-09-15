@@ -10,6 +10,7 @@
              , TYPE
              , F_GET_TAG_NM(ARTICLE_ID) TAG_IDS
              , USER_ID
+             , F_GET_USER_NM(USER_ID) USER_NM
              , TITLE
              , ARTICLE
              , LIKE_CNT
@@ -55,4 +56,10 @@
           , #{article.userId}
           )
     </insert>
+
+    <update id="likeArticle">
+        UPDATE ARTICLE
+           SET LIKE_CNT = LIKE_CNT + 1
+         WHERE ARTICLE_ID = #{articleId}
+    </update>
 </mapper>

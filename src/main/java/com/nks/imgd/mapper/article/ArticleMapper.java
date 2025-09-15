@@ -13,4 +13,6 @@ public interface ArticleMapper {
 	List<ArticleWithTags> findAllArticle();
 
 	int makeNewArticle(@Param("article") ArticleWithTags article);
+
+	int likeArticle(@Param("articleId") Long articleId);
 }

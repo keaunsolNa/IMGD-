@@ -20,6 +20,7 @@ public class ArticleWithTags {
 	private String tagIds;
 	private List<Tag> tagList;
 	private String userId;
+	private String userNm;
 	private String title;
 	private String article;
 	private Long like;

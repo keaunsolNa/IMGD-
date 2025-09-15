@@ -1,5 +1,6 @@
 package com.nks.imgd.service.article;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import com.nks.imgd.dto.Schema.Tag;
 import com.nks.imgd.dto.dataDTO.ArticleWithTags;
 import com.nks.imgd.mapper.article.ArticleMapper;
 import com.nks.imgd.service.articleTag.ArticleTagService;
+import com.nks.imgd.service.tag.TagService;
 
 /**
  * @author nks
@@ -24,10 +26,12 @@ public class ArticleService {
 	private static final CommonMethod commonMethod = new CommonMethod();
 	private final ArticleMapper articleMapper;
 	private final ArticleTagService articleTagService;
+	private final TagService tagService;
 
-	public ArticleService(ArticleMapper articleMapper, ArticleTagService articleTagService) {
+	public ArticleService(ArticleMapper articleMapper, ArticleTagService articleTagService, TagService tagService) {
 		this.articleMapper = articleMapper;
 		this.articleTagService = articleTagService;
+		this.tagService = tagService;
 	}
 
 	/**
@@ -50,8 +54,6 @@ public class ArticleService {
 	@Transactional(rollbackFor = Exception.class)
 	public ServiceResult<List<ArticleWithTags>> insertArticle(ArticleWithTags dto) {
 
-		System.out.println(dto);
-
 		ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
 			articleMapper.makeNewArticle(dto)
 		);
@@ -60,7 +62,6 @@ public class ArticleService {
 			return ServiceResult.failure(fsMsg);
 		}
 
-		System.out.println("AFTER");
 		for (Tag tag : dto.getTagList())
 		{
 			ArticleTag articleTag = new ArticleTag();
@@ -93,6 +94,21 @@ public class ArticleService {
 
 		article.setRegDtm(null != article.getRegDtm() ? commonMethod.translateDate(article.getRegDtm()) : null);
 		article.setModDtm(null != article.getModDtm() ? commonMethod.translateDate(article.getModDtm()) : null);
+
+		if (null != article.getTagIds())
+		{
+			List<Tag> tagList = new ArrayList<>();
+
+			String[] tagIds = article.getTagIds().split(",");
+
+			for (String tag : tagIds)
+			{
+				Tag tagDto = tagService.findTagById(Long.parseLong(tag));
+				tagList.add(tagDto);
+			}
+
+			article.setTagList(tagList);
+		}
 	}
 
 
