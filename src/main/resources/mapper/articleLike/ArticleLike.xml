@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nks.imgd.mapper.articleLike.ArticleLikeMapper">
+
+    <select id="findArticleLikeWhatIds" resultType="com.nks.imgd.dto.Schema.ArticleLike">
+        SELECT ARTICLE_ID
+             , USER_ID
+          FROM ARTICLE_LIKE
+         WHERE ARTICLE_ID = #{articleId}
+           AND USER_ID = #{userId}
+    </select>
+
+    <insert id="likeArticle">
+        INSERT
+          INTO ARTICLE_LIKE
+        ( ARTICLE_ID
+        , USER_ID
+        )
+          VALUES
+        ( #{articleId}
+        , #{userId}
+        )
+    </insert>
+
+    <delete id="unLikeArticle">
+        DELETE
+          FROM ARTICLE_LIKE
+         WHERE ARTICLE_ID = #{articleId}
+           AND USER_ID = #{userId}
+    </delete>
+</mapper>

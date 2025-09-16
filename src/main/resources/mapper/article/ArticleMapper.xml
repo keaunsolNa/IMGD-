@@ -5,7 +5,9 @@
 
 <mapper namespace="com.nks.imgd.mapper.article.ArticleMapper">
     
-    <select id="findAllArticle" resultType="com.nks.imgd.dto.dataDTO.ArticleWithTags">
+    <select id="findAllArticle"
+            parameterType="com.nks.imgd.dto.searchDTO.ArticleSearch"
+            resultType="com.nks.imgd.dto.dataDTO.ArticleWithTags">
         SELECT ARTICLE_ID
              , TYPE
              , F_GET_TAG_NM(ARTICLE_ID) TAG_IDS
@@ -13,13 +15,46 @@
              , F_GET_USER_NM(USER_ID) USER_NM
              , TITLE
              , ARTICLE
-             , LIKE_CNT
+             , F_GET_LIKE_CNT(ARTICLE_ID) LIKE_CNT
+             , F_GET_COMMENT_CNT(ARTICLE_ID) COMMENT_CNT
              , WATCH_CNT
              , REG_DTM
              , REG_ID
              , MOD_DTM
              , MOD_ID
           FROM ARTICLE
+         WHERE TYPE = 'POST'
+         <trim prefix="where" prefixOverrides="and | or">
+              <if test="userNm != null and userNm != ''">
+                 AND F_GET_USER_NM(USER_ID) = #{userNm}
+             </if>
+             <if test="title != null and title != ''">
+                 AND TITLE LIKE CONCAT('%', #{title}, '%')
+             </if>
+             <if test="article != null and article != ''">
+                 AND ARTICLE LIKE CONCAT('%', #{article}, '%')
+             </if>
+          </trim>
+         ORDER BY LIKE_CNT DESC, WATCH_CNT DESC, REG_DTM DESC
+    </select>
+
+    <select id="findArticleById" resultType="com.nks.imgd.dto.dataDTO.ArticleWithTags">
+        SELECT ARTICLE_ID
+             , TYPE
+             , F_GET_TAG_NM(ARTICLE_ID) TAG_IDS
+             , USER_ID
+             , F_GET_USER_NM(USER_ID) USER_NM
+             , TITLE
+             , ARTICLE
+             , F_GET_LIKE_CNT(ARTICLE_ID) LIKE_CNT
+             , F_GET_COMMENT_CNT(ARTICLE_ID) COMMENT_CNT
+             , WATCH_CNT
+             , REG_DTM
+             , REG_ID
+             , MOD_DTM
+             , MOD_ID
+        FROM ARTICLE
+       WHERE ARTICLE_ID = #{articleId}
     </select>
 
     <insert id="makeNewArticle"
@@ -34,7 +69,6 @@
           , USER_ID
           , TITLE
           , ARTICLE
-          , LIKE_CNT
           , WATCH_CNT
           , REG_DTM
           , REG_ID
@@ -49,7 +83,6 @@
           , #{article.title}
           , #{article.article}
           ,0
-          ,0
           , DATE_FORMAT(NOW(), '%Y%m%d')
           , #{article.userId}
           , DATE_FORMAT(NOW(), '%Y%m%d')
@@ -57,9 +90,10 @@
           )
     </insert>
 
-    <update id="likeArticle">
+    <update id="increaseArticleWatchCnt">
         UPDATE ARTICLE
-           SET LIKE_CNT = LIKE_CNT + 1
+           SET WATCH_CNT = WATCH_CNT + 1
          WHERE ARTICLE_ID = #{articleId}
     </update>
+
 </mapper>

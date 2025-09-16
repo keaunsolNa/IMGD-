@@ -17,7 +17,6 @@ public class Article {
 	private String userId;
 	private String title;
 	private String article;
-	private Long like;
 	private Long watch;
 	private String regDtm;
 	private String regId;
