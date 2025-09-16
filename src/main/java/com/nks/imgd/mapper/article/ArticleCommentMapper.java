@@ -1,4 +1,4 @@
-package com.nks.imgd.mapper.articleComment;
+package com.nks.imgd.mapper.article;
 
 import java.util.List;
 

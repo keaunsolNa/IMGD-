@@ -3,7 +3,7 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.nks.imgd.mapper.articleLike.ArticleLikeMapper">
+<mapper namespace="com.nks.imgd.mapper.article.ArticleLikeMapper">
 
     <select id="findArticleLikeWhatIds" resultType="com.nks.imgd.dto.Schema.ArticleLike">
         SELECT ARTICLE_ID

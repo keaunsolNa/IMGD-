@@ -1,4 +1,4 @@
-package com.nks.imgd.mapper.articleLike;
+package com.nks.imgd.mapper.article;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;

@@ -1,4 +1,4 @@
-package com.nks.imgd.service.articleComment;
+package com.nks.imgd.service.article;
 
 import java.util.List;
 
@@ -9,7 +9,7 @@ import com.nks.imgd.component.util.commonMethod.CommonMethod;
 import com.nks.imgd.component.util.maker.ServiceResult;
 import com.nks.imgd.dto.Enum.ResponseMsg;
 import com.nks.imgd.dto.Schema.ArticleComment;
-import com.nks.imgd.mapper.articleComment.ArticleCommentMapper;
+import com.nks.imgd.mapper.article.ArticleCommentMapper;
 
 /**
  * @author nks

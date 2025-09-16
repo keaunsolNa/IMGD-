@@ -1,4 +1,4 @@
-package com.nks.imgd.service.articleLike;
+package com.nks.imgd.service.article;
 
 import org.springframework.stereotype.Service;
 
@@ -6,7 +6,7 @@ import com.nks.imgd.component.util.commonMethod.CommonMethod;
 import com.nks.imgd.component.util.maker.ServiceResult;
 import com.nks.imgd.dto.Enum.ResponseMsg;
 import com.nks.imgd.dto.Schema.ArticleLike;
-import com.nks.imgd.mapper.articleLike.ArticleLikeMapper;
+import com.nks.imgd.mapper.article.ArticleLikeMapper;
 
 /**
  * @author nks

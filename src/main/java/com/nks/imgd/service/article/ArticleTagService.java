@@ -1,4 +1,4 @@
-package com.nks.imgd.service.articleTag;
+package com.nks.imgd.service.article;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -7,7 +7,7 @@ import com.nks.imgd.component.util.commonMethod.CommonMethod;
 import com.nks.imgd.component.util.maker.ServiceResult;
 import com.nks.imgd.dto.Enum.ResponseMsg;
 import com.nks.imgd.dto.Schema.ArticleTag;
-import com.nks.imgd.mapper.articleTag.ArticleTagMapper;
+import com.nks.imgd.mapper.article.ArticleTagMapper;
 
 /**
  * @author nks

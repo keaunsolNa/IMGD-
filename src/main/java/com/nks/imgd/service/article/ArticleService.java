@@ -17,9 +17,6 @@ import com.nks.imgd.dto.Schema.Tag;
 import com.nks.imgd.dto.dataDTO.ArticleWithTags;
 import com.nks.imgd.dto.searchDTO.ArticleSearch;
 import com.nks.imgd.mapper.article.ArticleMapper;
-import com.nks.imgd.service.articleComment.ArticleCommentService;
-import com.nks.imgd.service.articleLike.ArticleLikeService;
-import com.nks.imgd.service.articleTag.ArticleTagService;
 import com.nks.imgd.service.tag.TagService;
 
 /**
