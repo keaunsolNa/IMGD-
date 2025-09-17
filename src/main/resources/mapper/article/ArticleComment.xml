@@ -19,6 +19,26 @@
          WHERE ARTICLE_ID = #{articleId}
     </select>
 
+    <select id="findArticleById" resultType="com.nks.imgd.dto.dataDTO.ArticleWithTags">
+        SELECT ARTICLE_ID
+             , TYPE
+             , F_GET_TAG_NM(ARTICLE_ID) TAG_IDS
+             , USER_ID
+             , F_GET_PICTURE_NM(USER_ID) AS PICTURE_NM
+             , F_GET_USER_NM(USER_ID) USER_NM
+             , TITLE
+             , ARTICLE
+             , F_GET_LIKE_CNT(ARTICLE_ID) LIKE_CNT
+             , F_GET_COMMENT_CNT(ARTICLE_ID) COMMENT_CNT
+             , WATCH_CNT
+             , REG_DTM
+             , REG_ID
+             , MOD_DTM
+             , MOD_ID
+        FROM ARTICLE
+        WHERE ARTICLE_ID = #{articleId}
+    </select>
+
     <insert id="insertArticleComment">
         INSERT
           INTO ARTICLE_COMMENT
@@ -31,4 +51,12 @@
         , #{article.commentId}
         )
     </insert>
+
+    <delete id="deleteArticleComment">
+        DELETE
+          FROM article_comment
+         WHERE ARTICLE_ID = #{articleId}
+          AND COMMENT_ID = #{commentId}
+    </delete>
+
 </mapper>

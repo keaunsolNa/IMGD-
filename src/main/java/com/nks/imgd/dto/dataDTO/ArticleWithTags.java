@@ -3,7 +3,6 @@ package com.nks.imgd.dto.dataDTO;
 import java.util.List;
 
 import com.nks.imgd.dto.Enum.ArticleType;
-import com.nks.imgd.dto.Schema.Article;
 import com.nks.imgd.dto.Schema.Tag;
 
 import lombok.AllArgsConstructor;
@@ -16,12 +15,12 @@ import lombok.NoArgsConstructor;
 public class ArticleWithTags {
 
 	private Long articleId;
-	private String postPwd;
 	private ArticleType type;
 	private String tagIds;
 	private List<Tag> tagList;
 	private List<ArticleWithTags> comments;
 	private String userId;
+	private String pictureNm;
 	private String userNm;
 	private String title;
 	private String article;

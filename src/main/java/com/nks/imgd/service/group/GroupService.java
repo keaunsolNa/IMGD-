@@ -198,7 +198,7 @@ public class GroupService {
 	public ServiceResult<List<GroupUserWithNameDTO>>  changeMstUserGroup(GroupTableWithMstUserNameDTO dto, String userId) {
 
 		// 해당 그룹에 대상 유저가 없을 경우
-		if (groupTableMapper.isUserCheck(dto, userId) > 0) return ServiceResult.failure(ResponseMsg.CAN_NOT_FIND_USER, Map.of("userId", userId));
+		if (groupTableMapper.isUserCheck(dto, userId) <= 0) return ServiceResult.failure(ResponseMsg.CAN_NOT_FIND_USER, Map.of("userId", userId));
 
         ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
                 groupTableMapper.changeMstUserGroup(dto, userId)

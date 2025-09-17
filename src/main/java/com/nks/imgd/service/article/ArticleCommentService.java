@@ -9,6 +9,7 @@ import com.nks.imgd.component.util.commonMethod.CommonMethod;
 import com.nks.imgd.component.util.maker.ServiceResult;
 import com.nks.imgd.dto.Enum.ResponseMsg;
 import com.nks.imgd.dto.Schema.ArticleComment;
+import com.nks.imgd.dto.dataDTO.ArticleWithTags;
 import com.nks.imgd.mapper.article.ArticleCommentMapper;
 
 /**
@@ -65,5 +66,24 @@ public class ArticleCommentService {
 		}
 
 		return ServiceResult.success(() -> findArticleTagById(articleComment.getArticleId(), articleComment.getCommentId()));
+	}
+
+	/**
+	 * 게시글 - 댓글 테이블 삭제한다.
+	 *
+	 * @param articleId 대상 게시글 아이디
+	 * @param commentId 대상 댓글 아이디
+	 * @return boolean
+	 */
+	@Transactional(rollbackFor = Exception.class)
+	public ServiceResult<ArticleWithTags> deleteArticleComment(Long articleId, Long commentId) {
+
+		ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
+			articleCommentMapper.deleteArticleComment(articleId, commentId)
+		);
+
+		if(!fsMsg.equals(ResponseMsg.ON_SUCCESS)) return ServiceResult.failure(fsMsg);
+
+		return ServiceResult.success(() -> articleCommentMapper.findArticleById(articleId));
 	}
 }

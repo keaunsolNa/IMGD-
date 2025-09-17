@@ -43,6 +43,7 @@
              , TYPE
              , F_GET_TAG_NM(ARTICLE_ID) TAG_IDS
              , USER_ID
+             , F_GET_PICTURE_NM(USER_ID) AS PICTURE_NM
              , F_GET_USER_NM(USER_ID) USER_NM
              , TITLE
              , ARTICLE
@@ -64,8 +65,7 @@
         INSERT
           INTO ARTICLE
           (
-            POST_PWD
-          , TYPE
+            TYPE
           , USER_ID
           , TITLE
           , ARTICLE
@@ -77,8 +77,7 @@
           )
         VALUES
           (
-            #{article.postPwd}
-          , #{article.type}
+            #{article.type}
           , #{article.userId}
           , #{article.title}
           , #{article.article}
@@ -95,5 +94,11 @@
            SET WATCH_CNT = WATCH_CNT + 1
          WHERE ARTICLE_ID = #{articleId}
     </update>
+
+    <delete id="deleteArticle">
+        DELETE
+          FROM ARTICLE
+         WHERE ARTICLE_ID = #{articleId}
+    </delete>
 
 </mapper>

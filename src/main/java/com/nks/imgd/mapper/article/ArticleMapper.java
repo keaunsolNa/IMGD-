@@ -19,4 +19,5 @@ public interface ArticleMapper {
 
 	int increaseArticleWatchCnt(@Param("articleId") Long articleId);
 
+	int deleteArticle(@Param("articleId") Long articleId);
 }

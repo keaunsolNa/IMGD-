@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 public class Article {
 
 	private Long articleId;
-	private String postPwd;
 	private ArticleType type;
 	private String userId;
 	private String title;

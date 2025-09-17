@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -98,4 +99,17 @@ public class ArticleController {
 	public ResponseEntity<ApiResponse<ArticleWithTags>> likeArticle( @AuthenticationPrincipal Jwt jwt, @RequestBody Long articleId) {
 		return commonMethod.responseTransaction(articleService.likeArticle(articleId, jwt.getSubject()));
 	}
+
+	/**
+	 * 게시글에 달린 댓글을 삭제한다.
+	 * @param jwt 로그인 유저 토큰 정보
+	 * @param articleId 게시글 정보
+	 * @param commentId 댓글 정보
+	 * @return 해당 게시글 정보
+	 */
+	@DeleteMapping("/deleteArticleComment")
+	public ResponseEntity<ApiResponse<ArticleWithTags>> deleteArticleComment( @AuthenticationPrincipal Jwt jwt, @RequestParam Long articleId, @RequestParam Long commentId) {
+		return commonMethod.responseTransaction(articleService.deleteArticleComment(articleId, commentId, jwt.getSubject()));
+	}
+
 }

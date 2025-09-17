@@ -158,10 +158,14 @@ public class ArticleService {
 	@Transactional(rollbackFor = Exception.class)
 	public ServiceResult<ArticleWithTags> likeArticle(Long articleId, String userId) {
 
+		System.out.println("likeArticle");
 		if (articleMapper.findArticleById(articleId).getUserId().equals(userId))
 			return ServiceResult.success(() -> findArticleById(articleId, userId));
 
 		ServiceResult<ArticleLike> result;
+
+		System.out.println("isLiked?");
+		System.out.println(articleLikeService.isLiked(articleId, userId));
 
 		if (articleLikeService.isLiked(articleId, userId))
 		{
@@ -173,8 +177,38 @@ public class ArticleService {
 			result = articleLikeService.likeArticle(articleId, userId);
 		}
 
+		System.out.println("IN LIKE");
+		System.out.println(result.status());
+
 		if (!result.status().equals(ResponseMsg.ON_SUCCESS)) {
 			return ServiceResult.failure(result.status());
+		}
+
+		return ServiceResult.success(() -> findArticleById(articleId, userId));
+	}
+
+	/**
+	 * 게시글에 달린 댓글을 삭제한다.
+	 * @param articleId 대상 게시글 id
+	 * @param commentId 대상 댓글 아이디
+	 * @param userId 유저 아이디
+	 * @return 대상 게시글 반환
+	 */
+	@Transactional(rollbackFor = Exception.class)
+	public ServiceResult<ArticleWithTags> deleteArticleComment(Long articleId, Long commentId, String userId) {
+
+		ResponseMsg fsMsg = articleCommentService.deleteArticleComment(articleId, commentId).status();
+
+		if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
+			return ServiceResult.failure(fsMsg);
+		}
+
+		fsMsg = commonMethod.returnResultByResponseMsg(
+			articleMapper.deleteArticle(commentId)
+		);
+
+		if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
+			return ServiceResult.failure(fsMsg);
 		}
 
 		return ServiceResult.success(() -> findArticleById(articleId, userId));
