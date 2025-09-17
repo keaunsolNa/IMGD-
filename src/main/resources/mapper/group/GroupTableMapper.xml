@@ -130,7 +130,7 @@
       DELETE
         FROM GROUP_USER
        WHERE GROUP_ID = #{group.groupId}
-         AND USER_ID  = #{group.userId}
+         AND USER_ID  = #{userId}
     </delete>
 
     <delete id="deleteGroupTable">

@@ -227,7 +227,19 @@ public class GroupService {
            return ServiceResult.failure(ResponseMsg.FILE_DELETE_FAILED);
        }
 
+	   GroupTableWithMstUserNameDTO dto = groupTableMapper.findGroupByGroupId(groupId);
+
+	   // 해당 그룹 유저 (MST_USER) 삭제
 		ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
+			groupTableMapper.deleteGroupUser(dto, userId)
+		);
+
+		if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
+			return ServiceResult.failure(fsMsg);
+		}
+
+		// 그룹 삭제
+		fsMsg = commonMethod.returnResultByResponseMsg(
 			groupTableMapper.deleteGroupTable(groupId)
 		);
 

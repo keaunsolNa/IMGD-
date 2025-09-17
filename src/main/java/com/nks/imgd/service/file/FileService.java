@@ -335,15 +335,6 @@ public class FileService {
             if(!deleteFileById(file.getFileId())) return ServiceResult.failure(ResponseMsg.FILE_DELETE_FAILED);
         }
 
-        // DB 삭제
-        ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
-                fileTableMapper.deleteFilesByGroupId(groupId)
-        );
-
-        if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
-            return ServiceResult.failure(fsMsg);
-        }
-
         return ServiceResult.success(() -> groupPort.findGroupWhatInside(userid));
 
     }
@@ -359,6 +350,7 @@ public class FileService {
     public boolean deleteFileById(Long fileId) {
         // 1) 파일 메타 조회
         FileTable row = findFileById(fileId);
+
         if (null == row) {
             log.warn("deleteFileById: file row not found, fileId={}", fileId);
             return false;
@@ -366,7 +358,7 @@ public class FileService {
 
         // 폴더인 경우 디렉터리 삭제로 보낸다.
         if ("DIR".equalsIgnoreCase(row.getType())) {
-			deleteDirByFileId(fileId);
+			return deleteDirByFileId(fileId);
         }
 
         // 2) 물리 경로 계산
@@ -583,8 +575,10 @@ public class FileService {
 	 * @return 결과값
 	 */
 	private boolean deleteQuietly(Path p) {
+
 		try {
-			return Files.deleteIfExists(p);
+			Files.deleteIfExists(p);
+			return true;
 		} catch (IOException e) {
 			log.warn("Failed to delete file: {}", p, e);
 			return false;

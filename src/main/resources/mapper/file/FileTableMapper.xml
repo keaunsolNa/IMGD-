@@ -79,7 +79,7 @@
              , MOD_ID
           FROM FILE_TABLE
          WHERE GROUP_ID = #{groupId}
-         ORDER BY TYPE DESC
+         ORDER BY TYPE DESC, FILE_ID DESC
     </select>
     
     <select id="findFileByParentId" resultType="com.nks.imgd.dto.Schema.FileTable">
