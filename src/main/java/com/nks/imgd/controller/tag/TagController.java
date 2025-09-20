@@ -1,4 +1,4 @@
-package com.nks.imgd.controller;
+package com.nks.imgd.controller.tag;
 
 import java.util.List;
 
