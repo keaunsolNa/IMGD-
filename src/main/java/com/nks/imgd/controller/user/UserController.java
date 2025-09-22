@@ -125,27 +125,5 @@ public class UserController {
 		return commonMethod.responseTransaction(userService.updateUser(user));
 	}
 
-	/**
-	 * 친구를 추가 한다.
-	 * @param jwt 로그인 한 유저 토큰 정보
-	 * @param targetUserId 추가 하려는 유저 아이디
-	 * @param relationship F/B/R 세가지로, 친구의 F, 블록의 B, (친구) 거부의 R이 있다.
-	 * @return 상호 친구 목록
-	 */
-	@PostMapping("/insertUserFriendTable")
-	public ResponseEntity<ApiResponse<List<UserTableWithRelationshipAndPictureNmDTO>>> insertUserFriendTable(@AuthenticationPrincipal Jwt jwt, @RequestParam String targetUserId, @RequestParam String relationship) {
-		return commonMethod.responseTransaction(userService.insertUserFriendTable(jwt.getSubject(), targetUserId, relationship));
-	}
-
-	/**
-	 * 친구를 삭제 한다.
-	 * @param jwt 로그인 한 유저 토큰 정보
-	 * @param targetUserId 삭제 하려는 유저 아이디
-	 * @return 상호 친구 목록
-	 */
-	@DeleteMapping("/deleteUserFriendTable")
-	public ResponseEntity<ApiResponse<List<UserTableWithRelationshipAndPictureNmDTO>>> deleteUserFriendTable(@AuthenticationPrincipal Jwt jwt, @RequestParam String targetUserId) {
-		return commonMethod.responseTransaction(userService.deleteUserFriendTable(jwt.getSubject(), targetUserId));
-	}
 
 }

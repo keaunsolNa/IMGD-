@@ -103,6 +103,16 @@ public class FileService {
 		return postProcessingFileTable(fileTableMapper.findFileById(fileId));
 	}
 
+	/**
+	 * 유저의 프로필 사진 ID를 반환 한다.
+	 * 
+	 * @param userId 대상 유저 아이디
+	 * @return 파일에 대한 정보
+	 */
+	public FileTable findUserProfileFileId(@Param("userId") String userId) {
+		return postProcessingFileTable(fileTableMapper.findUserProfileFileId(userId));
+	}
+	
     /**
 	 * 그룹 생성시 그룹의 루트가 될 폴더를 만든다.
 	 * DB row 생성 → 물리 폴더 생성(실패 시 롤백)

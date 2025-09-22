@@ -1,6 +1,5 @@
 package com.nks.imgd.mapper.user;
 
-import com.nks.imgd.dto.Schema.FriendTable;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -22,8 +21,6 @@ public interface UserTableMapper {
 
 	List<UserTableWithRelationshipAndPictureNmDTO> findFriendWhoImAddButReject(String userId);
 
-	FriendTable findFriendTableIdByUserId(String userId);
-
 	List<UserTableWithRelationshipAndPictureNmDTO> findFriendWhoImAddButNot(String userId);
 
 	List<UserTableWithRelationshipAndPictureNmDTO> findFriend(String userId);
@@ -39,11 +36,5 @@ public interface UserTableMapper {
 	int updatePictureId(@Param("userId") String userId,
 						@Param("fileId") Long fileId);
 
-	int insertUserFriendTable(@Param("targetUserId") String targetUserId,
-							  @Param("friendId") Long friendId,
-							  @Param("userId") String userId,
-							  @Param("relationship") String relationship);
-
-	int deleteUserFriendTable(@Param("targetUserId") String targetUserId,
-							  @Param("friendId") Long friendId);
+	int deleteUser(@Param("userId") String userId);
 }

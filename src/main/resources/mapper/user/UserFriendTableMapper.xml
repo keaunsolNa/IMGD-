@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nks.imgd.mapper.user.UserFriendTableMapper">
+
+    <select id="findFriendEachOther" resultType="com.nks.imgd.dto.dataDTO.UserTableWithRelationshipAndPictureNmDTO">
+        SELECT T3.USER_ID
+             , F_GET_USER_NM(T3.USER_ID) NAME
+             , T3.REG_DTM
+             , T1.PICTURE_ID
+             , F_GET_PICTURE_NM(T3.USER_ID) PICTURE_NM
+          FROM USER_TABLE T1
+          JOIN FRIEND_TABLE T2
+            ON T1.USER_ID = T2.USER_ID
+          JOIN USER_FRIEND_TABLE T3
+            ON T2.FRIEND_ID = T3.FRIEND_ID
+         WHERE T1.USER_ID = #{userId}
+           AND T3.RELATIONSHIP = 'F'
+           AND T1.USER_ID IN (SELECT A3.USER_ID
+                               FROM USER_TABLE A1
+                               JOIN FRIEND_TABLE A2
+                                 ON A1.USER_ID = A2.USER_ID
+                               JOIN USER_FRIEND_TABLE A3
+                                 ON A2.FRIEND_ID = A3.FRIEND_ID
+                              WHERE A1.USER_ID = T3.USER_ID
+                                AND A3.RELATIONSHIP = 'F')
+         ORDER BY T3.REG_DTM, T3.USER_ID
+
+    </select>
+
+    <insert id="insertUserFriendTable">
+        INSERT
+          INTO USER_FRIEND_TABLE
+        VALUES (
+                 #{friendId}
+               , #{targetUserId}
+               , #{relationship}
+               , DATE_FORMAT(NOW(), '%Y%m%d')
+               , #{userId}
+               , DATE_FORMAT(NOW(), '%Y%m%d')
+               , #{userId}
+               )
+    </insert>
+
+    <delete id="deleteUserFriendTable">
+        DELETE
+          FROM USER_FRIEND_TABLE
+         WHERE FRIEND_ID = #{friendId}
+           AND USER_ID = #{targetUserId}
+    </delete>
+
+</mapper>

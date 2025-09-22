@@ -249,25 +249,11 @@
         WHERE USER_ID = #{userId}
     </update>
     
-    <insert id="insertUserFriendTable">
-        INSERT
-          INTO USER_FRIEND_TABLE
-        VALUES (
-                 #{friendId}
-               , #{targetUserId}
-               , #{relationship}
-               , DATE_FORMAT(NOW(), '%Y%m%d')
-               , #{userId}
-               , DATE_FORMAT(NOW(), '%Y%m%d')
-               , #{userId}
-               )
-    </insert>
-
-    <delete id="deleteUserFriendTable">
+    <delete id="deleteUser">
         DELETE
-          FROM USER_FRIEND_TABLE
-         WHERE FRIEND_ID = #{friendId}
-           AND USER_ID = #{targetUserId}
+          FROM USER
+         WHERE USER_ID = #{userId}
     </delete>
+
 
 </mapper>

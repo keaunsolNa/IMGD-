@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nks.imgd.mapper.user.FriendTableMapper">
+
+    <select id="findFriendTableIdByUserId">
+        SELECT T1.FRIEND_ID
+        FROM FRIEND_TABLE T1
+        WHERE T1.USER_ID = #{userId}
+        LIMIT 1
+    </select>
+
+</mapper>

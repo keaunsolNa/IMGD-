@@ -20,6 +20,8 @@ public interface FileTableMapper {
 
 	FileTable findFileById(@Param("fileId") Long fileId);
 
+	FileTable findUserProfileFileId(@Param("userId") String userId);
+
 	List<FileTable> findFileAndDirectory(@Param("parentId") Long parentId
 										  , @Param("groupId") Long groupId);
 

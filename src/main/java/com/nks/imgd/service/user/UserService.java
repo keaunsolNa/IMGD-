@@ -7,23 +7,24 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.nks.imgd.component.util.commonMethod.CommonMethod;
+import com.nks.imgd.dto.Schema.FileTable;
 import com.nks.imgd.dto.dataDTO.UserTableWithRelationshipAndPictureNmDTO;
 import com.nks.imgd.mapper.user.UserTableMapper;
+import com.nks.imgd.service.file.FileService;
 
 import java.util.List;
 
-import lombok.extern.slf4j.Slf4j;
-
 @Service
-@Slf4j
 public class UserService {
 
 	private final UserTableMapper userTableMapper;
+	private final FileService fileService;
 	private final CommonMethod commonMethod = new CommonMethod();
 
-	public UserService(UserTableMapper userTableMapper)
+	public UserService(UserTableMapper userTableMapper, FileService fileService)
 	{
 		this.userTableMapper = userTableMapper;
+		this.fileService = fileService;
 	}
 
 	/**
@@ -123,49 +124,29 @@ public class UserService {
 	}
 
 	/**
-	 * 친구 목록에 친구를 추가 한다.
-	 * @param userId 로그인 한 유저 아이디
-	 * @param targetUserId 추가 하려는 친구 유저 아이디
-	 * @return 결과값 반환
+	 * 계정을 제거한다.
+	 * 
+	 * @param userId 제거하려는 계정 아이디
+	 * @return 제거 결과 반환
 	 */
 	@Transactional(rollbackFor = Exception.class)
-	public ServiceResult<List<UserTableWithRelationshipAndPictureNmDTO>>  insertUserFriendTable(@Param("userId") String userId, @Param("targetUserId") String targetUserId, @Param("relationship") String relationship) {
+	public ServiceResult<UserTableWithRelationshipAndPictureNmDTO> deleteUser(@Param("userId") String userId) {
 
-		Long friendId = userTableMapper.findFriendTableIdByUserId(userId).getFriendId();
+		ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
+				userTableMapper.deleteUser(userId)
+		);
 
-        ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
-                userTableMapper.insertUserFriendTable(targetUserId, friendId, userId, relationship)
-        );
+		if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
+			return ServiceResult.failure(fsMsg);
+		}
 
-        if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
-            return ServiceResult.failure(fsMsg);
-        }
+		FileTable file = fileService.findUserProfileFileId(userId);
 
-        return ServiceResult.success(() -> findFriendEachOther(userId));
+		if(!fileService.deleteFileById(file.getFileId())) return ServiceResult.failure(ResponseMsg.FILE_DELETE_FAILED);
+
+		return ServiceResult.success(() -> findUserById(userId));
 	}
 
-	/**
-	 * 친구 목록에서 대상 친구를 삭제 한다.
-	 * @param userId 로그인 한 유저 아이디
-	 * @param targetUserId 삭제 하려는 친구 유저 아이디
-	 * @return 결과값 반환
-	 */
-	@Transactional(rollbackFor = Exception.class)
-	public ServiceResult<List<UserTableWithRelationshipAndPictureNmDTO>> deleteUserFriendTable(@Param("userId") String userId, @Param("targetUserId") String targetUserId) {
-
-		Long friendId = userTableMapper.findFriendTableIdByUserId(userId).getFriendId();
-
-        ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
-                userTableMapper.deleteUserFriendTable(targetUserId, friendId)
-        );
-
-        if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
-            return ServiceResult.failure(fsMsg);
-        }
-
-        return ServiceResult.success(() -> findFriendEachOther(userId));
-
-	}
 	// ───────────────────────────────── helper methods ───────────────────────────────
 
 	/**
