@@ -8,9 +8,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.nks.imgd.component.util.commonMethod.CommonMethod;
 import com.nks.imgd.dto.Schema.FileTable;
+import com.nks.imgd.dto.dataDTO.GroupTableWithMstUserNameDTO;
 import com.nks.imgd.dto.dataDTO.UserTableWithRelationshipAndPictureNmDTO;
 import com.nks.imgd.mapper.user.UserTableMapper;
 import com.nks.imgd.service.file.FileService;
+import com.nks.imgd.service.group.GroupService;
 
 import java.util.List;
 
@@ -20,11 +22,13 @@ public class UserService {
 	private final UserTableMapper userTableMapper;
 	private final FileService fileService;
 	private final CommonMethod commonMethod = new CommonMethod();
+	private final GroupService groupService;
 
-	public UserService(UserTableMapper userTableMapper, FileService fileService)
+	public UserService(UserTableMapper userTableMapper, FileService fileService, GroupService groupService)
 	{
 		this.userTableMapper = userTableMapper;
 		this.fileService = fileService;
+		this.groupService = groupService;
 	}
 
 	/**
@@ -130,21 +134,34 @@ public class UserService {
 	 * @return 제거 결과 반환
 	 */
 	@Transactional(rollbackFor = Exception.class)
-	public ServiceResult<UserTableWithRelationshipAndPictureNmDTO> deleteUser(@Param("userId") String userId) {
+	public ServiceResult<ResponseMsg> deleteUser(@Param("userId") String userId) {
+
+		// 그룹 관련 삭제
+		List<GroupTableWithMstUserNameDTO> groups = groupService.findGroupWhatUserIsMstAndJustOnlyOne(userId);
+
+		for (GroupTableWithMstUserNameDTO group : groups) {
+			groupService.deleteGroup(userId, group.getGroupId());
+		}
+		
+		// TODO 게시글 관련 삭제
+
+		// 유저 프로필 사진 삭제
+		FileTable file = fileService.findUserProfileFileId(userId);
+
+		if (null != file)
+		{
+			if (!fileService.deleteFileById(file.getFileId())) return ServiceResult.failure(ResponseMsg.FILE_DELETE_FAILED);
+		}
 
 		ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
-				userTableMapper.deleteUser(userId)
+			userTableMapper.deleteUser(userId)
 		);
 
 		if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
 			return ServiceResult.failure(fsMsg);
 		}
 
-		FileTable file = fileService.findUserProfileFileId(userId);
-
-		if(!fileService.deleteFileById(file.getFileId())) return ServiceResult.failure(ResponseMsg.FILE_DELETE_FAILED);
-
-		return ServiceResult.success(() -> findUserById(userId));
+		return ServiceResult.success(() -> fsMsg);
 	}
 
 	// ───────────────────────────────── helper methods ───────────────────────────────

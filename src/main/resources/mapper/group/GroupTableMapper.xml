@@ -66,6 +66,37 @@
          WHERE GROUP_MST_USER_ID = #{userId}
     </select>
 
+    <select id="isUserCheck">
+        SELECT COUNT(GROUP_ID)
+          FROM GROUP_USER
+         WHERE GROUP_ID = #{group.groupId}
+           AND USER_ID  = #{userId}
+    </select>
+
+    <select id="findGroupWhatUserIsMstAndJustOnlyOne" resultType="com.nks.imgd.dto.dataDTO.GroupTableWithMstUserNameDTO">
+        SELECT GROUP_ID
+             , GROUP_NM
+             , GROUP_MST_USER_ID
+             , REG_DTM
+             , REG_ID
+             , MOD_DTM
+             , MOD_ID
+        FROM GROUP_TABLE
+       WHERE GROUP_MST_USER_ID = #{userId}
+         AND GROUP_ID IN (SELECT GROUP_ID
+                            FROM GROUP_USER
+                           GROUP BY GROUP_ID
+                          HAVING COUNT(USER_ID) = 1)
+    </select>
+
+    <select id="countGroupUser">
+        SELECT COUNT(T2.USER_ID)
+          FROM GROUP_TABLE T1
+             , GROUP_USER  T2
+         WHERE T1.GROUP_ID = #{group.groupId}
+           AND T1.GROUP_ID = T2.GROUP_ID
+    </select>
+
     <insert id="makeNewGroup"
             useGeneratedKeys="true"
             keyProperty="group.groupId"
@@ -111,20 +142,13 @@
         )
     </insert>
 
-    <select id="isUserCheck">
-        SELECT COUNT(GROUP_ID)
-          FROM GROUP_USER
-         WHERE GROUP_ID = #{group.groupId}
-           AND USER_ID  = #{userId}
-    </select>
-
-    <select id="countGroupUser">
-        SELECT COUNT(T2.USER_ID)
-          FROM GROUP_TABLE T1
-             , GROUP_USER  T2
-         WHERE T1.GROUP_ID = #{group.groupId}
-           AND T1.GROUP_ID = T2.GROUP_ID
-    </select>
+    <update id="changeMstUserGroup">
+        UPDATE GROUP_TABLE
+        SET GROUP_MST_USER_ID = #{userId}
+          , MOD_DTM = DATE_FORMAT(NOW(), '%Y%m%d')
+          , MOD_ID = #{group.groupMstUserId}
+        WHERE GROUP_ID = #{group.groupId}
+    </update>
 
     <delete id="deleteGroupUser">
       DELETE
@@ -139,13 +163,6 @@
          WHERE GROUP_ID = #{groupId}
     </delete>
 
-    <update id="changeMstUserGroup">
-        UPDATE GROUP_TABLE
-           SET GROUP_MST_USER_ID = #{userId}
-             , MOD_DTM = DATE_FORMAT(NOW(), '%Y%m%d')
-             , MOD_ID = #{group.groupMstUserId}
-         WHERE GROUP_ID = #{group.groupId}
-    </update>
 
 
 

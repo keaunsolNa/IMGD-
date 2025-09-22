@@ -7,6 +7,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
+import com.nks.imgd.dto.Enum.ResponseMsg;
 import com.nks.imgd.dto.dataDTO.UserTableWithRelationshipAndPictureNmDTO;
 import com.nks.imgd.service.user.UserService;
 
@@ -123,6 +124,19 @@ public class UserController {
 	@PostMapping("/updateUser")
 	public ResponseEntity<ApiResponse<UserTableWithRelationshipAndPictureNmDTO>> updateUser(@RequestBody UserTableWithRelationshipAndPictureNmDTO user) {
 		return commonMethod.responseTransaction(userService.updateUser(user));
+	}
+
+	/**
+	 * 유저 정보를 삭제한다.
+	 * 이 때 유저가 GROUP_MST_USER 로 있는 그룹이 있을 경우, 해당 유저만 있다면 그룹을 삭제한다.
+	 * 해당 인원 외의 인원이 있다면 가장 오래된 가입자를 GROUP_MST_USER로 변경한다. (TRIGGER, T_DELETE_USER)
+	 *
+	 * @param userId 대상 유저 아이디
+	 * @return 실행 결과
+	 */
+	@DeleteMapping("/deleteUser")
+	public ResponseEntity<ApiResponse<ResponseMsg>> deleteUser(@RequestParam String userId) {
+		return commonMethod.responseTransaction(userService.deleteUser(userId));
 	}
 
 

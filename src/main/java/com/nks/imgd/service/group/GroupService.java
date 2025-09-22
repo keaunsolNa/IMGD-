@@ -80,6 +80,15 @@ public class GroupService {
     }
 
 	/**
+	 * 대상 유저를 그룹장으로 하는, 그룹마스터만 있는 그룹을 반환한다.
+	 * @param userId 대상 유저 아이디
+	 * @return 대상 그룹 목록
+	 */
+	public List<GroupTableWithMstUserNameDTO> findGroupWhatUserIsMstAndJustOnlyOne(String userId) {
+		return groupTableMapper.findGroupWhatUserIsMstAndJustOnlyOne(userId);
+	}
+
+	/**
 	 * 그룹을 생성 한다.
 	 * GroupTable 테이블 생성 후
 	 * 생성 유저를 통해 GroupUser Table 도 생성 한다.

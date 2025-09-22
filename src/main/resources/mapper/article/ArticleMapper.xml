@@ -23,9 +23,9 @@
              , MOD_DTM
              , MOD_ID
           FROM ARTICLE
-         WHERE TYPE = 'POST'
-         <trim prefix="where" prefixOverrides="and | or">
-              <if test="userNm != null and userNm != ''">
+         <where>
+             TYPE = 'POST'
+             <if test="userNm != null and userNm != ''">
                  AND F_GET_USER_NM(USER_ID) = #{userNm}
              </if>
              <if test="title != null and title != ''">
@@ -34,7 +34,7 @@
              <if test="article != null and article != ''">
                  AND ARTICLE LIKE CONCAT('%', #{article}, '%')
              </if>
-          </trim>
+         </where>
          ORDER BY LIKE_CNT DESC, WATCH_CNT DESC, REG_DTM DESC
     </select>
 

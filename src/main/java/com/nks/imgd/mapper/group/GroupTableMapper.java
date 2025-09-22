@@ -20,6 +20,8 @@ public interface GroupTableMapper {
 
 	GroupTableWithMstUserNameDTO findGroupByGroupId(@Param("groupId") Long groupId);
 
+	List<GroupTableWithMstUserNameDTO> findGroupWhatUserIsMstAndJustOnlyOne(@Param("userId") String userId);
+
     int findAllGroupWhatUserMake(@Param("userId") String userId);
 
 	int makeNewGroup(@Param("group") GroupTableWithMstUserNameDTO dto);
