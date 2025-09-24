@@ -32,6 +32,10 @@ public record ServiceResult<T>(
 		return new ServiceResult<>(ResponseMsg.ON_SUCCESS, Objects.requireNonNull(onSuccess, "onSuccess"), Map.of());
 	}
 
+	public static <T> ServiceResult<T> success(Map<String, Object> map) {
+		return new ServiceResult<>(ResponseMsg.ON_SUCCESS, null, map);
+	}
+
 	public static <T> ServiceResult<T> failure(ResponseMsg status) {
 		if (status == ResponseMsg.ON_SUCCESS) {
 			throw new IllegalArgumentException("Use success(...) for ON_SUCCESS");

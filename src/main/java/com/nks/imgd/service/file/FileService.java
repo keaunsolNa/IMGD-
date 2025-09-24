@@ -2,6 +2,7 @@ package com.nks.imgd.service.file;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,6 +28,9 @@ import com.sksamuel.scrimage.ImmutableImage;
 import com.sksamuel.scrimage.webp.WebpWriter;
 
 import org.apache.ibatis.annotations.Param;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.ContentDisposition;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -370,6 +374,46 @@ public class FileService {
         return ServiceResult.success(() -> groupPort.findGroupWhatInside(userid));
 
     }
+
+	/**
+	 * 파일을 다운로드 한다.
+	 *
+	 * @param fileId 다운로드 할 파일의 아이디
+	 * @return contentType, Resource, FileOrgNm이 담긴 Map
+	 */
+	public ServiceResult<Map<String, Object>> downloadFile(Long fileId) {
+
+		FileTable row = findFileById(fileId);
+		if (null == row) return ServiceResult.failure(ResponseMsg.NOT_FOUND);
+
+		String filePath = makePathByFileId(fileId) + ".webp";
+
+		Path path = Paths.get(filePath);
+
+		if (Files.notExists(path)) return ServiceResult.failure(ResponseMsg.NOT_FOUND);
+
+		try {
+
+			Resource resource = new UrlResource(path.toUri());
+
+			String contentType = Files.probeContentType(path);
+			if (null == contentType) contentType = "application/octet-stream";
+
+			String fileName = row.getFileNm();
+
+			ContentDisposition cd = ContentDisposition.attachment()
+				.filename(fileName, StandardCharsets.UTF_8) // ← 한글/이모지 안전
+				.build();
+
+			return ServiceResult.success(Map.of("contentType", contentType, "resource", resource, "fileInfo", cd.toString()));
+
+		} catch (IOException e) {
+
+			log.error("downloadFile: failed to download file. fileId={}", fileId, e);
+			return ServiceResult.failure(ResponseMsg.NOT_FOUND);
+		}
+
+	}
     // ───────────────────────────────── helper methods ───────────────────────────────
 
     /**

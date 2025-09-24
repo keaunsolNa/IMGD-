@@ -4,11 +4,15 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import com.nks.imgd.component.util.commonMethod.CommonMethod;
 import com.nks.imgd.component.util.maker.ApiResponse;
 import com.nks.imgd.component.util.maker.ServiceResult;
+
+import org.apache.hc.core5.http.HttpHeaders;
+import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -57,9 +61,27 @@ public class FileController {
 	 * @param fileId 대상 파일 아이디
 	 * @return 대상 파일 정보
 	 */
-	@GetMapping("findFileById")
+	@GetMapping("/findFileById")
 	public ResponseEntity<FileTable> FileTableDTO(@RequestParam Long fileId) {
 		return ResponseEntity.ok(fileService.findFileById(fileId));
+	}
+
+	/**
+	 * 파일을 다운로드 한다.
+	 * 
+	 * @param fileId 다운로드 받을 파일의 ID
+	 * @return 파일
+	 */
+	@GetMapping("/downloadFile")
+	public ResponseEntity<Resource> downloadFile (@RequestParam Long fileId) {
+
+		Map<String, Object> map = fileService.downloadFile(fileId).details();
+
+		return ResponseEntity.ok()
+			.contentType(MediaType.parseMediaType((String)map.get("contentType")))
+			.header(HttpHeaders.CONTENT_DISPOSITION,
+				"attachment; filename=\"" + map.get("fileInfo") + "\"")
+			.body((Resource)map.get("resource"));
 	}
 
 	/**
