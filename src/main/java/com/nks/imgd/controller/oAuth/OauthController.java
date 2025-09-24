@@ -2,6 +2,7 @@ package com.nks.imgd.controller.oAuth;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +53,6 @@ public class OauthController {
 	public ResponseEntity<Map<String, String>> socialLoginType(
 		@PathVariable(name = "socialLoginType") SocialLoginType socialLoginType) {
 
-
 		return ResponseEntity.ok()
 			.body(authService.request(socialLoginType));
 	}
@@ -76,12 +76,9 @@ public class OauthController {
 		String[] tokens;
 		String code = authorizationCode.get("authorizationCode");
 
-		tokens = authService.requestAccessToken(socialLoginType, code /*, redirectUri*/);
-		// if (socialLoginType.equals(SocialLoginType.GOOGLE)) {
-		// 	tokens = authService.requestUserInfo(authorizationCode.get("authorizationCode"));
-		// } else {
-		// 	tokens = authService.requestAccessToken(socialLoginType, authorizationCode.get("authorizationCode"));
-		// }
+        CompletableFuture<String[]> future = authService.requestAccessToken(socialLoginType, code);
+        tokens = future.join(); // 또는 future.get()
+//		tokens = authService.requestAccessToken(socialLoginType, code /*, redirectUri*/);
 
 		// refreshToken
 		String refreshTokenValue = tokens[0];

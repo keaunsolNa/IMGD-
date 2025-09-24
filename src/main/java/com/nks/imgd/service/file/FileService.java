@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 import com.nks.imgd.component.util.commonMethod.CommonMethod;
 import com.nks.imgd.component.util.maker.ServiceResult;
@@ -26,6 +27,7 @@ import com.sksamuel.scrimage.ImmutableImage;
 import com.sksamuel.scrimage.webp.WebpWriter;
 
 import org.apache.ibatis.annotations.Param;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -169,6 +171,20 @@ public class FileService {
         return ServiceResult.success(() -> findFileAndDirectory(req.getParentId(), req.getGroupId()));
     }
 
+    /**
+     * 파일 업로드 비동기 처리를 위한 래퍼 메서드
+     * @param folderId 파일이 생성될 부모 폴더 ID
+     * @param userId 파일을 생성 하는 그룹의 MST_USER_ID
+     * @param groupId 파일이 생성될 그룹 ID
+     * @param fileOrgNm 생성할 파일 원본 이름
+     * @param originalFile 생성할 파일
+     * @return 업로드된 파일 정보
+     */
+    @Transactional(rollbackFor = Exception.class)
+    @Async("virtualThreadExecutor")
+    public CompletableFuture<ServiceResult<FileTable>> makeFileAsync(Long folderId, String userId, Long groupId, String fileOrgNm, File originalFile) {
+        return CompletableFuture.supplyAsync(() -> makeFile(folderId, userId, groupId, fileOrgNm, originalFile));
+    }
 
     /**
      * 파일 생성
@@ -179,7 +195,7 @@ public class FileService {
      * @param groupId 파일이 생성될 그룹 ID
      * @param fileOrgNm 생성할 파일 원본 이름
      * @param originalFile 생성할 파일
-     * @return int 결과 값
+     * @return 업로드된 파일 정보
      *
      */
     @Transactional(rollbackFor = Exception.class)
@@ -211,6 +227,12 @@ public class FileService {
 
         if (null == convertToWebp(targetNoExt, originalFile, fileNm, customWriter)) return ServiceResult.failure(ResponseMsg.FILE_CREATE_FAILED);
         else return ServiceResult.success(() -> findFileById(dto.getFileId()));
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Async("virtualThreadExecutor")
+    public CompletableFuture<ServiceResult<UserTableWithRelationshipAndPictureNmDTO>> makeUserProfileImgAsync(MakeFileDTO dto, File originalFile) {
+        return CompletableFuture.supplyAsync(() -> makeUserProfileImg(dto, originalFile));
     }
 
 	/**

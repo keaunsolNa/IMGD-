@@ -4,9 +4,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import com.nks.imgd.component.util.commonMethod.CommonMethod;
 import com.nks.imgd.component.util.maker.ApiResponse;
+import com.nks.imgd.component.util.maker.ServiceResult;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -96,13 +98,18 @@ public class FileController {
 		mf.transferTo(tmp);
 
 		try {
-			return commonMethod.responseTransaction(fileService.makeFile(
+
+            CompletableFuture<ServiceResult<FileTable>> future = fileService.makeFileAsync(
 				req.getFolderId(),
 				req.getUserId(),
 				req.getGroupId(),
 				mf.getOriginalFilename(),     // DB의 원본명 컬럼에는 실제 업로드 파일명 사용
 				tmp.toFile()
-			));
+			);
+
+            ServiceResult<FileTable> result = future.join();
+            return commonMethod.responseTransaction(result);
+
 		} finally {
 			Files.deleteIfExists(tmp); // 임시파일 정리
 		}
@@ -123,7 +130,12 @@ public class FileController {
 		mf.transferTo(tmp);
 
 		try {
-			return commonMethod.responseTransaction(fileService.makeUserProfileImg(req, tmp.toFile()));
+
+            CompletableFuture<ServiceResult<UserTableWithRelationshipAndPictureNmDTO>> future = fileService.makeUserProfileImgAsync(req, tmp.toFile());
+
+            ServiceResult<UserTableWithRelationshipAndPictureNmDTO> result = future.join();
+            return commonMethod.responseTransaction(result);
+
 		} finally {
 			Files.deleteIfExists(tmp); // 임시 파일 정리
 		}

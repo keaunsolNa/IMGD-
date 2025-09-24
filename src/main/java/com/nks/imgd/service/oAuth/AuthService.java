@@ -3,9 +3,11 @@ package com.nks.imgd.service.oAuth;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -37,7 +39,8 @@ public class AuthService {
 		return responseBody;
 	}
 
-	public String[] requestAccessToken(SocialLoginType socialLoginType, String code) {
+    @Async("IMGD_VirtualThreadExecutor")
+	public CompletableFuture<String[]> requestAccessToken(SocialLoginType socialLoginType, String code) {
 		SocialOauth socialOauth = this.findSocialOauthByType(socialLoginType);
 
 		String callBackResponse = socialOauth.requestAccessToken(code);
@@ -53,7 +56,7 @@ public class AuthService {
 		assert jsonNode != null;
 		String accessToken = jsonNode.get("access_token").asText();
 
-		return socialOauth.requestUserInfo(accessToken);
+		return CompletableFuture.completedFuture(socialOauth.requestUserInfo(accessToken));
 	}
 
 	public String[] requestUserInfo(String accessToken) {
