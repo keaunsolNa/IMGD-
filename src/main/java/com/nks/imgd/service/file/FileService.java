@@ -181,7 +181,7 @@ public class FileService {
      * @return 업로드된 파일 정보
      */
     @Transactional(rollbackFor = Exception.class)
-    @Async("virtualThreadExecutor")
+    @Async("IMGD_VirtualThreadExecutor")
     public CompletableFuture<ServiceResult<FileTable>> makeFileAsync(Long folderId, String userId, Long groupId, String fileOrgNm, File originalFile) {
         return CompletableFuture.supplyAsync(() -> makeFile(folderId, userId, groupId, fileOrgNm, originalFile));
     }
@@ -230,7 +230,7 @@ public class FileService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    @Async("virtualThreadExecutor")
+    @Async("IMGD_VirtualThreadExecutor")
     public CompletableFuture<ServiceResult<UserTableWithRelationshipAndPictureNmDTO>> makeUserProfileImgAsync(MakeFileDTO dto, File originalFile) {
         return CompletableFuture.supplyAsync(() -> makeUserProfileImg(dto, originalFile));
     }
@@ -520,14 +520,14 @@ public class FileService {
 		Path target = path.resolve(
 			fileNm + ".webp"
 		);
-
 		createDirectoriesOrThrow(target.getParent());
-
 		try
 		{
+
 			ImmutableImage.loader()
 				.fromFile(originalFile)
 				.output(customWriter, target.toFile()); // 여기서 실제 파일 생성
+
 			return target.toFile();
 
 		} catch (IOException e) {
