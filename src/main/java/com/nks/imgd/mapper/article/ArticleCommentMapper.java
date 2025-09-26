@@ -6,7 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import com.nks.imgd.dto.Schema.ArticleComment;
-import com.nks.imgd.dto.dataDTO.ArticleWithTags;
+import com.nks.imgd.dto.dataDTO.ArticleWithTagsAndFiles;
 
 @Mapper
 public interface ArticleCommentMapper {
@@ -15,7 +15,7 @@ public interface ArticleCommentMapper {
 
 	List<ArticleComment> findArticleCommentById(@Param("articleId") Long articleId);
 
-	ArticleWithTags findArticleById(@Param("articleId") Long articleId);
+	ArticleWithTagsAndFiles findArticleById(@Param("articleId") Long articleId);
 
 	int insertArticleComment(@Param("article") ArticleComment articleComment);
 

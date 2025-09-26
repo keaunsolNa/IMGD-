@@ -121,13 +121,14 @@ public class FileController {
 
 		try {
 
-            CompletableFuture<ServiceResult<FileTable>> future = fileService.makeFileAsync(
-				req.getFolderId(),
-				req.getUserId(),
-				req.getGroupId(),
-				mf.getOriginalFilename(),     // DB의 원본명 컬럼에는 실제 업로드 파일명 사용
-				tmp.toFile()
-			);
+            MakeFileDTO file = new MakeFileDTO();
+            file.setFolderId(req.getFolderId());
+            file.setUserId(req.getUserId());
+            file.setGroupId(req.getGroupId());
+            file.setFileOrgNm(mf.getOriginalFilename());
+            file.setOriginalFile(mf);
+
+            CompletableFuture<ServiceResult<FileTable>> future = fileService.makeFileAsync(file);
 
             ServiceResult<FileTable> result = future.join();
             return commonMethod.responseTransaction(result);

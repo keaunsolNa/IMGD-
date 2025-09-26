@@ -9,7 +9,7 @@ import com.nks.imgd.component.util.commonMethod.CommonMethod;
 import com.nks.imgd.component.util.maker.ServiceResult;
 import com.nks.imgd.dto.Enum.ResponseMsg;
 import com.nks.imgd.dto.Schema.ArticleComment;
-import com.nks.imgd.dto.dataDTO.ArticleWithTags;
+import com.nks.imgd.dto.dataDTO.ArticleWithTagsAndFiles;
 import com.nks.imgd.mapper.article.ArticleCommentMapper;
 
 /**
@@ -76,7 +76,7 @@ public class ArticleCommentService {
 	 * @return boolean
 	 */
 	@Transactional(rollbackFor = Exception.class)
-	public ServiceResult<ArticleWithTags> deleteArticleComment(Long articleId, Long commentId) {
+	public ServiceResult<ArticleWithTagsAndFiles> deleteArticleComment(Long articleId, Long commentId) {
 
 		ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
 			articleCommentMapper.deleteArticleComment(articleId, commentId)

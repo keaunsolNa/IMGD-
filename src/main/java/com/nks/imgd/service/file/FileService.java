@@ -177,59 +177,58 @@ public class FileService {
 
     /**
      * 파일 업로드 비동기 처리를 위한 래퍼 메서드
-     * @param folderId 파일이 생성될 부모 폴더 ID
-     * @param userId 파일을 생성 하는 그룹의 MST_USER_ID
-     * @param groupId 파일이 생성될 그룹 ID
-     * @param fileOrgNm 생성할 파일 원본 이름
-     * @param originalFile 생성할 파일
+     *
+     * @param dto 파일 정보가 담긴 DTO
      * @return 업로드된 파일 정보
      */
     @Transactional(rollbackFor = Exception.class)
     @Async("IMGD_VirtualThreadExecutor")
-    public CompletableFuture<ServiceResult<FileTable>> makeFileAsync(Long folderId, String userId, Long groupId, String fileOrgNm, File originalFile) {
-        return CompletableFuture.supplyAsync(() -> makeFile(folderId, userId, groupId, fileOrgNm, originalFile));
+    public CompletableFuture<ServiceResult<FileTable>> makeFileAsync(MakeFileDTO dto) {
+        return CompletableFuture.supplyAsync(() -> makeFile(dto));
     }
 
     /**
      * 파일 생성
      * DB row 생성 → 물리 폴더 생성(실패 시 롤백)
      *
-     * @param folderId 파일이 생성될 부모 폴더 ID
-     * @param userId 파일을 생성 하는 그룹의 MST_USER_ID
-     * @param groupId 파일이 생성될 그룹 ID
-     * @param fileOrgNm 생성할 파일 원본 이름
-     * @param originalFile 생성할 파일
+     * @param dto 파일 정보가 담긴 DTO
      * @return 업로드된 파일 정보
      *
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServiceResult<FileTable> makeFile(Long folderId, String userId, Long groupId, String fileOrgNm, File originalFile)
+    public ServiceResult<FileTable> makeFile(MakeFileDTO dto)
     {
 
-        MakeFileDTO dto =  new MakeFileDTO();
         String fileNm = UUID.randomUUID().toString();
-        String path = findFileNmByDirId(folderId);
+        String path = findFileNmByDirId(dto.getFolderId());
 
         dto.setFileNm(fileNm);
-        dto.setFileOrgNm(fileOrgNm);
         dto.setPath(path);
-        dto.setFolderId(folderId);
-        dto.setGroupId(groupId);
-        dto.setUserId(userId);
 
         if (fileTableMapper.makeFile(dto) != 1)
             return ServiceResult.failure(ResponseMsg.BAD_REQUEST);
 
-        Path targetNoExt = makePathByFileId(folderId);
+        Path targetNoExt = makePathByFileId(dto.getFolderId());
 
-        Role role = Role.valueOf(userProfilePort.findHighestUserRole(userId).getRoleNm());
+        Role role = Role.valueOf(userProfilePort.findHighestUserRole(dto.getUserId()).getRoleNm());
         int q = role.getPermissionOfWebpWriter()[0];
         int m = role.getPermissionOfWebpWriter()[1];
         int z = role.getPermissionOfWebpWriter()[2];
 
         WebpWriter customWriter = WebpWriter.DEFAULT.withQ(q).withM(m).withZ(z);
+        Path tmp;
 
-        if (null == convertToWebp(targetNoExt, originalFile, fileNm, customWriter)) return ServiceResult.failure(ResponseMsg.FILE_CREATE_FAILED);
+        try {
+            tmp = Files.createTempFile("upload-", ".bin");
+            dto.getOriginalFile().transferTo(tmp);
+
+        } catch (IOException e) {
+
+            log.error(e.getMessage());
+            throw new RuntimeException(e);
+        }
+
+        if (null == convertToWebp(targetNoExt, tmp.toFile(), fileNm, customWriter)) return ServiceResult.failure(ResponseMsg.FILE_CREATE_FAILED);
         else return ServiceResult.success(() -> findFileById(dto.getFileId()));
     }
 

@@ -19,7 +19,7 @@
          WHERE ARTICLE_ID = #{articleId}
     </select>
 
-    <select id="findArticleById" resultType="com.nks.imgd.dto.dataDTO.ArticleWithTags">
+    <select id="findArticleById" resultType="com.nks.imgd.dto.dataDTO.ArticleWithTagsAndFiles">
         SELECT ARTICLE_ID
              , TYPE
              , F_GET_TAG_NM(ARTICLE_ID) TAG_IDS

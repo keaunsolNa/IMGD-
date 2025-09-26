@@ -12,13 +12,14 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ArticleWithTags {
+public class ArticleWithTagsAndFiles {
 
 	private Long articleId;
 	private ArticleType type;
 	private String tagIds;
 	private List<Tag> tagList;
-	private List<ArticleWithTags> comments;
+	private List<ArticleWithTagsAndFiles> comments;
+    private List<MakeFileDTO> files;
 	private String userId;
 	private String pictureNm;
 	private String userNm;

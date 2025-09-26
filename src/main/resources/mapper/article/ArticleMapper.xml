@@ -7,7 +7,7 @@
     
     <select id="findAllArticle"
             parameterType="com.nks.imgd.dto.searchDTO.ArticleSearch"
-            resultType="com.nks.imgd.dto.dataDTO.ArticleWithTags">
+            resultType="com.nks.imgd.dto.dataDTO.ArticleWithTagsAndFiles">
         SELECT ARTICLE_ID
              , TYPE
              , F_GET_TAG_NM(ARTICLE_ID) TAG_IDS
@@ -38,7 +38,7 @@
          ORDER BY LIKE_CNT DESC, WATCH_CNT DESC, REG_DTM DESC
     </select>
 
-    <select id="findArticleById" resultType="com.nks.imgd.dto.dataDTO.ArticleWithTags">
+    <select id="findArticleById" resultType="com.nks.imgd.dto.dataDTO.ArticleWithTagsAndFiles">
         SELECT ARTICLE_ID
              , TYPE
              , F_GET_TAG_NM(ARTICLE_ID) TAG_IDS
