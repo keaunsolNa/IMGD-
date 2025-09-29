@@ -2,8 +2,8 @@ package com.nks.imgd.service.user;
 
 import org.springframework.stereotype.Component;
 
-import com.nks.imgd.dto.Schema.Roles;
-import com.nks.imgd.dto.dataDTO.UserTableWithRelationshipAndPictureNmDTO;
+import com.nks.imgd.dto.data.UserTableWithRelationshipAndPictureNmDto;
+import com.nks.imgd.dto.schema.Roles;
 import com.nks.imgd.mapper.user.UserTableMapper;
 
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ public class UserProfilePortAdapter implements UserProfilePort {
 	}
 
 	@Override
-	public UserTableWithRelationshipAndPictureNmDTO findUserById(String userId) {
+	public UserTableWithRelationshipAndPictureNmDto findUserById(String userId) {
 		return userTableMapper.findById(userId);
 	}
 

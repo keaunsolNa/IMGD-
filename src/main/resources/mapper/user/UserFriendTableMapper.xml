@@ -5,7 +5,7 @@
 
 <mapper namespace="com.nks.imgd.mapper.user.UserFriendTableMapper">
 
-    <select id="findFriendEachOther" resultType="com.nks.imgd.dto.dataDTO.UserTableWithRelationshipAndPictureNmDTO">
+    <select id="findFriendEachOther" resultType="com.nks.imgd.dto.data.UserTableWithRelationshipAndPictureNmDto">
         SELECT T3.USER_ID
              , F_GET_USER_NM(T3.USER_ID) NAME
              , T3.REG_DTM

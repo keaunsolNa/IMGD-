@@ -6,5 +6,5 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface ArticleFileMapper {
 
-    int makeArticleFile(@Param("articleId") Long articleId, @Param("fileId") Long fileId);
+	int makeArticleFile(@Param("articleId") Long articleId, @Param("fileId") Long fileId);
 }

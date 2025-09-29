@@ -5,7 +5,7 @@
 
 <mapper namespace="com.nks.imgd.mapper.user.UserTableMapper">
 
-    <select id="findAllUsers" resultType="com.nks.imgd.dto.dataDTO.UserTableWithRelationshipAndPictureNmDTO">
+    <select id="findAllUsers" resultType="com.nks.imgd.dto.data.UserTableWithRelationshipAndPictureNmDto">
         SELECT USER_ID
              , NAME
              , EMAIL
@@ -21,7 +21,7 @@
          ORDER BY USER_ID
     </select>
 
-    <select id="findById" resultType="com.nks.imgd.dto.dataDTO.UserTableWithRelationshipAndPictureNmDTO">
+    <select id="findById" resultType="com.nks.imgd.dto.data.UserTableWithRelationshipAndPictureNmDto">
         SELECT USER_ID
              , NAME
              , EMAIL
@@ -39,7 +39,7 @@
          LIMIT 1
     </select>
 
-    <select id="findHighestUserRole" resultType="com.nks.imgd.dto.Schema.Roles">
+    <select id="findHighestUserRole" resultType="com.nks.imgd.dto.schema.Roles">
         SELECT T3.ROLE_ID
              , T3.ROLE_NM
           FROM USER_TABLE T1
@@ -52,7 +52,7 @@
          LIMIT 1
     </select>
 
-    <select id="findFriendEachOther" resultType="com.nks.imgd.dto.dataDTO.UserTableWithRelationshipAndPictureNmDTO">
+    <select id="findFriendEachOther" resultType="com.nks.imgd.dto.data.UserTableWithRelationshipAndPictureNmDto">
         SELECT T3.USER_ID
              , F_GET_USER_NM(T3.USER_ID) NAME
              , T3.REG_DTM
@@ -77,7 +77,7 @@
 
     </select>
 
-    <select id="findFriendWhoAddMeButImNot" resultType="com.nks.imgd.dto.dataDTO.UserTableWithRelationshipAndPictureNmDTO">
+    <select id="findFriendWhoAddMeButImNot" resultType="com.nks.imgd.dto.data.UserTableWithRelationshipAndPictureNmDto">
         SELECT T3.USER_ID
              , T3.NAME
              , T1.REG_DTM
@@ -101,7 +101,7 @@
         ORDER BY T3.REG_DTM, T3.USER_ID
     </select>
 
-    <select id="findFriendWhoImAddButNot" resultType="com.nks.imgd.dto.dataDTO.UserTableWithRelationshipAndPictureNmDTO">
+    <select id="findFriendWhoImAddButNot" resultType="com.nks.imgd.dto.data.UserTableWithRelationshipAndPictureNmDto">
         SELECT T3.USER_ID
              , F_GET_USER_NM(T3.USER_ID) AS NAME
              , T1.REG_DTM
@@ -123,7 +123,7 @@
         ORDER BY T3.REG_DTM, T3.USER_ID
     </select>
 
-    <select id="findFriendWhoImAddButReject" resultType="com.nks.imgd.dto.dataDTO.UserTableWithRelationshipAndPictureNmDTO">
+    <select id="findFriendWhoImAddButReject" resultType="com.nks.imgd.dto.data.UserTableWithRelationshipAndPictureNmDto">
         SELECT T3.USER_ID
              , F_GET_USER_NM(T3.USER_ID) AS NAME
              , T1.REG_DTM
@@ -146,7 +146,7 @@
         ORDER BY T3.REG_DTM, T3.USER_ID
     </select>
 
-    <select id="findFriend" resultType="com.nks.imgd.dto.dataDTO.UserTableWithRelationshipAndPictureNmDTO">
+    <select id="findFriend" resultType="com.nks.imgd.dto.data.UserTableWithRelationshipAndPictureNmDto">
         SELECT T3.USER_ID
              , F_GET_USER_NM(T3.USER_ID) AS NAME
              , T1.REG_DTM
@@ -162,7 +162,7 @@
         ORDER BY T3.REG_DTM, T3.USER_ID
     </select>
 
-    <select id="searchFriend" resultType="com.nks.imgd.dto.dataDTO.UserTableWithRelationshipAndPictureNmDTO">
+    <select id="searchFriend" resultType="com.nks.imgd.dto.data.UserTableWithRelationshipAndPictureNmDto">
         SELECT T1.USER_ID
              , F_GET_USER_NM(T1.USER_ID) AS NAME
              , T1.REG_DTM
@@ -185,7 +185,7 @@
          LIMIT 1
     </select>
 
-    <select id="findFriendEachOtherAndNotInGroup" resultType="com.nks.imgd.dto.dataDTO.UserTableWithRelationshipAndPictureNmDTO">
+    <select id="findFriendEachOtherAndNotInGroup" resultType="com.nks.imgd.dto.data.UserTableWithRelationshipAndPictureNmDto">
     SELECT T3.USER_ID
          , F_GET_USER_NM(T3.USER_ID) NAME
          , T3.REG_DTM

@@ -88,12 +88,12 @@
         <appender-ref ref="FILE_SQL"/>
     </logger>
 
-    <logger name="com.nks.imgd.component.util.aop.MethodAOP" level="INFO" additivity="false">
+    <logger name="com.nks.imgd.component.util.aop.MethodAop" level="INFO" additivity="false">
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="FILE_METHOD"/>
     </logger>
 
-    <logger name="com.nks.imgd.component.util.aop.ExceptionAOP" level="INFO" additivity="false">
+    <logger name="com.nks.imgd.component.util.aop.ExceptionAop" level="INFO" additivity="false">
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="FILE_EXCEPTION"/>
     </logger>

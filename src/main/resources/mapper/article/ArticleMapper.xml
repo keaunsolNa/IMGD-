@@ -6,8 +6,8 @@
 <mapper namespace="com.nks.imgd.mapper.article.ArticleMapper">
     
     <select id="findAllArticle"
-            parameterType="com.nks.imgd.dto.searchDTO.ArticleSearch"
-            resultType="com.nks.imgd.dto.dataDTO.ArticleWithTagsAndFiles">
+            parameterType="com.nks.imgd.dto.searchdto.ArticleSearch"
+            resultType="com.nks.imgd.dto.data.ArticleWithTagsAndFiles">
         SELECT ARTICLE_ID
              , TYPE
              , F_GET_TAG_NM(ARTICLE_ID) TAG_IDS
@@ -38,7 +38,7 @@
          ORDER BY LIKE_CNT DESC, WATCH_CNT DESC, REG_DTM DESC
     </select>
 
-    <select id="findArticleById" resultType="com.nks.imgd.dto.dataDTO.ArticleWithTagsAndFiles">
+    <select id="findArticleById" resultType="com.nks.imgd.dto.data.ArticleWithTagsAndFiles">
         SELECT ARTICLE_ID
              , TYPE
              , F_GET_TAG_NM(ARTICLE_ID) TAG_IDS

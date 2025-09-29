@@ -15,10 +15,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.nks.imgd.component.util.commonMethod.CommonMethod;
+import com.nks.imgd.component.util.commonmethod.CommonMethod;
 import com.nks.imgd.component.util.maker.ApiResponse;
-import com.nks.imgd.dto.dataDTO.ArticleWithTagsAndFiles;
-import com.nks.imgd.dto.searchDTO.ArticleSearch;
+import com.nks.imgd.dto.data.ArticleWithTagsAndFiles;
+import com.nks.imgd.dto.searchdto.ArticleSearch;
 import com.nks.imgd.service.article.ArticleService;
 
 /**
@@ -53,7 +53,8 @@ public class ArticleController {
 	 * @return 대상 게시글
 	 */
 	@GetMapping("/findArticleById")
-	public ResponseEntity<ArticleWithTagsAndFiles> findArticleById(@AuthenticationPrincipal Jwt jwt, @RequestParam Long articleId) {
+	public ResponseEntity<ArticleWithTagsAndFiles> findArticleById(@AuthenticationPrincipal Jwt jwt,
+		@RequestParam Long articleId) {
 		return ResponseEntity.ok(articleService.findArticleById(articleId, jwt.getSubject()));
 	}
 
@@ -61,11 +62,12 @@ public class ArticleController {
 	 * 신규 게시글을 추가 한다.
 	 * 
 	 * @param dto 추가할 게시글 정보
-	 * @param jwt 사용자 정보   
+	 * @param jwt 사용자 정보
 	 * @return 모든 게시글 데이터
 	 */
 	@PostMapping("/insertArticle")
-	public ResponseEntity<ApiResponse<List<ArticleWithTagsAndFiles>>> insertArticle(@AuthenticationPrincipal Jwt jwt, @RequestBody ArticleWithTagsAndFiles dto) {
+	public ResponseEntity<ApiResponse<List<ArticleWithTagsAndFiles>>> insertArticle(@AuthenticationPrincipal Jwt jwt,
+		@RequestBody ArticleWithTagsAndFiles dto) {
 		dto.setUserId(jwt.getSubject());
 		dto.setRegId(jwt.getSubject());
 
@@ -81,7 +83,8 @@ public class ArticleController {
 	 * @return 해당 게시글 데이터
 	 */
 	@PostMapping("/insertComment")
-	public ResponseEntity<ApiResponse<ArticleWithTagsAndFiles>> insertComment(@AuthenticationPrincipal Jwt jwt, @RequestBody ArticleWithTagsAndFiles dto, @RequestParam Long articleId) {
+	public ResponseEntity<ApiResponse<ArticleWithTagsAndFiles>> insertComment(@AuthenticationPrincipal Jwt jwt,
+		@RequestBody ArticleWithTagsAndFiles dto, @RequestParam Long articleId) {
 		dto.setUserId(jwt.getSubject());
 		dto.setRegId(jwt.getSubject());
 
@@ -96,7 +99,8 @@ public class ArticleController {
 	 * @return 좋아요한 게시글
 	 */
 	@PutMapping("/likeArticle")
-	public ResponseEntity<ApiResponse<ArticleWithTagsAndFiles>> likeArticle(@AuthenticationPrincipal Jwt jwt, @RequestBody Long articleId) {
+	public ResponseEntity<ApiResponse<ArticleWithTagsAndFiles>> likeArticle(@AuthenticationPrincipal Jwt jwt,
+		@RequestBody Long articleId) {
 		return commonMethod.responseTransaction(articleService.likeArticle(articleId, jwt.getSubject()));
 	}
 
@@ -108,8 +112,10 @@ public class ArticleController {
 	 * @return 해당 게시글 정보
 	 */
 	@DeleteMapping("/deleteArticleComment")
-	public ResponseEntity<ApiResponse<ArticleWithTagsAndFiles>> deleteArticleComment(@AuthenticationPrincipal Jwt jwt, @RequestParam Long articleId, @RequestParam Long commentId) {
-		return commonMethod.responseTransaction(articleService.deleteArticleComment(articleId, commentId, jwt.getSubject()));
+	public ResponseEntity<ApiResponse<ArticleWithTagsAndFiles>> deleteArticleComment(@AuthenticationPrincipal Jwt jwt,
+		@RequestParam Long articleId, @RequestParam Long commentId) {
+		return commonMethod
+			.responseTransaction(articleService.deleteArticleComment(articleId, commentId, jwt.getSubject()));
 	}
 
 }

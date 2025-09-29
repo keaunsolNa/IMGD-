@@ -5,7 +5,7 @@
 
 <mapper namespace="com.nks.imgd.mapper.tag.TagMapper">
 
-    <select id="findAllTag" resultType="com.nks.imgd.dto.Schema.Tag">
+    <select id="findAllTag" resultType="com.nks.imgd.dto.schema.Tag">
         SELECT T1.TAG_ID
              , T1.NAME
              , T1.DESCRIPTION
@@ -22,7 +22,7 @@
         LIMIT 10
     </select>
 
-    <select id="findTagById" resultType="com.nks.imgd.dto.Schema.Tag">
+    <select id="findTagById" resultType="com.nks.imgd.dto.schema.Tag">
         SELECT T1.TAG_ID
              , T1.NAME
              , T1.DESCRIPTION
@@ -35,7 +35,7 @@
          WHERE TAG_ID = #{tagId};
     </select>
 
-    <select id="selectTagByLikeName" resultType="com.nks.imgd.dto.Schema.Tag">
+    <select id="selectTagByLikeName" resultType="com.nks.imgd.dto.schema.Tag">
         SELECT TAG_ID
              , NAME
              , DESCRIPTION
@@ -49,7 +49,7 @@
          ORDER BY NAME;
     </select>
 
-    <select id="selectTagWhatInTarget" resultType="com.nks.imgd.dto.Schema.Tag">
+    <select id="selectTagWhatInTarget" resultType="com.nks.imgd.dto.schema.Tag">
         SELECT TAG_ID
              , NAME
              , DESCRIPTION

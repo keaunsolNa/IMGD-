@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.nks.imgd.component.util.commonMethod.CommonMethod;
+import com.nks.imgd.component.util.commonmethod.CommonMethod;
 import com.nks.imgd.component.util.maker.ApiResponse;
-import com.nks.imgd.dto.dataDTO.UserTableWithRelationshipAndPictureNmDTO;
+import com.nks.imgd.dto.data.UserTableWithRelationshipAndPictureNmDto;
 import com.nks.imgd.service.user.UserFriendService;
 
 @RestController
@@ -35,8 +35,10 @@ public class UserFriendController {
 	 * @return 상호 친구 목록
 	 */
 	@PostMapping("/insertUserFriendTable")
-	public ResponseEntity<ApiResponse<List<UserTableWithRelationshipAndPictureNmDTO>>> insertUserFriendTable(@AuthenticationPrincipal Jwt jwt, @RequestParam String targetUserId, @RequestParam String relationship) {
-		return commonMethod.responseTransaction(userFriendService.insertUserFriendTable(jwt.getSubject(), targetUserId, relationship));
+	public ResponseEntity<ApiResponse<List<UserTableWithRelationshipAndPictureNmDto>>> insertUserFriendTable(
+		@AuthenticationPrincipal Jwt jwt, @RequestParam String targetUserId, @RequestParam String relationship) {
+		return commonMethod
+			.responseTransaction(userFriendService.insertUserFriendTable(jwt.getSubject(), targetUserId, relationship));
 	}
 
 	/**
@@ -46,7 +48,9 @@ public class UserFriendController {
 	 * @return 상호 친구 목록
 	 */
 	@DeleteMapping("/deleteUserFriendTable")
-	public ResponseEntity<ApiResponse<List<UserTableWithRelationshipAndPictureNmDTO>>> deleteUserFriendTable(@AuthenticationPrincipal Jwt jwt, @RequestParam String targetUserId) {
-		return commonMethod.responseTransaction(userFriendService.deleteUserFriendTable(jwt.getSubject(), targetUserId));
+	public ResponseEntity<ApiResponse<List<UserTableWithRelationshipAndPictureNmDto>>> deleteUserFriendTable(
+		@AuthenticationPrincipal Jwt jwt, @RequestParam String targetUserId) {
+		return commonMethod
+			.responseTransaction(userFriendService.deleteUserFriendTable(jwt.getSubject(), targetUserId));
 	}
 }

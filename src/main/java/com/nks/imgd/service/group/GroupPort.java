@@ -2,10 +2,10 @@ package com.nks.imgd.service.group;
 
 import java.util.List;
 
-import com.nks.imgd.dto.dataDTO.GroupTableWithMstUserNameDTO;
+import com.nks.imgd.dto.data.GroupTableWithMstUserNameDto;
 
 public interface GroupPort {
 
-	List<GroupTableWithMstUserNameDTO> findGroupWhatInside(String userId);
+	List<GroupTableWithMstUserNameDto> findGroupWhatInside(String userId);
 
 }

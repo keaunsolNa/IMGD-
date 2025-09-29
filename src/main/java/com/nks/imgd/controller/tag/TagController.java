@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.nks.imgd.component.util.commonMethod.CommonMethod;
+import com.nks.imgd.component.util.commonmethod.CommonMethod;
 import com.nks.imgd.component.util.maker.ApiResponse;
-import com.nks.imgd.dto.Schema.Tag;
+import com.nks.imgd.dto.schema.Tag;
 import com.nks.imgd.service.tag.TagService;
 
 /**

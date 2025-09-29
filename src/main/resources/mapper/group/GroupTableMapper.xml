@@ -5,7 +5,7 @@
 
 <mapper namespace="com.nks.imgd.mapper.group.GroupTableMapper">
 
-    <select id="findGroupName" resultType="com.nks.imgd.dto.dataDTO.GroupTableWithMstUserNameDTO">
+    <select id="findGroupName" resultType="com.nks.imgd.dto.data.GroupTableWithMstUserNameDto">
         SELECT T1.GROUP_ID
              , T1.GROUP_NM
              , IF(T1.GROUP_MST_USER_ID = T2.USER_ID, 1, 2) IS_MST
@@ -21,7 +21,7 @@
         ORDER BY IS_MST, T1.REG_DTM
     </select>
 
-    <select id="findGroupWhatInside" resultType="com.nks.imgd.dto.dataDTO.GroupTableWithMstUserNameDTO">
+    <select id="findGroupWhatInside" resultType="com.nks.imgd.dto.data.GroupTableWithMstUserNameDto">
         SELECT T1.GROUP_ID
              , T1.GROUP_NM
              , F_GET_USER_NM(T1.GROUP_MST_USER_ID) AS `GROUP_MST_USER_NM`
@@ -35,7 +35,7 @@
          ORDER BY IS_MST, T2.REG_DTM
     </select>
 
-    <select id="findGroupUserWhatInside" resultType="com.nks.imgd.dto.dataDTO.GroupUserWithNameDTO">
+    <select id="findGroupUserWhatInside" resultType="com.nks.imgd.dto.data.GroupUserWithNameDto">
         SELECT T1.USER_ID
              , F_GET_USER_NM(T1.USER_ID) AS `USER_NM`
              , T1.REG_DTM
@@ -47,7 +47,7 @@
         ORDER BY IS_MST, T1.REG_DTM
     </select>
 
-    <select id="findGroupByGroupId" resultType="com.nks.imgd.dto.dataDTO.GroupTableWithMstUserNameDTO">
+    <select id="findGroupByGroupId" resultType="com.nks.imgd.dto.data.GroupTableWithMstUserNameDto">
         SELECT GROUP_ID
              , GROUP_NM
              , GROUP_MST_USER_ID
@@ -73,7 +73,7 @@
            AND USER_ID  = #{userId}
     </select>
 
-    <select id="findGroupWhatUserIsMstAndJustOnlyOne" resultType="com.nks.imgd.dto.dataDTO.GroupTableWithMstUserNameDTO">
+    <select id="findGroupWhatUserIsMstAndJustOnlyOne" resultType="com.nks.imgd.dto.data.GroupTableWithMstUserNameDto">
         SELECT GROUP_ID
              , GROUP_NM
              , GROUP_MST_USER_ID

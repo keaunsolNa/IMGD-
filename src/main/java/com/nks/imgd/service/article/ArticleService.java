@@ -3,19 +3,22 @@ package com.nks.imgd.service.article;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.nks.imgd.dto.Schema.*;
-import com.nks.imgd.dto.dataDTO.MakeFileDTO;
-import com.nks.imgd.service.file.FileService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.nks.imgd.component.util.commonMethod.CommonMethod;
+import com.nks.imgd.component.util.commonmethod.CommonMethod;
 import com.nks.imgd.component.util.maker.ServiceResult;
-import com.nks.imgd.dto.Enum.ArticleType;
-import com.nks.imgd.dto.Enum.ResponseMsg;
-import com.nks.imgd.dto.dataDTO.ArticleWithTagsAndFiles;
-import com.nks.imgd.dto.searchDTO.ArticleSearch;
+import com.nks.imgd.dto.data.ArticleWithTagsAndFiles;
+import com.nks.imgd.dto.data.MakeFileDto;
+import com.nks.imgd.dto.enums.ArticleType;
+import com.nks.imgd.dto.enums.ResponseMsg;
+import com.nks.imgd.dto.schema.ArticleComment;
+import com.nks.imgd.dto.schema.ArticleLike;
+import com.nks.imgd.dto.schema.ArticleTag;
+import com.nks.imgd.dto.schema.Tag;
+import com.nks.imgd.dto.searchdto.ArticleSearch;
 import com.nks.imgd.mapper.article.ArticleMapper;
+import com.nks.imgd.service.file.FileService;
 import com.nks.imgd.service.tag.TagService;
 
 /**
@@ -28,22 +31,23 @@ public class ArticleService {
 	private static final CommonMethod commonMethod = new CommonMethod();
 	private final ArticleMapper articleMapper;
 	private final ArticleTagService articleTagService;
-    private final ArticleFileService articleFileService;
+	private final ArticleFileService articleFileService;
 	private final TagService tagService;
 	private final ArticleLikeService articleLikeService;
 	private final ArticleCommentService articleCommentService;
-    private final FileService fileService;
+	private final FileService fileService;
 
-    public ArticleService(ArticleMapper articleMapper, ArticleTagService articleTagService, ArticleFileService articleFileService, TagService tagService,
-                          ArticleLikeService articleLikeService, ArticleCommentService articleCommentService, FileService fileService) {
+	public ArticleService(ArticleMapper articleMapper, ArticleTagService articleTagService,
+		ArticleFileService articleFileService, TagService tagService,
+		ArticleLikeService articleLikeService, ArticleCommentService articleCommentService, FileService fileService) {
 		this.articleMapper = articleMapper;
 		this.articleTagService = articleTagService;
-        this.articleFileService = articleFileService;
-        this.tagService = tagService;
+		this.articleFileService = articleFileService;
+		this.tagService = tagService;
 		this.articleLikeService = articleLikeService;
 		this.articleCommentService = articleCommentService;
-        this.fileService = fileService;
-    }
+		this.fileService = fileService;
+	}
 
 	/**
 	 * 모든 게시글 목록 반환
@@ -65,11 +69,9 @@ public class ArticleService {
 	@Transactional(rollbackFor = Exception.class)
 	public ArticleWithTagsAndFiles findArticleById(Long articleId, String userId) {
 
-		if (!articleMapper.findArticleById(articleId).getUserId().equals(userId))
-		{
+		if (!articleMapper.findArticleById(articleId).getUserId().equals(userId)) {
 			ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
-				articleMapper.increaseArticleWatchCnt(articleId)
-			);
+				articleMapper.increaseArticleWatchCnt(articleId));
 
 			if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
 				return null;
@@ -89,20 +91,17 @@ public class ArticleService {
 	@Transactional(rollbackFor = Exception.class)
 	public ServiceResult<List<ArticleWithTagsAndFiles>> insertArticle(ArticleWithTagsAndFiles dto) {
 
-        // ARTICLE DB INSERT
+		// ARTICLE DB INSERT
 		ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
-			articleMapper.makeNewArticle(dto)
-		);
+			articleMapper.makeNewArticle(dto));
 
 		if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
 			return ServiceResult.failure(fsMsg);
 		}
 
-        // 태그일 경우
-		if (dto.getType().equals(ArticleType.POST))
-		{
-			for (Tag tag : dto.getTagList())
-			{
+		// 태그일 경우
+		if (dto.getType().equals(ArticleType.POST)) {
+			for (Tag tag : dto.getTagList()) {
 				ArticleTag articleTag = new ArticleTag();
 				articleTag.setArticleId(dto.getArticleId());
 				articleTag.setTagId(tag.getTagId());
@@ -116,55 +115,51 @@ public class ArticleService {
 
 		}
 
-        // 파일이 있을 때
-        if (null != dto.getFiles() && !dto.getFiles().isEmpty())
-        {
-            List<MakeFileDTO> files = dto.getFiles();
-            List<Long> fileIdList = new ArrayList<>();
+		// 파일이 있을 때
+		if (null != dto.getFiles() && !dto.getFiles().isEmpty()) {
+			List<MakeFileDto> files = dto.getFiles();
+			List<Long> fileIdList = new ArrayList<>();
 
-            for (MakeFileDTO file : files) {
+			for (MakeFileDto file : files) {
 
-                fsMsg = fileService.makeFile(file).status();
-                if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
-                    return ServiceResult.failure(fsMsg);
-                }
+				fsMsg = fileService.makeFile(file).status();
+				if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
+					return ServiceResult.failure(fsMsg);
+				}
 
-                fileIdList.add(file.getFileId());
-            }
+				fileIdList.add(file.getFileId());
+			}
 
-            for (Long fileId : fileIdList) {
+			for (Long fileId : fileIdList) {
 
-                fsMsg = articleFileService.makeArticleFile(dto.getArticleId(), fileId).status();
-                if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
-                    return ServiceResult.failure(fsMsg);
-                }
-            }
+				fsMsg = articleFileService.makeArticleFile(dto.getArticleId(), fileId).status();
+				if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
+					return ServiceResult.failure(fsMsg);
+				}
+			}
 
-        }
+		}
 
 		return ServiceResult.success(() -> findAllArticle(new ArticleSearch()));
 	}
 
 	/**
 	 * 신규 댓글 작성
-	 * 
 	 * @param dto 댓글 정보
-	 * @param articleId 대상 게시글 정보   
+	 * @param articleId 대상 게시글 정보
 	 * @return 대상 게시글 정보
 	 */
 	@Transactional(rollbackFor = Exception.class)
 	public ServiceResult<ArticleWithTagsAndFiles> insertComment(ArticleWithTagsAndFiles dto, Long articleId) {
 
 		ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
-			articleMapper.makeNewArticle(dto)
-		);
+			articleMapper.makeNewArticle(dto));
 
 		if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
 			return ServiceResult.failure(fsMsg);
 		}
 
-		if (dto.getType().equals(ArticleType.COMMENT))
-		{
+		if (dto.getType().equals(ArticleType.COMMENT)) {
 			ArticleComment articleComment = new ArticleComment();
 			articleComment.setArticleId(articleId);
 			articleComment.setCommentId(dto.getArticleId());
@@ -179,7 +174,7 @@ public class ArticleService {
 
 		return ServiceResult.success(() -> findArticleById(articleId, dto.getUserId()));
 	}
-	
+
 	/**
 	 * 게시글에 좋아요 표시, 취소
 	 * @param articleId 대상 게시글
@@ -189,27 +184,17 @@ public class ArticleService {
 	@Transactional(rollbackFor = Exception.class)
 	public ServiceResult<ArticleWithTagsAndFiles> likeArticle(Long articleId, String userId) {
 
-		System.out.println("likeArticle");
-		if (articleMapper.findArticleById(articleId).getUserId().equals(userId))
+		if (articleMapper.findArticleById(articleId).getUserId().equals(userId)) {
 			return ServiceResult.success(() -> findArticleById(articleId, userId));
+		}
 
 		ServiceResult<ArticleLike> result;
 
-		System.out.println("isLiked?");
-		System.out.println(articleLikeService.isLiked(articleId, userId));
-
-		if (articleLikeService.isLiked(articleId, userId))
-		{
+		if (articleLikeService.isLiked(articleId, userId)) {
 			result = articleLikeService.unLikeArticle(articleId, userId);
-		}
-
-		else
-		{
+		} else {
 			result = articleLikeService.likeArticle(articleId, userId);
 		}
-
-		System.out.println("IN LIKE");
-		System.out.println(result.status());
 
 		if (!result.status().equals(ResponseMsg.ON_SUCCESS)) {
 			return ServiceResult.failure(result.status());
@@ -235,8 +220,7 @@ public class ArticleService {
 		}
 
 		fsMsg = commonMethod.returnResultByResponseMsg(
-			articleMapper.deleteArticle(commentId)
-		);
+			articleMapper.deleteArticle(commentId));
 
 		if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
 			return ServiceResult.failure(fsMsg);
@@ -249,8 +233,7 @@ public class ArticleService {
 
 	public List<ArticleWithTagsAndFiles> postProcessingArticleTables(List<ArticleWithTagsAndFiles> articles) {
 
-		for (ArticleWithTagsAndFiles article : articles)
-		{
+		for (ArticleWithTagsAndFiles article : articles) {
 			postProcessingArticleTable(article);
 		}
 		return articles;
@@ -261,14 +244,12 @@ public class ArticleService {
 		article.setRegDtm(null != article.getRegDtm() ? commonMethod.translateDate(article.getRegDtm()) : null);
 		article.setModDtm(null != article.getModDtm() ? commonMethod.translateDate(article.getModDtm()) : null);
 
-		if (null != article.getTagIds())
-		{
+		if (null != article.getTagIds()) {
 			List<Tag> tagList = new ArrayList<>();
 
 			String[] tagIds = article.getTagIds().split(",");
 
-			for (String tag : tagIds)
-			{
+			for (String tag : tagIds) {
 				Tag tagDto = tagService.findTagById(Long.parseLong(tag));
 				tagList.add(tagDto);
 			}
@@ -279,8 +260,7 @@ public class ArticleService {
 		List<ArticleComment> comments = articleCommentService.findArticleCommentById(article.getArticleId());
 		List<ArticleWithTagsAndFiles> commentArticles = new ArrayList<>();
 
-		for (ArticleComment comment : comments)
-		{
+		for (ArticleComment comment : comments) {
 			Long commentId = comment.getCommentId();
 			commentArticles.add(articleMapper.findArticleById(commentId));
 		}
@@ -289,6 +269,5 @@ public class ArticleService {
 
 		return article;
 	}
-
 
 }

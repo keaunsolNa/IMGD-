@@ -13,8 +13,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 
-import com.nks.imgd.dto.Schema.Roles;
-import com.nks.imgd.dto.dataDTO.UserTableWithRelationshipAndPictureNmDTO;
+import com.nks.imgd.dto.data.UserTableWithRelationshipAndPictureNmDto;
+import com.nks.imgd.dto.schema.Roles;
 import com.nks.imgd.mapper.user.UserTableMapper;
 
 import io.jsonwebtoken.Claims;
@@ -48,17 +48,17 @@ public class JwtTokenProvider {
 	 * @param user 매개변수로 받은 UserRoleDTO
 	 * @return 생성된 토큰
 	 */
-	public String generateAccessToken(UserTableWithRelationshipAndPictureNmDTO user) {
+	public String generateAccessToken(UserTableWithRelationshipAndPictureNmDto user) {
 
 		long now = System.currentTimeMillis();
-		long ACCESS_EXPIRATION = 31 * 24 * 60 * 10000;
+		long accessExpiration = 31 * 24 * 60 * 10000;
 
 		return Jwts.builder()
 			.header().add("typ", "JWT").add("alg", "HmacSHA256").and()
 			.issuer(issuer)
 			.claims(createClaims(user))
 			.subject(String.valueOf(user.getUserId()))
-			.expiration(new Date(now + ACCESS_EXPIRATION))
+			.expiration(new Date(now + accessExpiration))
 			.signWith(jwtSecretKey)
 			.compact();
 
@@ -72,17 +72,17 @@ public class JwtTokenProvider {
 	 * @param user 매개변수로 받은 UserRoleDTO
 	 * @return 재생성된 토큰
 	 */
-	public String generateRefreshToken(UserTableWithRelationshipAndPictureNmDTO user) {
+	public String generateRefreshToken(UserTableWithRelationshipAndPictureNmDto user) {
 
 		long now = System.currentTimeMillis();
-		long REFRESH_EXPIRATION = 7 * 24 * 60 * 10000;
+		long refreshExpiration = 7 * 24 * 60 * 10000;
 
 		return Jwts.builder()
 			.header().add("typ", "JWT").add("alg", "HmacSHA256").and()
 			.issuer(issuer)
 			.claims(createClaims(user))
 			.subject(String.valueOf(user.getUserId()))
-			.expiration(new Date(now + REFRESH_EXPIRATION))
+			.expiration(new Date(now + refreshExpiration))
 			.signWith(jwtSecretKey)
 			.compact();
 
@@ -95,7 +95,7 @@ public class JwtTokenProvider {
 	 * @param user 매개변수로 받은 UserRoleDTO
 	 * @return 생성된 Claims 타입
 	 */
-	private Map<String, Object> createClaims(UserTableWithRelationshipAndPictureNmDTO user) {
+	private Map<String, Object> createClaims(UserTableWithRelationshipAndPictureNmDto user) {
 
 		Roles roles = userTableMapper.findHighestUserRole(user.getUserId());
 		Map<String, Object> claims = new HashMap<>();
@@ -157,8 +157,9 @@ public class JwtTokenProvider {
 	public String getUserPk(String token) {
 
 		try {
-			if (null == token || token.isEmpty())
+			if (null == token || token.isEmpty()) {
 				return null;
+			}
 			Claims claims = Jwts.parser()
 				.verifyWith(jwtSecretKey)
 				.build()
@@ -180,7 +181,7 @@ public class JwtTokenProvider {
 	 */
 	public Authentication getAuthentication(String token) {
 
-		UserTableWithRelationshipAndPictureNmDTO userDetails = userTableMapper.findById(this.getUserPk(token));
+		UserTableWithRelationshipAndPictureNmDto userDetails = userTableMapper.findById(this.getUserPk(token));
 		return new UsernamePasswordAuthenticationToken(userDetails, "");
 	}
 
@@ -190,7 +191,7 @@ public class JwtTokenProvider {
 	 * @param token : 대상 refreshToken
 	 * @return 유저 정보
 	 */
-	public UserTableWithRelationshipAndPictureNmDTO getUserDetails(String token) {
+	public UserTableWithRelationshipAndPictureNmDto getUserDetails(String token) {
 		return userTableMapper.findById(this.getUserPk(token));
 	}
 
@@ -203,8 +204,9 @@ public class JwtTokenProvider {
 	public boolean validateToken(String jwtToken) {
 		try {
 
-			if (null == jwtToken || jwtToken.isEmpty())
+			if (null == jwtToken || jwtToken.isEmpty()) {
 				return false;
+			}
 
 			Jwts.parser()
 				.verifyWith(jwtSecretKey)

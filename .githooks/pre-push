@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# ---------- JDK 경로 보정 (필요 시 수정) ----------
+if [[ -n "${JAVA_HOME:-}" ]]; then
+  echo "✓ Using JAVA_HOME from system: $JAVA_HOME" >&2
+  # JAVA_HOME/bin 이 PATH에 없다면 추가 (중복 추가 방지)
+  case ":$PATH:" in
+    *":$JAVA_HOME/bin:"*) ;;
+    *) export PATH="$JAVA_HOME/bin:$PATH" ;;
+  esac
+elif command -v java >/dev/null 2>&1; then
+  echo "✓ Using 'java' from PATH: $(command -v java)" >&2
+else
+  echo "✗ Java not found. Please set JAVA_HOME as a system environment variable (or add java to PATH)." >&2
+  echo "   예) Windows(시스템 환경변수): JAVA_HOME=C:\\Program Files\\Java\\jdk-21" >&2
+  echo "       macOS/Linux(shell 설정): export JAVA_HOME=\$(/usr/libexec/java_home -v 21) && export PATH=\"\$JAVA_HOME/bin:\$PATH\"" >&2
+  exit 1
+fi
+
+# 동작 확인
+java -version >&2
+# -----------------------------------------------
+
+echo "🔎 Verifying code style before push (spotless + checkstyle)..." >&2
+
+# Windows/Unix 모두 동작하도록 gradle wrapper 호출
+if [ -f "./gradlew" ]; then
+  ./gradlew --no-daemon -q spotlessCheck checkstyleMain
+else
+  cmd /c "gradlew.bat --no-daemon -q spotlessCheck checkstyleMain"
+fi
+
+echo "✅ Style checks passed. Proceeding with push." >&2

@@ -1,20 +1,20 @@
 package com.nks.imgd.service.user;
 
-import com.nks.imgd.component.util.maker.ServiceResult;
-import com.nks.imgd.dto.Enum.ResponseMsg;
+import java.util.List;
+
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.nks.imgd.component.util.commonMethod.CommonMethod;
-import com.nks.imgd.dto.Schema.FileTable;
-import com.nks.imgd.dto.dataDTO.GroupTableWithMstUserNameDTO;
-import com.nks.imgd.dto.dataDTO.UserTableWithRelationshipAndPictureNmDTO;
+import com.nks.imgd.component.util.commonmethod.CommonMethod;
+import com.nks.imgd.component.util.maker.ServiceResult;
+import com.nks.imgd.dto.data.GroupTableWithMstUserNameDto;
+import com.nks.imgd.dto.data.UserTableWithRelationshipAndPictureNmDto;
+import com.nks.imgd.dto.enums.ResponseMsg;
+import com.nks.imgd.dto.schema.FileTable;
 import com.nks.imgd.mapper.user.UserTableMapper;
 import com.nks.imgd.service.file.FileService;
 import com.nks.imgd.service.group.GroupService;
-
-import java.util.List;
 
 @Service
 public class UserService {
@@ -24,8 +24,7 @@ public class UserService {
 	private final CommonMethod commonMethod = new CommonMethod();
 	private final GroupService groupService;
 
-	public UserService(UserTableMapper userTableMapper, FileService fileService, GroupService groupService)
-	{
+	public UserService(UserTableMapper userTableMapper, FileService fileService, GroupService groupService) {
 		this.userTableMapper = userTableMapper;
 		this.fileService = fileService;
 		this.groupService = groupService;
@@ -37,7 +36,7 @@ public class UserService {
 	 * @param userId 대상 유저 ID
 	 * @return 대상 유저가 가지고 있는 정보
 	 */
-	public UserTableWithRelationshipAndPictureNmDTO findUserById(@Param("userId") String userId) {
+	public UserTableWithRelationshipAndPictureNmDto findUserById(@Param("userId") String userId) {
 
 		return postProcessingUserTable(userTableMapper.findById(userId));
 	}
@@ -48,7 +47,7 @@ public class UserService {
 	 * @param userId 대상 유저 아이디
 	 * @return 친구 목록
 	 */
-	public List<UserTableWithRelationshipAndPictureNmDTO> findFriendEachOther(@Param("userId") String userId) {
+	public List<UserTableWithRelationshipAndPictureNmDto> findFriendEachOther(@Param("userId") String userId) {
 		return postProcessingUserTables(userTableMapper.findFriendEachOther(userId));
 	}
 
@@ -57,7 +56,7 @@ public class UserService {
 	 * @param userId 대상 유저 아이디
 	 * @return 대상 목록
 	 */
-	public List<UserTableWithRelationshipAndPictureNmDTO> findFriendWhoAddMeButImNot(@Param("userId") String userId) {
+	public List<UserTableWithRelationshipAndPictureNmDto> findFriendWhoAddMeButImNot(@Param("userId") String userId) {
 		return postProcessingUserTables(userTableMapper.findFriendWhoAddMeButImNot(userId));
 	}
 
@@ -66,7 +65,7 @@ public class UserService {
 	 * @param userId 대상 유저 아이디
 	 * @return 대상 목록
 	 */
-	public List<UserTableWithRelationshipAndPictureNmDTO> findFriendWhoImAddButNot(@Param("userId") String userId) {
+	public List<UserTableWithRelationshipAndPictureNmDto> findFriendWhoImAddButNot(@Param("userId") String userId) {
 		return postProcessingUserTables(userTableMapper.findFriendWhoImAddButNot(userId));
 	}
 
@@ -75,7 +74,7 @@ public class UserService {
 	 * @param userId 대상 유저 아이디
 	 * @return 대상 목록
 	 */
-	public List<UserTableWithRelationshipAndPictureNmDTO> findFriendWhoImAddButReject(@Param("userId") String userId) {
+	public List<UserTableWithRelationshipAndPictureNmDto> findFriendWhoImAddButReject(@Param("userId") String userId) {
 		return postProcessingUserTables(userTableMapper.findFriendWhoImAddButReject(userId));
 	}
 
@@ -84,7 +83,7 @@ public class UserService {
 	 * @param userId 대상 유저 아이디
 	 * @return 대상 목록
 	 */
-	public List<UserTableWithRelationshipAndPictureNmDTO> findFriend(@Param("userId") String userId){
+	public List<UserTableWithRelationshipAndPictureNmDto> findFriend(@Param("userId") String userId) {
 		return postProcessingUserTables(userTableMapper.findFriend(userId));
 	}
 
@@ -93,10 +92,10 @@ public class UserService {
 	 * @param userId 대상 유저 아이디
 	 * @return 대상 목록
 	 */
-	public UserTableWithRelationshipAndPictureNmDTO searchFriend(@Param("loginId") String loginId, @Param("userId") String userId){
+	public UserTableWithRelationshipAndPictureNmDto searchFriend(@Param("loginId") String loginId,
+		@Param("userId") String userId) {
 		return postProcessingUserTable(userTableMapper.searchFriend(loginId, userId));
 	}
-
 
 	/**
 	 * 해당 그룹에 소속 되지 않은 친구 목록을 가져 온다.
@@ -104,9 +103,11 @@ public class UserService {
 	 * @param groupId 대상 그룹 아이디
 	 * @return 대상 유저 목록
 	 */
-	public List<UserTableWithRelationshipAndPictureNmDTO> findFriendEachOtherAndNotInGroup(@Param("userId") String userId, @Param("groupId") Long groupId){
+	public List<UserTableWithRelationshipAndPictureNmDto> findFriendEachOtherAndNotInGroup(
+		@Param("userId") String userId, @Param("groupId") Long groupId) {
 		return postProcessingUserTables(userTableMapper.findFriendEachOtherAndNotInGroup(userId, groupId));
 	}
+
 	/**
 	 * 로그인 한 유저가 가지고 있는 회원 정보를 변경 한다.
 	 *
@@ -114,17 +115,17 @@ public class UserService {
 	 * @return 대상 유저가 가지고 있는 정보
 	 */
 	@Transactional(rollbackFor = Exception.class)
-	public ServiceResult<UserTableWithRelationshipAndPictureNmDTO> updateUser(@Param("user") UserTableWithRelationshipAndPictureNmDTO user) {
+	public ServiceResult<UserTableWithRelationshipAndPictureNmDto> updateUser(
+		@Param("user") UserTableWithRelationshipAndPictureNmDto user) {
 
-        ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
-                userTableMapper.updateUser(user)
-        );
+		ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
+			userTableMapper.updateUser(user));
 
-        if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
-            return ServiceResult.failure(fsMsg);
-        }
+		if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
+			return ServiceResult.failure(fsMsg);
+		}
 
-        return ServiceResult.success(() -> findUserById(user.getUserId()));
+		return ServiceResult.success(() -> findUserById(user.getUserId()));
 	}
 
 	/**
@@ -137,25 +138,25 @@ public class UserService {
 	public ServiceResult<ResponseMsg> deleteUser(@Param("userId") String userId) {
 
 		// 그룹 관련 삭제
-		List<GroupTableWithMstUserNameDTO> groups = groupService.findGroupWhatUserIsMstAndJustOnlyOne(userId);
+		List<GroupTableWithMstUserNameDto> groups = groupService.findGroupWhatUserIsMstAndJustOnlyOne(userId);
 
-		for (GroupTableWithMstUserNameDTO group : groups) {
+		for (GroupTableWithMstUserNameDto group : groups) {
 			groupService.deleteGroup(userId, group.getGroupId());
 		}
-		
+
 		// TODO 게시글 관련 삭제
 
 		// 유저 프로필 사진 삭제
 		FileTable file = fileService.findUserProfileFileId(userId);
 
-		if (null != file)
-		{
-			if (!fileService.deleteFileById(file.getFileId())) return ServiceResult.failure(ResponseMsg.FILE_DELETE_FAILED);
+		if (null != file) {
+			if (!fileService.deleteFileById(file.getFileId())) {
+				return ServiceResult.failure(ResponseMsg.FILE_DELETE_FAILED);
+			}
 		}
 
 		ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
-			userTableMapper.deleteUser(userId)
-		);
+			userTableMapper.deleteUser(userId));
 
 		if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
 			return ServiceResult.failure(fsMsg);
@@ -173,9 +174,10 @@ public class UserService {
 	 * @param users 대상 유저 리스트
 	 * @return 후처리 후 대상 유저 리스트
 	 */
-	public List<UserTableWithRelationshipAndPictureNmDTO> postProcessingUserTables(List<UserTableWithRelationshipAndPictureNmDTO> users) {
+	public List<UserTableWithRelationshipAndPictureNmDto> postProcessingUserTables(
+		List<UserTableWithRelationshipAndPictureNmDto> users) {
 
-		for (UserTableWithRelationshipAndPictureNmDTO user : users) {
+		for (UserTableWithRelationshipAndPictureNmDto user : users) {
 			postProcessingUserTable(user);
 		}
 
@@ -189,11 +191,14 @@ public class UserService {
 	 * @param user 대상 유저
 	 * @return 후처리 후 대상 유저
 	 */
-	public UserTableWithRelationshipAndPictureNmDTO postProcessingUserTable(
-		UserTableWithRelationshipAndPictureNmDTO user) {
+	public UserTableWithRelationshipAndPictureNmDto postProcessingUserTable(
+		UserTableWithRelationshipAndPictureNmDto user) {
 
-		if (null == user) return null;
-		user.setLastLoginDate(null != user.getLastLoginDate()  ? commonMethod.translateDate(user.getLastLoginDate()) : null);
+		if (null == user) {
+			return null;
+		}
+		user.setLastLoginDate(
+			null != user.getLastLoginDate() ? commonMethod.translateDate(user.getLastLoginDate()) : null);
 		user.setRegDtm(null != user.getRegDtm() ? commonMethod.translateDate(user.getRegDtm()) : null);
 		user.setModDtm(null != user.getModDtm() ? commonMethod.translateDate(user.getModDtm()) : null);
 

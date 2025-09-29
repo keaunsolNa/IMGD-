@@ -5,7 +5,7 @@
 
 <mapper namespace="com.nks.imgd.mapper.article.ArticleCommentMapper">
 
-    <select id="findArticleCommentByIds" resultType="com.nks.imgd.dto.Schema.ArticleComment">
+    <select id="findArticleCommentByIds" resultType="com.nks.imgd.dto.schema.ArticleComment">
         SELECT ARTICLE_ID
              , COMMENT_ID
           FROM ARTICLE_COMMENT
@@ -13,13 +13,13 @@
            AND COMMENT_ID = #{commentId}
     </select>
 
-    <select id="findArticleCommentById" resultType="com.nks.imgd.dto.Schema.ArticleComment">
+    <select id="findArticleCommentById" resultType="com.nks.imgd.dto.schema.ArticleComment">
         SELECT COMMENT_ID
           FROM ARTICLE_COMMENT
          WHERE ARTICLE_ID = #{articleId}
     </select>
 
-    <select id="findArticleById" resultType="com.nks.imgd.dto.dataDTO.ArticleWithTagsAndFiles">
+    <select id="findArticleById" resultType="com.nks.imgd.dto.data.ArticleWithTagsAndFiles">
         SELECT ARTICLE_ID
              , TYPE
              , F_GET_TAG_NM(ARTICLE_ID) TAG_IDS

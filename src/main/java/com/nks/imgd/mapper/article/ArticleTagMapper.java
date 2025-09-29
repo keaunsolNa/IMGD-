@@ -3,7 +3,7 @@ package com.nks.imgd.mapper.article;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import com.nks.imgd.dto.Schema.ArticleTag;
+import com.nks.imgd.dto.schema.ArticleTag;
 
 @Mapper
 public interface ArticleTagMapper {

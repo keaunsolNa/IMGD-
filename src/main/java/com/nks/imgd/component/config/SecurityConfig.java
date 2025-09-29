@@ -24,72 +24,67 @@ import com.nks.imgd.component.converter.JwtKeyConverter;
 @Configuration
 public class SecurityConfig {
 
-    /**
-     * Spring Security Filter Chain 정의
-     * - JWT 인증 기반이므로 Stateless 세션 유지
-     * - /auth, /user, /api 등은 인증 없이 접근 가능
-     */
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+	/**
+	 * Spring Security Filter Chain 정의
+	 * - JWT 인증 기반이므로 Stateless 세션 유지
+	 * - /auth, /user, /api 등은 인증 없이 접근 가능
+	 */
+	@Bean
+	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        http
-                // HTTP Basic 인증 비활성화 및 401 에러 리턴
-                .httpBasic(
-                        httpBasic -> httpBasic.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
-                // CSRF 보호 비활성화
-                .csrf((AbstractHttpConfigurer::disable))
-                // CORS 설정
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                // 세션을 설정하지 않도록(Stateless)
-                .sessionManagement((sessionManagement) ->
-                        sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
-                // 엔드포인트별 접근 권한 설정
-                .authorizeHttpRequests(authorizeRequests ->
-                        authorizeRequests
-                                .requestMatchers("/auth/**").permitAll()            	// 로그인, 토큰 인증 관련
-                                .requestMatchers("/user/**").authenticated()			// 사용자 관련
-                                .requestMatchers("/group/**").authenticated()			// 그룹 관련
-                                .requestMatchers("/file/**").authenticated()			// API 관련
-								.requestMatchers("/article/**").authenticated()		// 커뮤니티 게시글 관련
-								.requestMatchers("/tag/**").authenticated()			// 커뮤니티 태그 관련
-                                .requestMatchers("/favicon.ico").permitAll()        	// favicon
-                                .anyRequest().authenticated()
-                )
-				// OAuth2 리소스 서버 설정 (JWT 인증 방식 사용)
-				.oauth2ResourceServer(oauth2 -> oauth2
-					.jwt(jwt -> jwt.jwtAuthenticationConverter(new JwtKeyConverter()))
-					.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
-				)
-                // 인증 실패 시 401 반환
-                .exceptionHandling(exceptionHandling ->
-                        exceptionHandling.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
-                );
+		http
+			// HTTP Basic 인증 비활성화 및 401 에러 리턴
+			.httpBasic(
+				httpBasic -> httpBasic.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
+			// CSRF 보호 비활성화
+			.csrf((AbstractHttpConfigurer::disable))
+			// CORS 설정
+			.cors(cors -> cors.configurationSource(corsConfigurationSource()))
+			// 세션을 설정하지 않도록(Stateless)
+			.sessionManagement(
+				(sessionManagement) -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+			// 엔드포인트별 접근 권한 설정
+			.authorizeHttpRequests(authorizeRequests -> authorizeRequests
+				.requestMatchers("/auth/**").permitAll() // 로그인, 토큰 인증 관련
+				.requestMatchers("/user/**").authenticated() // 사용자 관련
+				.requestMatchers("/group/**").authenticated() // 그룹 관련
+				.requestMatchers("/file/**").authenticated() // API 관련
+				.requestMatchers("/article/**").authenticated() // 커뮤니티 게시글 관련
+				.requestMatchers("/tag/**").authenticated() // 커뮤니티 태그 관련
+				.requestMatchers("/favicon.ico").permitAll() // favicon
+				.anyRequest().authenticated())
+			// OAuth2 리소스 서버 설정 (JWT 인증 방식 사용)
+			.oauth2ResourceServer(oauth2 -> oauth2
+				.jwt(jwt -> jwt.jwtAuthenticationConverter(new JwtKeyConverter()))
+				.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
+			// 인증 실패 시 401 반환
+			.exceptionHandling(exceptionHandling -> exceptionHandling
+				.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)));
 
-        return http.build();
-    }
+		return http.build();
+	}
 
-    /**
-     * CORS 설정 정의
-     * - 프론트엔드와 도메인이 다른 경우에도 요청 허용
-     */
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(
-                List.of("http://192.168.35.199:8081",
-                        "http://localhost:8081", // React Native 웹
-						"http://localhost:3000", // React Native 웹 (다른 포트)
-						"http://localhost:19006",// Expo 웹 서버
-						"http://localhost:19000" // Expo 웹 서버 (다른 포트)
-                ));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));       // 허용할 HTTP 메서드
-        configuration.setAllowedHeaders(List.of("Content-Type", "Authorization"));      // 허용할 요청 헤더
-        configuration.setExposedHeaders(List.of("Authorization", "Set-Cookie"));        // 클라이언트에서 접근 가능한 응답 헤더
-        configuration.setAllowCredentials(true); // 쿠키와 인증정보 포함 허용
+	/**
+	 * CORS 설정 정의
+	 * - 프론트엔드와 도메인이 다른 경우에도 요청 허용
+	 */
+	@Bean
+	public CorsConfigurationSource corsConfigurationSource() {
+		CorsConfiguration configuration = new CorsConfiguration();
+		configuration.setAllowedOrigins(
+			List.of("http://192.168.35.199:8081",
+				"http://localhost:8081", // React Native 웹
+				"http://localhost:3000", // React Native 웹 (다른 포트)
+				"http://localhost:19006", // Expo 웹 서버
+				"http://localhost:19000" // Expo 웹 서버 (다른 포트)
+			));
+		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE")); // 허용할 HTTP 메서드
+		configuration.setAllowedHeaders(List.of("Content-Type", "Authorization")); // 허용할 요청 헤더
+		configuration.setExposedHeaders(List.of("Authorization", "Set-Cookie")); // 클라이언트에서 접근 가능한 응답 헤더
+		configuration.setAllowCredentials(true); // 쿠키와 인증정보 포함 허용
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", configuration);
+		return source;
+	}
 }

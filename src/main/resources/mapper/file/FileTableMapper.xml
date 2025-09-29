@@ -5,7 +5,7 @@
 
 <mapper namespace="com.nks.imgd.mapper.file.FileTableMapper">
 
-    <select id="findFileAndDirectory" resultType="com.nks.imgd.dto.Schema.FileTable">
+    <select id="findFileAndDirectory" resultType="com.nks.imgd.dto.schema.FileTable">
         SELECT FILE_ID
              , FILE_NM
              , FILE_ORG_NM
@@ -23,21 +23,21 @@
          ORDER BY TYPE, REG_DTM DESC, FILE_ORG_NM
     </select>
 
-    <select id="findRootPath" resultType="com.nks.imgd.dto.Schema.FileTable">
+    <select id="findRootPath" resultType="com.nks.imgd.dto.schema.FileTable">
         SELECT FILE_PATH
              , PARENT_ID
           FROM FILE_TABLE
          WHERE FILE_ID = #{fileId}
     </select>
 
-    <select id="findFileIdByFileOrgNmInDirCase" resultType="com.nks.imgd.dto.Schema.FileTable">
+    <select id="findFileIdByFileOrgNmInDirCase" resultType="com.nks.imgd.dto.schema.FileTable">
         SELECT FILE_ID
           FROM FILE_TABLE
          WHERE FILE_ORG_NM = CONCAT(#{group.groupId}, '_', #{group.groupNm})
            AND TYPE = 'DIR'
     </select>
 
-    <select id="findFileNmByDirId" resultType="com.nks.imgd.dto.Schema.FileTable">
+    <select id="findFileNmByDirId" resultType="com.nks.imgd.dto.schema.FileTable">
         SELECT FILE_NM
              , FILE_NM
              , FILE_ORG_NM
@@ -49,7 +49,7 @@
          WHERE FILE_ID = #{dirId}
     </select>
     
-    <select id="findFileById" resultType="com.nks.imgd.dto.Schema.FileTable">
+    <select id="findFileById" resultType="com.nks.imgd.dto.schema.FileTable">
         SELECT FILE_ID
              , FILE_NM
              , FILE_ORG_NM
@@ -65,7 +65,7 @@
          WHERE FILE_ID = #{fileId}
     </select>
 
-    <select id="findFileByGroupId" resultType="com.nks.imgd.dto.Schema.FileTable">
+    <select id="findFileByGroupId" resultType="com.nks.imgd.dto.schema.FileTable">
         SELECT FILE_ID
              , FILE_NM
              , FILE_ORG_NM
@@ -82,7 +82,7 @@
          ORDER BY TYPE DESC, FILE_ID DESC
     </select>
     
-    <select id="findFileByParentId" resultType="com.nks.imgd.dto.Schema.FileTable">
+    <select id="findFileByParentId" resultType="com.nks.imgd.dto.schema.FileTable">
         SELECT FILE_ID
              , FILE_NM
              , FILE_ORG_NM
@@ -99,7 +99,7 @@
          ORDER BY TYPE DESC, FILE_ID
     </select>
 
-    <select id="findUserProfileFileId" resultType="com.nks.imgd.dto.Schema.FileTable">
+    <select id="findUserProfileFileId" resultType="com.nks.imgd.dto.schema.FileTable">
         SELECT FILE_ID
              , FILE_NM
              , FILE_ORG_NM

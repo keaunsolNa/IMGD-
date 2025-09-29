@@ -5,8 +5,8 @@ import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Service;
 
-import com.nks.imgd.component.util.commonMethod.CommonMethod;
-import com.nks.imgd.dto.Schema.FriendTable;
+import com.nks.imgd.component.util.commonmethod.CommonMethod;
+import com.nks.imgd.dto.schema.FriendTable;
 import com.nks.imgd.mapper.user.FriendTableMapper;
 
 @Service

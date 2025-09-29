@@ -5,7 +5,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import com.nks.imgd.dto.Schema.Tag;
+import com.nks.imgd.dto.schema.Tag;
 
 @Mapper
 public interface TagMapper {

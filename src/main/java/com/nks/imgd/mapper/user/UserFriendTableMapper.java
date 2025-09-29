@@ -5,12 +5,12 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import com.nks.imgd.dto.dataDTO.UserTableWithRelationshipAndPictureNmDTO;
+import com.nks.imgd.dto.data.UserTableWithRelationshipAndPictureNmDto;
 
 @Mapper
 public interface UserFriendTableMapper {
 
-	List<UserTableWithRelationshipAndPictureNmDTO> findFriendEachOther(String userId);
+	List<UserTableWithRelationshipAndPictureNmDto> findFriendEachOther(String userId);
 
 	int insertUserFriendTable(@Param("targetUserId") String targetUserId,
 		@Param("friendId") Long friendId,

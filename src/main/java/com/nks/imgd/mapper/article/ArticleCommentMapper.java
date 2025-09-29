@@ -5,8 +5,8 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import com.nks.imgd.dto.Schema.ArticleComment;
-import com.nks.imgd.dto.dataDTO.ArticleWithTagsAndFiles;
+import com.nks.imgd.dto.data.ArticleWithTagsAndFiles;
+import com.nks.imgd.dto.schema.ArticleComment;
 
 @Mapper
 public interface ArticleCommentMapper {

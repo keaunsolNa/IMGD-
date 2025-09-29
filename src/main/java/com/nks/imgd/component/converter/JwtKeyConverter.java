@@ -14,7 +14,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
 
-import com.nks.imgd.dto.Enum.JwtRule;
+import com.nks.imgd.dto.enums.JwtRule;
 
 import lombok.NonNull;
 
@@ -54,11 +54,11 @@ public class JwtKeyConverter implements Converter<Jwt, AbstractAuthenticationTok
 			if (key.equals(JwtRule.TYPE.getValue())) {
 				roleSet.add(String.valueOf(entry.getValue()));
 			} else if (key.equals(JwtRule.RESOURCE_ACCESS.getValue())) {
-				@SuppressWarnings("unchecked")
-				Map<String, List<String>> resourceAccess = (Map<String, List<String>>)entry.getValue();
+				@SuppressWarnings("unchecked") Map<String, List<String>> resourceAccess = (Map<String, List<String>>)entry
+					.getValue();
 				if (resourceAccess.containsKey(JwtRule.ACCOUNT.getValue())) {
-					@SuppressWarnings("unchecked")
-					Map<String, List<String>> account = (Map<String, List<String>>)resourceAccess.get("account");
+					@SuppressWarnings("unchecked") Map<String, List<String>> account = (Map<String, List<String>>)resourceAccess
+						.get("account");
 					if (account.containsKey(JwtRule.ROLES.getValue())) {
 						roleSet.addAll(account.get(JwtRule.ROLES.getValue()));
 					}

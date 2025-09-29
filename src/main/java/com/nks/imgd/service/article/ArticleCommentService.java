@@ -5,11 +5,11 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.nks.imgd.component.util.commonMethod.CommonMethod;
+import com.nks.imgd.component.util.commonmethod.CommonMethod;
 import com.nks.imgd.component.util.maker.ServiceResult;
-import com.nks.imgd.dto.Enum.ResponseMsg;
-import com.nks.imgd.dto.Schema.ArticleComment;
-import com.nks.imgd.dto.dataDTO.ArticleWithTagsAndFiles;
+import com.nks.imgd.dto.data.ArticleWithTagsAndFiles;
+import com.nks.imgd.dto.enums.ResponseMsg;
+import com.nks.imgd.dto.schema.ArticleComment;
 import com.nks.imgd.mapper.article.ArticleCommentMapper;
 
 /**
@@ -47,7 +47,6 @@ public class ArticleCommentService {
 		return articleCommentMapper.findArticleCommentById(articleId);
 	}
 
-
 	/**
 	 * 게시글-댓글 테이블 입력한다.
 	 * 
@@ -58,14 +57,14 @@ public class ArticleCommentService {
 	public ServiceResult<ArticleComment> makeNewArticleComment(ArticleComment articleComment) {
 
 		ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
-			articleCommentMapper.insertArticleComment(articleComment)
-		);
+			articleCommentMapper.insertArticleComment(articleComment));
 
 		if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
 			return ServiceResult.failure(fsMsg);
 		}
 
-		return ServiceResult.success(() -> findArticleTagById(articleComment.getArticleId(), articleComment.getCommentId()));
+		return ServiceResult
+			.success(() -> findArticleTagById(articleComment.getArticleId(), articleComment.getCommentId()));
 	}
 
 	/**
@@ -79,10 +78,11 @@ public class ArticleCommentService {
 	public ServiceResult<ArticleWithTagsAndFiles> deleteArticleComment(Long articleId, Long commentId) {
 
 		ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
-			articleCommentMapper.deleteArticleComment(articleId, commentId)
-		);
+			articleCommentMapper.deleteArticleComment(articleId, commentId));
 
-		if(!fsMsg.equals(ResponseMsg.ON_SUCCESS)) return ServiceResult.failure(fsMsg);
+		if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
+			return ServiceResult.failure(fsMsg);
+		}
 
 		return ServiceResult.success(() -> articleCommentMapper.findArticleById(articleId));
 	}

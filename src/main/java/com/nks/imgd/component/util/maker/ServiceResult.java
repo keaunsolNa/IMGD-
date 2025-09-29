@@ -1,10 +1,10 @@
 package com.nks.imgd.component.util.maker;
 
-import com.nks.imgd.dto.Enum.ResponseMsg;
-
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Supplier;
+
+import com.nks.imgd.dto.enums.ResponseMsg;
 
 /**
  * @author nks
@@ -20,8 +20,7 @@ import java.util.function.Supplier;
 public record ServiceResult<T>(
 	ResponseMsg status,
 	Supplier<T> onSuccess,
-	Map<String, Object> details
-) {
+	Map<String, Object> details) {
 	public ServiceResult {
 		Objects.requireNonNull(status, "status");
 		// onSuccess는 실패 케이스에서 null 허용

@@ -3,10 +3,10 @@ package com.nks.imgd.service.article;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.nks.imgd.component.util.commonMethod.CommonMethod;
+import com.nks.imgd.component.util.commonmethod.CommonMethod;
 import com.nks.imgd.component.util.maker.ServiceResult;
-import com.nks.imgd.dto.Enum.ResponseMsg;
-import com.nks.imgd.dto.Schema.ArticleTag;
+import com.nks.imgd.dto.enums.ResponseMsg;
+import com.nks.imgd.dto.schema.ArticleTag;
 import com.nks.imgd.mapper.article.ArticleTagMapper;
 
 /**
@@ -45,8 +45,7 @@ public class ArticleTagService {
 	public ServiceResult<ArticleTag> makeNewArticleTag(ArticleTag articleTag) {
 
 		ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
-			articleTagMapper.makeNewArticleTag(articleTag)
-		);
+			articleTagMapper.makeNewArticleTag(articleTag));
 
 		if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
 			return ServiceResult.failure(fsMsg);
@@ -55,8 +54,6 @@ public class ArticleTagService {
 		return ServiceResult.success(() -> findArticleTagById(articleTag.getArticleId(), articleTag.getTagId()));
 	}
 
-
 	// ───────────────────────────────── helper methods ───────────────────────────────
-
 
 }

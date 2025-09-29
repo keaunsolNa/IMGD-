@@ -5,7 +5,7 @@
 
 <mapper namespace="com.nks.imgd.mapper.article.ArticleTagMapper">
 
-    <select id="findArticleTagById" resultType="com.nks.imgd.dto.Schema.ArticleTag">
+    <select id="findArticleTagById" resultType="com.nks.imgd.dto.schema.ArticleTag">
         SELECT ARTICLE_ID
              , TAG_ID
           FROM ARTICLE_TAG

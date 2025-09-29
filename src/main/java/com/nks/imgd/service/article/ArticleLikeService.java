@@ -2,10 +2,10 @@ package com.nks.imgd.service.article;
 
 import org.springframework.stereotype.Service;
 
-import com.nks.imgd.component.util.commonMethod.CommonMethod;
+import com.nks.imgd.component.util.commonmethod.CommonMethod;
 import com.nks.imgd.component.util.maker.ServiceResult;
-import com.nks.imgd.dto.Enum.ResponseMsg;
-import com.nks.imgd.dto.Schema.ArticleLike;
+import com.nks.imgd.dto.enums.ResponseMsg;
+import com.nks.imgd.dto.schema.ArticleLike;
 import com.nks.imgd.mapper.article.ArticleLikeMapper;
 
 /**
@@ -40,7 +40,7 @@ public class ArticleLikeService {
 	 * @param userId 대상 유저 아이디
 	 * @return 대상 게시글/유저 정보
 	 */
-	public ArticleLike findArticleLikeWhatIds (Long articleId, String userId) {
+	public ArticleLike findArticleLikeWhatIds(Long articleId, String userId) {
 		return articleLikeMapper.findArticleLikeWhatIds(articleId, userId);
 	}
 
@@ -51,11 +51,10 @@ public class ArticleLikeService {
 	 * @param userId 대상 유저 아이디
 	 * @return 대상 결과
 	 */
-	public ServiceResult<ArticleLike> likeArticle (Long articleId, String userId) {
+	public ServiceResult<ArticleLike> likeArticle(Long articleId, String userId) {
 
 		ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
-			articleLikeMapper.likeArticle(articleId, userId)
-		);
+			articleLikeMapper.likeArticle(articleId, userId));
 
 		if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
 			return ServiceResult.failure(fsMsg);
@@ -71,11 +70,10 @@ public class ArticleLikeService {
 	 * @param userId 대상 유저 아이디
 	 * @return 대상 결과
 	 */
-	public ServiceResult<ArticleLike> unLikeArticle (Long articleId, String userId) {
+	public ServiceResult<ArticleLike> unLikeArticle(Long articleId, String userId) {
 
 		ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
-			articleLikeMapper.unLikeArticle(articleId, userId)
-		);
+			articleLikeMapper.unLikeArticle(articleId, userId));
 
 		if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
 			return ServiceResult.failure(fsMsg);

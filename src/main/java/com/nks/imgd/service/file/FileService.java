@@ -12,21 +12,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-import com.nks.imgd.component.util.commonMethod.CommonMethod;
-import com.nks.imgd.component.util.maker.ServiceResult;
-import com.nks.imgd.dto.Enum.ResponseMsg;
-import com.nks.imgd.dto.Enum.Role;
-import com.nks.imgd.dto.dataDTO.MakeDirDTO;
-import com.nks.imgd.dto.dataDTO.MakeFileDTO;
-import com.nks.imgd.dto.Schema.FileTable;
-import com.nks.imgd.dto.dataDTO.GroupTableWithMstUserNameDTO;
-import com.nks.imgd.dto.dataDTO.UserTableWithRelationshipAndPictureNmDTO;
-import com.nks.imgd.mapper.file.FileTableMapper;
-import com.nks.imgd.service.group.GroupPort;
-import com.nks.imgd.service.user.UserProfilePort;
-import com.sksamuel.scrimage.ImmutableImage;
-import com.sksamuel.scrimage.webp.WebpWriter;
-
 import org.apache.ibatis.annotations.Param;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -34,6 +19,21 @@ import org.springframework.http.ContentDisposition;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.nks.imgd.component.util.commonmethod.CommonMethod;
+import com.nks.imgd.component.util.maker.ServiceResult;
+import com.nks.imgd.dto.data.GroupTableWithMstUserNameDto;
+import com.nks.imgd.dto.data.MakeDirDto;
+import com.nks.imgd.dto.data.MakeFileDto;
+import com.nks.imgd.dto.data.UserTableWithRelationshipAndPictureNmDto;
+import com.nks.imgd.dto.enums.ResponseMsg;
+import com.nks.imgd.dto.enums.Role;
+import com.nks.imgd.dto.schema.FileTable;
+import com.nks.imgd.mapper.file.FileTableMapper;
+import com.nks.imgd.service.group.GroupPort;
+import com.nks.imgd.service.user.UserProfilePort;
+import com.sksamuel.scrimage.ImmutableImage;
+import com.sksamuel.scrimage.webp.WebpWriter;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -76,7 +76,7 @@ public class FileService {
 	private final Path rootPath = Paths.get(resolveRootFromEnv()).toAbsolutePath().normalize();
 	private final CommonMethod commonMethod = new CommonMethod();
 
-    public FileService(FileTableMapper fileTableMapper, UserProfilePort userProfilePort, GroupPort groupPort) {
+	public FileService(FileTableMapper fileTableMapper, UserProfilePort userProfilePort, GroupPort groupPort) {
 		this.fileTableMapper = fileTableMapper;
 		this.userProfilePort = userProfilePort;
 		this.groupPort = groupPort;
@@ -86,7 +86,7 @@ public class FileService {
 			throw new IllegalStateException("Cannot create root directory: " + this.rootPath, e);
 		}
 		log.info("IMGD root path = {}", this.rootPath);
-    }
+	}
 
 	/**
 	 * 해당 위치에 존재 하는 파일 / 폴더를 반환 한다.
@@ -95,7 +95,7 @@ public class FileService {
 	 * @param groupId 현재 유저가 위치한 그룹의 ID
 	 * @return 해당 위치에 존재 하는 파일 / 폴더 목록
 	 */
-	public List<FileTable> findFileAndDirectory(@Param("parentId") Long parentId, @Param("groupId")  Long groupId) {
+	public List<FileTable> findFileAndDirectory(@Param("parentId") Long parentId, @Param("groupId") Long groupId) {
 		return postProcessingFileTables(fileTableMapper.findFileAndDirectory(parentId, groupId));
 	}
 
@@ -118,37 +118,38 @@ public class FileService {
 	public FileTable findUserProfileFileId(@Param("userId") String userId) {
 		return postProcessingFileTable(fileTableMapper.findUserProfileFileId(userId));
 	}
-	
-    /**
+
+	/**
 	 * 그룹 생성시 그룹의 루트가 될 폴더를 만든다.
 	 * DB row 생성 → 물리 폴더 생성(실패 시 롤백)
 	 *
-     * @param dto directory 생성할 그룹
+	 * @param dto directory 생성할 그룹
 	 * @return 생성된 폴더의 정보
-     */
+	 */
 	@Transactional(rollbackFor = Exception.class)
-    public ServiceResult<FileTable> makeGroupDir(GroupTableWithMstUserNameDTO dto)
-    {
+	public ServiceResult<FileTable> makeGroupDir(GroupTableWithMstUserNameDto dto) {
 
-        ResponseMsg returnMsg = commonMethod.returnResultByResponseMsg(fileTableMapper.makeGroupDir(dto));
+		ResponseMsg returnMsg = commonMethod.returnResultByResponseMsg(fileTableMapper.makeGroupDir(dto));
 
-		if (!returnMsg.equals(ResponseMsg.ON_SUCCESS)) return ServiceResult.failure(returnMsg);
+		if (!returnMsg.equals(ResponseMsg.ON_SUCCESS)) {
+			return ServiceResult.failure(returnMsg);
+		}
 
-        FileTable fileDTO = fileTableMapper.findFileIdByFileOrgNmInDirCase(dto);
+		FileTable fileDto = fileTableMapper.findFileIdByFileOrgNmInDirCase(dto);
 
-		if (null == fileDTO  || null == fileDTO.getFileId()) {
-            return ServiceResult.failure(ResponseMsg.BAD_REQUEST);
-        }
+		if (null == fileDto || null == fileDto.getFileId()) {
+			return ServiceResult.failure(ResponseMsg.BAD_REQUEST);
+		}
 
-        // 물리 폴더 생성 (실패 시 예외 -> 트랜잭션 롤백)
-        ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
-                createDirectoriesOrThrow(makePathByFileId(fileDTO.getFileId()))
-        );
-        if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
-            return ServiceResult.failure(fsMsg);
-        }
+		// 물리 폴더 생성 (실패 시 예외 -> 트랜잭션 롤백)
+		ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
+			createDirectoriesOrThrow(makePathByFileId(fileDto.getFileId())));
 
-        return ServiceResult.success(() -> findFileById(fileDTO.getFileId()));
+		if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
+			return ServiceResult.failure(fsMsg);
+		}
+
+		return ServiceResult.success(() -> findFileById(fileDto.getFileId()));
 
 	}
 
@@ -160,83 +161,88 @@ public class FileService {
 	 * @return 생성된 폴더 정보
 	 */
 	@Transactional(rollbackFor = Exception.class)
-    public ServiceResult<List<FileTable>> makeDir(MakeDirDTO req)
-    {
+	public ServiceResult<List<FileTable>> makeDir(MakeDirDto req) {
 
-		if (fileTableMapper.makeDir(req) != 1) return ServiceResult.failure(ResponseMsg.BAD_REQUEST);
+		if (fileTableMapper.makeDir(req) != 1) {
+			return ServiceResult.failure(ResponseMsg.BAD_REQUEST);
+		}
 
-        ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
-                createDirectoriesOrThrow(Path.of(makePathByFileId(req.getParentId()) + "\\" + req.getDirNm()))
-        );
-        if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
-            return ServiceResult.failure(fsMsg);
-        }
+		ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
+			createDirectoriesOrThrow(Path.of(makePathByFileId(req.getParentId()) + "\\" + req.getDirNm())));
 
-        return ServiceResult.success(() -> findFileAndDirectory(req.getParentId(), req.getGroupId()));
-    }
+		if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
+			return ServiceResult.failure(fsMsg);
+		}
 
-    /**
-     * 파일 업로드 비동기 처리를 위한 래퍼 메서드
-     *
-     * @param dto 파일 정보가 담긴 DTO
-     * @return 업로드된 파일 정보
-     */
-    @Transactional(rollbackFor = Exception.class)
-    @Async("IMGD_VirtualThreadExecutor")
-    public CompletableFuture<ServiceResult<FileTable>> makeFileAsync(MakeFileDTO dto) {
-        return CompletableFuture.supplyAsync(() -> makeFile(dto));
-    }
+		return ServiceResult.success(() -> findFileAndDirectory(req.getParentId(), req.getGroupId()));
+	}
 
-    /**
-     * 파일 생성
-     * DB row 생성 → 물리 폴더 생성(실패 시 롤백)
-     *
-     * @param dto 파일 정보가 담긴 DTO
-     * @return 업로드된 파일 정보
-     *
-     */
-    @Transactional(rollbackFor = Exception.class)
-    public ServiceResult<FileTable> makeFile(MakeFileDTO dto)
-    {
+	/**
+	 * 파일 업로드 비동기 처리를 위한 래퍼 메서드
+	 *
+	 * @param dto 파일 정보가 담긴 DTO
+	 * @return 업로드된 파일 정보
+	 */
+	@Transactional(rollbackFor = Exception.class)
+	@Async("IMGD_VirtualThreadExecutor")
+	public CompletableFuture<ServiceResult<FileTable>> makeFileAsync(MakeFileDto dto) {
+		return CompletableFuture.supplyAsync(() -> makeFile(dto));
+	}
 
-        String fileNm = UUID.randomUUID().toString();
-        String path = findFileNmByDirId(dto.getFolderId());
+	/**
+	 * 파일 생성
+	 * DB row 생성 → 물리 폴더 생성(실패 시 롤백)
+	 *
+	 * @param dto 파일 정보가 담긴 DTO
+	 * @return 업로드된 파일 정보
+	 *
+	 */
+	@Transactional(rollbackFor = Exception.class)
+	public ServiceResult<FileTable> makeFile(MakeFileDto dto) {
 
-        dto.setFileNm(fileNm);
-        dto.setPath(path);
+		String fileNm = UUID.randomUUID().toString();
+		String path = findFileNmByDirId(dto.getFolderId());
 
-        if (fileTableMapper.makeFile(dto) != 1)
-            return ServiceResult.failure(ResponseMsg.BAD_REQUEST);
+		dto.setFileNm(fileNm);
+		dto.setPath(path);
 
-        Path targetNoExt = makePathByFileId(dto.getFolderId());
+		if (fileTableMapper.makeFile(dto) != 1) {
+			return ServiceResult.failure(ResponseMsg.BAD_REQUEST);
+		}
 
-        Role role = Role.valueOf(userProfilePort.findHighestUserRole(dto.getUserId()).getRoleNm());
-        int q = role.getPermissionOfWebpWriter()[0];
-        int m = role.getPermissionOfWebpWriter()[1];
-        int z = role.getPermissionOfWebpWriter()[2];
+		Path targetNoExt = makePathByFileId(dto.getFolderId());
 
-        WebpWriter customWriter = WebpWriter.DEFAULT.withQ(q).withM(m).withZ(z);
-        Path tmp;
+		Role role = Role.valueOf(userProfilePort.findHighestUserRole(dto.getUserId()).getRoleNm());
+		int qValue = role.getPermissionOfWebpWriter()[0];
+		int mValue = role.getPermissionOfWebpWriter()[1];
+		int zValue = role.getPermissionOfWebpWriter()[2];
 
-        try {
-            tmp = Files.createTempFile("upload-", ".bin");
-            dto.getOriginalFile().transferTo(tmp);
+		WebpWriter customWriter = WebpWriter.DEFAULT.withQ(qValue).withM(mValue).withZ(zValue);
+		Path tmp;
 
-        } catch (IOException e) {
+		try {
+			tmp = Files.createTempFile("upload-", ".bin");
+			dto.getOriginalFile().transferTo(tmp);
 
-            log.error(e.getMessage());
-            throw new RuntimeException(e);
-        }
+		} catch (IOException e) {
 
-        if (null == convertToWebp(targetNoExt, tmp.toFile(), fileNm, customWriter)) return ServiceResult.failure(ResponseMsg.FILE_CREATE_FAILED);
-        else return ServiceResult.success(() -> findFileById(dto.getFileId()));
-    }
+			log.error(e.getMessage());
+			throw new RuntimeException(e);
+		}
 
-    @Transactional(rollbackFor = Exception.class)
-    @Async("IMGD_VirtualThreadExecutor")
-    public CompletableFuture<ServiceResult<UserTableWithRelationshipAndPictureNmDTO>> makeUserProfileImgAsync(MakeFileDTO dto, File originalFile) {
-        return CompletableFuture.supplyAsync(() -> makeUserProfileImg(dto, originalFile));
-    }
+		if (null == convertToWebp(targetNoExt, tmp.toFile(), fileNm, customWriter)) {
+			return ServiceResult.failure(ResponseMsg.FILE_CREATE_FAILED);
+		} else {
+			return ServiceResult.success(() -> findFileById(dto.getFileId()));
+		}
+	}
+
+	@Transactional(rollbackFor = Exception.class)
+	@Async("IMGD_VirtualThreadExecutor")
+	public CompletableFuture<ServiceResult<UserTableWithRelationshipAndPictureNmDto>> makeUserProfileImgAsync(
+		MakeFileDto dto, File originalFile) {
+		return CompletableFuture.supplyAsync(() -> makeUserProfileImg(dto, originalFile));
+	}
 
 	/**
 	 * 유저의 Profile Img 변경 한다.
@@ -246,41 +252,48 @@ public class FileService {
 	 * @return insert 후 결과값
 	 */
 	@Transactional(rollbackFor = Exception.class)
-	public ServiceResult<UserTableWithRelationshipAndPictureNmDTO> makeUserProfileImg(MakeFileDTO dto, File originalFile)
-	{
+	public ServiceResult<UserTableWithRelationshipAndPictureNmDto> makeUserProfileImg(MakeFileDto dto,
+		File originalFile) {
 		String fileNm = UUID.randomUUID().toString();
 
-		FileTable fileDTO = new FileTable();
-		fileDTO.setFileNm(fileNm);
-		fileDTO.setFileOrgNm(dto.getFileName());
+		FileTable fileDto = new FileTable();
+		fileDto.setFileNm(fileNm);
+		fileDto.setFileOrgNm(dto.getFileName());
 
 		// ✅ 파일 테이블에 ROW 생성
-		int result = fileTableMapper.makeUserProfileImg(fileDTO, dto.getUserId());
+		int result = fileTableMapper.makeUserProfileImg(fileDto, dto.getUserId());
 
-		if (result != 1) return ServiceResult.failure(ResponseMsg.BAD_REQUEST);
+		if (result != 1) {
+			return ServiceResult.failure(ResponseMsg.BAD_REQUEST);
+		}
 
 		// 성공 했다면 user 정보 변경한다.
-		long fileId = fileDTO.getFileId();
+		long fileId = fileDto.getFileId();
 
 		// ✅ 유저 정보 확인
-		UserTableWithRelationshipAndPictureNmDTO userProfile = userProfilePort.findUserById(dto.getUserId());
+		UserTableWithRelationshipAndPictureNmDto userProfile = userProfilePort.findUserById(dto.getUserId());
 
-		if (null == userProfile) ServiceResult.failure(ResponseMsg.CAN_NOT_FIND_USER, Map.of("userId", dto.getUserId()));
+		if (null == userProfile) {
+			ServiceResult.failure(ResponseMsg.CAN_NOT_FIND_USER, Map.of("userId", dto.getUserId()));
+		}
 
 		// 기존 유저 정보에 사진이 있다면 해당 파일을 삭제한다.
-        assert userProfile != null;
-        if (null != userProfile.getPictureId())
-		{
+		assert userProfile != null;
+		if (null != userProfile.getPictureId()) {
 			try {
 
 				boolean resultDeleteFile = deleteFileById(userProfile.getPictureId());
 
-				if (resultDeleteFile) log.info("Deleted file ID: {}", fileId);
-				else log.info("Failed to delete file ID: {}", fileId);
+				if (resultDeleteFile) {
+					log.info("Deleted file ID: {}", fileId);
+				} else {
+					log.info("Failed to delete file ID: {}", fileId);
+				}
 
 			} catch (Exception e) {
 				// 실패해도 신규 사용에는 영향 없음
-				log.warn("Best-effort delete of old profile image failed. oldPictureId={}", userProfile.getPictureId(), e);
+				log.warn("Best-effort delete of old profile image failed. oldPictureId={}", userProfile.getPictureId(),
+					e);
 			}
 		}
 
@@ -288,91 +301,99 @@ public class FileService {
 		userProfile.setPictureId(fileId);
 		int userResult = userProfilePort.updatePictureId(userProfile.getUserId(), fileId);
 
-		if (userResult != 1) return ServiceResult.failure(ResponseMsg.FILE_UPDATE_FAILED);
+		if (userResult != 1) {
+			return ServiceResult.failure(ResponseMsg.FILE_UPDATE_FAILED);
+		}
 		Path targetNoExt = makePathByFileId(3L);
 
 		// ✅ 파일 Webp 형태로 변환 및 저장
-		if (null == convertToWebp(targetNoExt, originalFile, fileDTO.getFileNm(), WebpWriter.DEFAULT)) return ServiceResult.failure(ResponseMsg.BAD_REQUEST);
-		else return ServiceResult.success(() -> userProfilePort.findUserById(dto.getUserId()));
+		if (null == convertToWebp(targetNoExt, originalFile, fileDto.getFileNm(), WebpWriter.DEFAULT)) {
+			return ServiceResult.failure(ResponseMsg.BAD_REQUEST);
+		} else {
+			return ServiceResult.success(() -> userProfilePort.findUserById(dto.getUserId()));
+		}
 	}
 
 	/**
 	 * 파일 삭제
-     *
+	 *
 	 * @param fileId 삭제할 파일 아이디
 	 * @return 삭제할 파일이 있는 곳 정보 (parentId)
 	 */
 	@Transactional(rollbackFor = Exception.class)
-	public ServiceResult<FileTable> deleteFile (Long fileId) {
+	public ServiceResult<FileTable> deleteFile(Long fileId) {
 
 		FileTable row = findFileById(fileId);
 
-		if (!deleteFileById(fileId)) return ServiceResult.failure(ResponseMsg.FILE_DELETE_FAILED);
+		if (!deleteFileById(fileId)) {
+			return ServiceResult.failure(ResponseMsg.FILE_DELETE_FAILED);
+		}
 		return ServiceResult.success(() -> findFileById(row.getParentId()));
 	}
 
-    /**
-     * 디렉터리 삭제
-     *
-     * @param fileId 삭제할 디렉터리 아이디
-     * @return 삭제할 디렉터리가 있는 곳 정보 (parentId)
-     */
-    @Transactional(rollbackFor = Exception.class)
-    public ServiceResult<FileTable> deleteDir (long fileId) {
+	/**
+	 * 디렉터리 삭제
+	 *
+	 * @param fileId 삭제할 디렉터리 아이디
+	 * @return 삭제할 디렉터리가 있는 곳 정보 (parentId)
+	 */
+	@Transactional(rollbackFor = Exception.class)
+	public ServiceResult<FileTable> deleteDir(long fileId) {
 
-        // 빈 객체 선언
-        List<FileTable> childFiles;
-        Long parentId = findFileById(fileId).getParentId();
+		// 빈 객체 선언
+		List<FileTable> childFiles;
+		Long parentId = findFileById(fileId).getParentId();
 
-        // 해당 id를 부모로 가지고 있는 객체가 없을 때 까지 순환
-        do {
+		// 해당 id를 부모로 가지고 있는 객체가 없을 때 까지 순환
+		do {
 
-            childFiles = findFileByParentId(fileId);
+			childFiles = findFileByParentId(fileId);
 
-            for (FileTable childFile : childFiles) {
-                deleteDir(childFile.getFileId());
-            }
+			for (FileTable childFile : childFiles) {
+				deleteDir(childFile.getFileId());
+			}
 
-        } while (!childFiles.isEmpty());
+		} while (!childFiles.isEmpty());
 
-        // 부모 객체가 없다면 객체 가져오기
-        FileTable fileTableSchema = findFileById(fileId);
+		// 부모 객체가 없다면 객체 가져오기
+		FileTable fileTableSchema = findFileById(fileId);
 
-        // 유형 별 삭제
-        if (fileTableSchema.getType().equals("DIR"))
-        {
-            if(!deleteDirByFileId(fileTableSchema.getFileId())) return ServiceResult.failure(ResponseMsg.FILE_DELETE_FAILED);
-        }
-        else
-        {
-            if(deleteFileById(fileTableSchema.getFileId())) return ServiceResult.failure(ResponseMsg.FILE_DELETE_FAILED);
-        }
+		// 유형 별 삭제
+		if (fileTableSchema.getType().equals("DIR")) {
+			if (!deleteDirByFileId(fileTableSchema.getFileId())) {
+				return ServiceResult.failure(ResponseMsg.FILE_DELETE_FAILED);
+			}
+		} else {
+			if (deleteFileById(fileTableSchema.getFileId())) {
+				return ServiceResult.failure(ResponseMsg.FILE_DELETE_FAILED);
+			}
+		}
 
-        return ServiceResult.success(() -> findFileById(parentId));
-    }
+		return ServiceResult.success(() -> findFileById(parentId));
+	}
 
-    /**
-     * 특정 그룹 아이디를 가진 모든 파일을 삭제한다
-     * .
-     * @param userid 시행하는 대상 유저 아이디
-     * @param groupId 대상 그룹 아이디
-     * @return 삭제 후 유저가 가진 그룹 목록 반환
-     */
-    @Transactional(rollbackFor = Exception.class)
-    public ServiceResult<List<GroupTableWithMstUserNameDTO>> deleteFilesByGroupId(String userid, Long groupId)
-    {
+	/**
+	 * 특정 그룹 아이디를 가진 모든 파일을 삭제한다
+	 * .
+	 * @param userid 시행하는 대상 유저 아이디
+	 * @param groupId 대상 그룹 아이디
+	 * @return 삭제 후 유저가 가진 그룹 목록 반환
+	 */
+	@Transactional(rollbackFor = Exception.class)
+	public ServiceResult<List<GroupTableWithMstUserNameDto>> deleteFilesByGroupId(String userid, Long groupId) {
 
-        List<FileTable> filesInGroup = fileTableMapper.findFileByGroupId(groupId);
+		List<FileTable> filesInGroup = fileTableMapper.findFileByGroupId(groupId);
 
-        // 물리 파일 삭제, 파일을 모두 삭제 후 디렉터리도 삭제한다.
-        for (FileTable file : filesInGroup)
-        {
-            if(!deleteFileById(file.getFileId())) return ServiceResult.failure(ResponseMsg.FILE_DELETE_FAILED);
-        }
+		// 물리 파일 삭제, 파일을 모두 삭제 후 디렉터리도 삭제한다.
+		for (FileTable file : filesInGroup) {
+			if (!deleteFileById(file.getFileId())) {
+				return ServiceResult.failure(ResponseMsg.FILE_DELETE_FAILED);
+			}
+		}
 
-        return ServiceResult.success(() -> groupPort.findGroupWhatInside(userid));
+		return ServiceResult.success(() -> groupPort.findGroupWhatInside(userid));
 
-    }
+	}
 
 	/**
 	 * 파일을 다운로드 한다.
@@ -383,20 +404,26 @@ public class FileService {
 	public ServiceResult<Map<String, Object>> downloadFile(Long fileId) {
 
 		FileTable row = findFileById(fileId);
-		if (null == row) return ServiceResult.failure(ResponseMsg.NOT_FOUND);
+		if (null == row) {
+			return ServiceResult.failure(ResponseMsg.NOT_FOUND);
+		}
 
 		String filePath = makePathByFileId(fileId) + ".webp";
 
 		Path path = Paths.get(filePath);
 
-		if (Files.notExists(path)) return ServiceResult.failure(ResponseMsg.NOT_FOUND);
+		if (Files.notExists(path)) {
+			return ServiceResult.failure(ResponseMsg.NOT_FOUND);
+		}
 
 		try {
 
 			Resource resource = new UrlResource(path.toUri());
 
 			String contentType = Files.probeContentType(path);
-			if (null == contentType) contentType = "application/octet-stream";
+			if (null == contentType) {
+				contentType = "application/octet-stream";
+			}
 
 			String fileName = row.getFileNm();
 
@@ -404,7 +431,8 @@ public class FileService {
 				.filename(fileName, StandardCharsets.UTF_8) // ← 한글/이모지 안전
 				.build();
 
-			return ServiceResult.success(Map.of("contentType", contentType, "resource", resource, "fileInfo", cd.toString()));
+			return ServiceResult
+				.success(Map.of("contentType", contentType, "resource", resource, "fileInfo", cd.toString()));
 
 		} catch (IOException e) {
 
@@ -413,135 +441,140 @@ public class FileService {
 		}
 
 	}
-    // ───────────────────────────────── helper methods ───────────────────────────────
+	// ───────────────────────────────── helper methods ───────────────────────────────
 
-    /**
-     * 파일 삭제 메서드
-     *
-     * @param fileId 삭제할 파일 아이디
-     * @return 삭제 성공/실패
-     */
-    @Transactional(rollbackFor = Exception.class)
-    public boolean deleteFileById(Long fileId) {
-        // 1) 파일 메타 조회
-        FileTable row = findFileById(fileId);
+	/**
+	 * 파일 삭제 메서드
+	 *
+	 * @param fileId 삭제할 파일 아이디
+	 * @return 삭제 성공/실패
+	 */
+	@Transactional(rollbackFor = Exception.class)
+	public boolean deleteFileById(Long fileId) {
+		// 1) 파일 메타 조회
+		FileTable row = findFileById(fileId);
 
-        if (null == row) {
-            log.warn("deleteFileById: file row not found, fileId={}", fileId);
-            return false;
-        }
+		if (null == row) {
+			log.warn("deleteFileById: file row not found, fileId={}", fileId);
+			return false;
+		}
 
-        // 폴더인 경우 디렉터리 삭제로 보낸다.
-        if ("DIR".equalsIgnoreCase(row.getType())) {
+		// 폴더인 경우 디렉터리 삭제로 보낸다.
+		if ("DIR".equalsIgnoreCase(row.getType())) {
 			return deleteDirByFileId(fileId);
-        }
+		}
 
-        // 2) 물리 경로 계산
-        //    파일은 "부모 폴더 경로" + "fileNm + 확장자"
-        Path parentDir = makePathByFileId(row.getParentId());
-        // 기본 저장 포맷이 webp:
-        Path main = parentDir.resolve(row.getFileNm() + ".webp");
+		// 2) 물리 경로 계산
+		//    파일은 "부모 폴더 경로" + "fileNm + 확장자"
+		Path parentDir = makePathByFileId(row.getParentId());
+		// 기본 저장 포맷이 webp:
+		Path main = parentDir.resolve(row.getFileNm() + ".webp");
 
-        boolean deletedAny = deleteQuietly(main);
-        // 2-1) 같은 baseName 파생 파일들(.jpg, .png, *_thumb.webp 등)도 함께 제거
-        deletedAny |= deleteSiblingsByBaseName(parentDir, row.getFileNm());
+		boolean deletedAny = deleteQuietly(main);
+		// 2-1) 같은 baseName 파생 파일들(.jpg, .png, *_thumb.webp 등)도 함께 제거
+		deletedAny |= deleteSiblingsByBaseName(parentDir, row.getFileNm());
 
-        if (deletedAny) log.info("deleted physical file ID: {}", fileId);
-        else log.info("failed deleted physical file ID: {}", fileId);
+		if (deletedAny) {
+			log.info("deleted physical file ID: {}", fileId);
+		} else {
+			log.info("failed deleted physical file ID: {}", fileId);
+		}
 
-        // 3) DB Row 삭제 (파일 삭제가 일부 실패 해도 DB는 맞춰 준다)
-        int db = fileTableMapper.deleteById(fileId);
+		// 3) DB Row 삭제 (파일 삭제가 일부 실패 해도 DB는 맞춰 준다)
+		int db = fileTableMapper.deleteById(fileId);
 
-        return (db == 1);
-    }
+		return (db == 1);
+	}
 
-    /**
-     * 폴더 삭제 메서드
-     *
-     * @param fileId 삭제할 폴더의 id
-     * @return 삭제 결과
-     */
-    @Transactional(rollbackFor = Exception.class)
-    public boolean deleteDirByFileId(Long fileId)
-    {
-        FileTable row = findFileById(fileId);
-        if (null == row) {
-            log.warn("deleteDirByFileId: file row not found, fileId={}", fileId);
-            return false;
-        }
+	/**
+	 * 폴더 삭제 메서드
+	 *
+	 * @param fileId 삭제할 폴더의 id
+	 * @return 삭제 결과
+	 */
+	@Transactional(rollbackFor = Exception.class)
+	public boolean deleteDirByFileId(Long fileId) {
+		FileTable row = findFileById(fileId);
+		if (null == row) {
+			log.warn("deleteDirByFileId: file row not found, fileId={}", fileId);
+			return false;
+		}
 
-        // 2) 물리 경로 계산
-        //    디렉터리는 "부모 폴더 경로" + "fileNm"
-        Path parentDir = makePathByFileId(row.getParentId());
-        Path main = parentDir.resolve(row.getFileNm());
+		// 2) 물리 경로 계산
+		//    디렉터리는 "부모 폴더 경로" + "fileNm"
+		Path parentDir = makePathByFileId(row.getParentId());
+		Path main = parentDir.resolve(row.getFileNm());
 
-        boolean deletedAny = deleteQuietly(main);
+		boolean deletedAny = deleteQuietly(main);
 
-        if (deletedAny) log.info("deleted physical Dir ID: {}", fileId);
-        else log.info("failed deleted physical Dir ID: {}", fileId);
+		if (deletedAny) {
+			log.info("deleted physical Dir ID: {}", fileId);
+		} else {
+			log.info("failed deleted physical Dir ID: {}", fileId);
+		}
 
-        // 3) DB Row 삭제 (파일 삭제가 일부 실패 해도 DB는 맞춰 준다)
-        int db = fileTableMapper.deleteById(fileId);
+		// 3) DB Row 삭제 (파일 삭제가 일부 실패 해도 DB는 맞춰 준다)
+		int db = fileTableMapper.deleteById(fileId);
 
-        // 4) 빈 폴더 정리
-        cleanupIfEmpty(parentDir);
+		// 4) 빈 폴더 정리
+		cleanupIfEmpty(parentDir);
 
-        return (db == 1);
-    }
+		return (db == 1);
+	}
 
-    /**
-     * 경로 아이디로 파일 이름 반환
-     *
-     * @param dirId 경로 ID
-     * @return 파일 이름
-     */
-    public String findFileNmByDirId(Long dirId) {
+	/**
+	 * 경로 아이디로 파일 이름 반환
+	 *
+	 * @param dirId 경로 ID
+	 * @return 파일 이름
+	 */
+	public String findFileNmByDirId(Long dirId) {
 
-        return fileTableMapper.findFileNmByDirId(dirId).getFileNm();
-    }
+		return fileTableMapper.findFileNmByDirId(dirId).getFileNm();
+	}
 
-    /**
-     * FILE_TABLE 역추적 하여 상대 경로 체인을 반환 한다.
-     *
-     * @param fileId 대상 파일 ID
-     * @return 상대 경로 체인
-     */
-    public String findRootPath(Long fileId) {
+	/**
+	 * FILE_TABLE 역추적 하여 상대 경로 체인을 반환 한다.
+	 *
+	 * @param fileId 대상 파일 ID
+	 * @return 상대 경로 체인
+	 */
+	public String findRootPath(Long fileId) {
 
-        StringBuilder sb = new StringBuilder();
+		StringBuilder sb = new StringBuilder();
 
-        Long cur = fileId;
+		Long cur = fileId;
 
-        while (null != cur) {
-            FileTable r = fileTableMapper.findRootPath(cur);
-            if (r == null) break;
-            if (null != r.getFilePath()) {
-                sb.insert(0, "/" + r.getFilePath());
-            }
-            cur = r.getParentId();
-        }
-        return sb.toString();
+		while (null != cur) {
+			FileTable res = fileTableMapper.findRootPath(cur);
+			if (res == null) {
+				break;
+			}
+			if (null != res.getFilePath()) {
+				sb.insert(0, "/" + res.getFilePath());
+			}
+			cur = res.getParentId();
+		}
+		return sb.toString();
 
-    }
+	}
 
-    /**
-     * 파일 아이디를 부모 아이디로 가지고 있는 객체들을 반환한다.
-     * @param fileId 대상 파일 아이디
-     * @return 파일 테이블 객체들
-     */
-    public List<FileTable> findFileByParentId(Long fileId)
-    {
-        return fileTableMapper.findFileByParentId(fileId);
-    }
+	/**
+	 * 파일 아이디를 부모 아이디로 가지고 있는 객체들을 반환한다.
+	 * @param fileId 대상 파일 아이디
+	 * @return 파일 테이블 객체들
+	 */
+	public List<FileTable> findFileByParentId(Long fileId) {
+		return fileTableMapper.findFileByParentId(fileId);
+	}
 
-    /**
+	/**
 	 * 파일의 ID로 경로 찾아 오기
 	 *
 	 * @param fileId 파일의 ID
 	 * @return 파일의 절대 경로
 	 */
-	public Path makePathByFileId(Long fileId)
-	{
+	public Path makePathByFileId(Long fileId) {
 
 		String relativeChain = findRootPath(fileId);
 		String parentName = findFileNmByDirId(fileId);
@@ -556,16 +589,13 @@ public class FileService {
 	 * @param originalFile 업로드 할 파일
 	 * @return 변환된 파일
 	 */
-	public File convertToWebp(Path path, File originalFile, String fileNm, WebpWriter customWriter)
-	{
+	public File convertToWebp(Path path, File originalFile, String fileNm, WebpWriter customWriter) {
 
 		// 최종 대상: uuid.webp
 		Path target = path.resolve(
-			fileNm + ".webp"
-		);
+			fileNm + ".webp");
 		createDirectoriesOrThrow(target.getParent());
-		try
-		{
+		try {
 
 			ImmutableImage.loader()
 				.fromFile(originalFile)
@@ -602,7 +632,9 @@ public class FileService {
 	 * @return 치환 문자열
 	 */
 	private String sanitizeSegment(String name) {
-		if (null == name) return "_";
+		if (null == name) {
+			return "_";
+		}
 		return name.replaceAll("[\\\\/:*?\"<>|]", "_").trim();
 	}
 
@@ -626,36 +658,35 @@ public class FileService {
 
 	/**
 	 * 환경 변수 읽어 오기
-	 *
-	 * @return 환경 변수 
+	 * @return 환경 변수
 	 */
 	private static String resolveRootFromEnv() {
 		// 1) JVM 옵션: -D imgd.root.path=...
-		String v = System.getProperty("imgd.root.path");
-		if (null == v || v.isBlank()) {
+		String property = System.getProperty("imgd.root.path");
+		if (null == property || property.isBlank()) {
 			// 2) 환경 변수(우선): IMGD_ROOT_PATH (예: C:/IMGD)
-			v = System.getenv("IMGD_ROOT_PATH");
+			property = System.getenv("IMGD_ROOT_PATH");
 		}
-		if (v == null || v.isBlank()) {
+		if (property == null || property.isBlank()) {
 			// 3) 레거시 호환
-			v = System.getenv("FILE_ROOT");
+			property = System.getenv("FILE_ROOT");
 		}
-		return (null == v || v.isBlank()) ? "C:/IMGD" : v;
+		return (null == property || property.isBlank()) ? "C:/IMGD" : property;
 	}
 
 	/**
 	 * 물리 파일을 삭제 한다.
 	 *
-	 * @param p 대상 경로
+	 * @param path 대상 경로
 	 * @return 결과값
 	 */
-	private boolean deleteQuietly(Path p) {
+	private boolean deleteQuietly(Path path) {
 
 		try {
-			Files.deleteIfExists(p);
+			Files.deleteIfExists(path);
 			return true;
 		} catch (IOException e) {
-			log.warn("Failed to delete file: {}", p, e);
+			log.warn("Failed to delete file: {}", path, e);
 			return false;
 		}
 	}
@@ -724,7 +755,9 @@ public class FileService {
 	 */
 	public FileTable postProcessingFileTable(FileTable file) {
 
-		if (null == file) return null;
+		if (null == file) {
+			return null;
+		}
 		file.setRegDtm(null != file.getRegDtm() ? commonMethod.translateDate(file.getRegDtm()) : null);
 		file.setModDtm(null != file.getModDtm() ? commonMethod.translateDate(file.getModDtm()) : null);
 

@@ -3,19 +3,18 @@ package com.nks.imgd.service.group;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.nks.imgd.component.util.commonmethod.CommonMethod;
 import com.nks.imgd.component.util.maker.ServiceResult;
-import com.nks.imgd.dto.Enum.ResponseMsg;
-import com.nks.imgd.dto.Enum.Role;
+import com.nks.imgd.dto.data.GroupTableWithMstUserNameDto;
+import com.nks.imgd.dto.data.GroupUserWithNameDto;
+import com.nks.imgd.dto.enums.ResponseMsg;
+import com.nks.imgd.dto.enums.Role;
+import com.nks.imgd.mapper.group.GroupTableMapper;
 import com.nks.imgd.service.file.FileService;
 import com.nks.imgd.service.user.UserProfilePort;
-import org.springframework.stereotype.Service;
-
-import com.nks.imgd.component.util.commonMethod.CommonMethod;
-import com.nks.imgd.dto.dataDTO.GroupTableWithMstUserNameDTO;
-import com.nks.imgd.dto.dataDTO.GroupUserWithNameDTO;
-import com.nks.imgd.mapper.group.GroupTableMapper;
-
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author nks
@@ -26,13 +25,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class GroupService {
 
 	private final GroupTableMapper groupTableMapper;
-    private final UserProfilePort userProfilePort;
+	private final UserProfilePort userProfilePort;
 	private final FileService fileService;
 	private static final CommonMethod commonMethod = new CommonMethod();
 
-    public GroupService(GroupTableMapper groupTableMapper, UserProfilePort userProfilePort, FileService fileService) {
+	public GroupService(GroupTableMapper groupTableMapper, UserProfilePort userProfilePort, FileService fileService) {
 		this.groupTableMapper = groupTableMapper;
-        this.userProfilePort = userProfilePort;
+		this.userProfilePort = userProfilePort;
 		this.fileService = fileService;
 	}
 
@@ -42,8 +41,7 @@ public class GroupService {
 	 * @param userId 대상 유저 아이디
 	 * @return 대상이 가지고 있는 그룹 목록
 	 */
-	public List<GroupTableWithMstUserNameDTO> findGroupName(String userId)
-	{
+	public List<GroupTableWithMstUserNameDto> findGroupName(String userId) {
 		return groupTableMapper.findGroupName(userId);
 	}
 
@@ -53,8 +51,7 @@ public class GroupService {
 	 * @param userId 대상 유저 아이디
 	 * @return 대상이 가지고 있는 그룹 목록
 	 */
-	public List<GroupTableWithMstUserNameDTO> findGroupWhatInside(String userId)
-	{
+	public List<GroupTableWithMstUserNameDto> findGroupWhatInside(String userId) {
 		return postProcessingGroupTables(groupTableMapper.findGroupWhatInside(userId));
 	}
 
@@ -64,27 +61,26 @@ public class GroupService {
 	 * @param groupId 대상 그룹 아이디
 	 * @return 그룹이 가지고 있는 유저 목록
 	 */
-	public List<GroupUserWithNameDTO> findGroupUserWhatInside(String userId, Long groupId)
-	{
+	public List<GroupUserWithNameDto> findGroupUserWhatInside(String userId, Long groupId) {
 		return postProcessingGroupUserTables(groupTableMapper.findGroupUserWhatInside(userId, groupId));
 	}
 
-    /**
-     * 그룹 아이디를 통해 그룹 정보를 반환 한다.
-     * 
-     * @param groupId 대상 그룹 아이디
-     * @return 그룹 정보
-     */
-    public GroupTableWithMstUserNameDTO findGroupByGroupId(Long groupId) {
-        return groupTableMapper.findGroupByGroupId(groupId);
-    }
+	/**
+	 * 그룹 아이디를 통해 그룹 정보를 반환 한다.
+	 * 
+	 * @param groupId 대상 그룹 아이디
+	 * @return 그룹 정보
+	 */
+	public GroupTableWithMstUserNameDto findGroupByGroupId(Long groupId) {
+		return groupTableMapper.findGroupByGroupId(groupId);
+	}
 
 	/**
 	 * 대상 유저를 그룹장으로 하는, 그룹마스터만 있는 그룹을 반환한다.
 	 * @param userId 대상 유저 아이디
 	 * @return 대상 그룹 목록
 	 */
-	public List<GroupTableWithMstUserNameDTO> findGroupWhatUserIsMstAndJustOnlyOne(String userId) {
+	public List<GroupTableWithMstUserNameDto> findGroupWhatUserIsMstAndJustOnlyOne(String userId) {
 		return groupTableMapper.findGroupWhatUserIsMstAndJustOnlyOne(userId);
 	}
 
@@ -97,25 +93,28 @@ public class GroupService {
 	 * @return 생성 성공 여부
 	 */
 	@Transactional(rollbackFor = Exception.class)
-	public ServiceResult<GroupTableWithMstUserNameDTO> createGroup(GroupTableWithMstUserNameDTO dto) {
+	public ServiceResult<GroupTableWithMstUserNameDto> createGroup(GroupTableWithMstUserNameDto dto) {
 
-        Role role = Role.valueOf(userProfilePort.findHighestUserRole(dto.getGroupMstUserId()).getRoleNm());
-        int canMakeGroupValue = role.getPermissionOfMakeGroup();
-        int totalCountOfMakeGroup = groupTableMapper.findAllGroupWhatUserMake(dto.getGroupMstUserId());
+		Role role = Role.valueOf(userProfilePort.findHighestUserRole(dto.getGroupMstUserId()).getRoleNm());
+		int canMakeGroupValue = role.getPermissionOfMakeGroup();
+		int totalCountOfMakeGroup = groupTableMapper.findAllGroupWhatUserMake(dto.getGroupMstUserId());
 
-        if (canMakeGroupValue <= totalCountOfMakeGroup) return ServiceResult.failure(ResponseMsg.GROUP_LIMIT_EXCEEDED);
+		if (canMakeGroupValue <= totalCountOfMakeGroup) {
+			return ServiceResult.failure(ResponseMsg.GROUP_LIMIT_EXCEEDED);
+		}
 
-		if (groupTableMapper.makeNewGroup(dto) != 1) return ServiceResult.failure(ResponseMsg.BAD_REQUEST);
+		if (groupTableMapper.makeNewGroup(dto) != 1) {
+			return ServiceResult.failure(ResponseMsg.BAD_REQUEST);
+		}
 
-        ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
-                groupTableMapper.makeNewGroupUserTable(dto, dto.getGroupMstUserId())
-        );
+		ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
+			groupTableMapper.makeNewGroupUserTable(dto, dto.getGroupMstUserId()));
 
-        if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
-            return ServiceResult.failure(fsMsg);
-        }
+		if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
+			return ServiceResult.failure(fsMsg);
+		}
 
-        return ServiceResult.success(() -> findGroupByGroupId(dto.getGroupId()));
+		return ServiceResult.success(() -> findGroupByGroupId(dto.getGroupId()));
 	}
 
 	/**
@@ -125,23 +124,23 @@ public class GroupService {
 	 * @param userId 추가할 유저 ID
 	 * @return 생성 성공 여부
 	 */
-    @Transactional(rollbackFor = Exception.class)
-	public ServiceResult<List<GroupUserWithNameDTO>> makeNewGroupUser(GroupTableWithMstUserNameDTO dto, String userId) {
+	@Transactional(rollbackFor = Exception.class)
+	public ServiceResult<List<GroupUserWithNameDto>> makeNewGroupUser(GroupTableWithMstUserNameDto dto, String userId) {
 
-        // 이미 가입 된 인원 추가 요청 시
-		if (groupTableMapper.isUserCheck(dto, userId) > 0) return ServiceResult.failure(ResponseMsg.ALREADY_JOIN_USER);
+		// 이미 가입 된 인원 추가 요청 시
+		if (groupTableMapper.isUserCheck(dto, userId) > 0) {
+			return ServiceResult.failure(ResponseMsg.ALREADY_JOIN_USER);
+		}
 
-        ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
-                groupTableMapper.makeNewGroupUserTable(dto, userId)
-        );
+		ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
+			groupTableMapper.makeNewGroupUserTable(dto, userId));
 
-        if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
-            return ServiceResult.failure(fsMsg);
-        }
+		if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
+			return ServiceResult.failure(fsMsg);
+		}
 
-        return ServiceResult.success(() -> findGroupUserWhatInside(userId, dto.getGroupId()));
+		return ServiceResult.success(() -> findGroupUserWhatInside(userId, dto.getGroupId()));
 	}
-
 
 	/**
 	 * GroupUser 그룹 구성원 제거.
@@ -150,12 +149,14 @@ public class GroupService {
 	 * @param userId 삭제할 유저 ID
 	 * @return 삭제 성공 여부
 	 */
-    @Transactional(rollbackFor = Exception.class)
-	public ServiceResult<List<GroupUserWithNameDTO>> deleteGroupUser(GroupTableWithMstUserNameDTO dto, String userId) {
+	@Transactional(rollbackFor = Exception.class)
+	public ServiceResult<List<GroupUserWithNameDto>> deleteGroupUser(GroupTableWithMstUserNameDto dto, String userId) {
 
 		// 해당 그룹에 대상 유저가 존재 하지 않을 경우
-		if (groupTableMapper.isUserCheck(dto, userId) <= 0) return ServiceResult.failure(ResponseMsg.CAN_NOT_FIND_USER,
-			Map.of("userId", userId));
+		if (groupTableMapper.isUserCheck(dto, userId) <= 0) {
+			return ServiceResult.failure(ResponseMsg.CAN_NOT_FIND_USER,
+				Map.of("userId", userId));
+		}
 
 		/*
 			삭제 하려는 유저가 MST 유저일 경우,
@@ -164,37 +165,35 @@ public class GroupService {
 		 */
 		if (dto.getGroupMstUserId().equals(userId)) {
 
-            // 그룹 구성원이 한 명이고, 시행 유저가 그룹의 MST_USER 라면
+			// 그룹 구성원이 한 명이고, 시행 유저가 그룹의 MST_USER 라면
 			if (groupTableMapper.countGroupUser(dto) == 1 && groupTableMapper.deleteGroupTable(dto.getGroupId()) == 1) {
 
-                // 그룹 유저를 삭제한 뒤
-                ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
-                        groupTableMapper.deleteGroupUser(dto, userId)
-                );
+				// 그룹 유저를 삭제한 뒤
+				ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
+					groupTableMapper.deleteGroupUser(dto, userId));
 
-                if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
-                    return ServiceResult.failure(fsMsg);
-                }
+				if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
+					return ServiceResult.failure(fsMsg);
+				}
 
-                // 그룹에 속한 모든 폴더 / 파일을 삭제한다.
-                return deleteGroup(userId, dto.getGroupId());
+				// 그룹에 속한 모든 폴더 / 파일을 삭제한다.
+				return deleteGroup(userId, dto.getGroupId());
 
+			} else {
+				return ServiceResult.failure(ResponseMsg.GROUP_MST_USER_CANT_DELETE);
 			}
-			else return ServiceResult.failure(ResponseMsg.GROUP_MST_USER_CANT_DELETE);
 		}
 
-        ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
-                groupTableMapper.deleteGroupUser(dto, userId)
-        );
+		ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
+			groupTableMapper.deleteGroupUser(dto, userId));
 
-        if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
-            return ServiceResult.failure(fsMsg);
-        }
+		if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
+			return ServiceResult.failure(fsMsg);
+		}
 
-        return ServiceResult.success(() -> findGroupUserWhatInside(userId, dto.getGroupId()));
+		return ServiceResult.success(() -> findGroupUserWhatInside(userId, dto.getGroupId()));
 
 	}
-
 
 	/**
 	 * GroupUser 테이블 MST_USER_ID 변경
@@ -203,45 +202,46 @@ public class GroupService {
 	 * @param userId MST_USER 될 ID
 	 * @return 삭제 성공 여부
 	 */
-    @Transactional(rollbackFor = Exception.class)
-	public ServiceResult<List<GroupUserWithNameDTO>>  changeMstUserGroup(GroupTableWithMstUserNameDTO dto, String userId) {
+	@Transactional(rollbackFor = Exception.class)
+	public ServiceResult<List<GroupUserWithNameDto>> changeMstUserGroup(GroupTableWithMstUserNameDto dto,
+		String userId) {
 
 		// 해당 그룹에 대상 유저가 없을 경우
-		if (groupTableMapper.isUserCheck(dto, userId) <= 0) return ServiceResult.failure(ResponseMsg.CAN_NOT_FIND_USER, Map.of("userId", userId));
+		if (groupTableMapper.isUserCheck(dto, userId) <= 0) {
+			return ServiceResult.failure(ResponseMsg.CAN_NOT_FIND_USER, Map.of("userId", userId));
+		}
 
-        ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
-                groupTableMapper.changeMstUserGroup(dto, userId)
-        );
+		ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
+			groupTableMapper.changeMstUserGroup(dto, userId));
 
-        if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
-            return ServiceResult.failure(fsMsg);
-        }
+		if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
+			return ServiceResult.failure(fsMsg);
+		}
 
-        return ServiceResult.success(() -> findGroupUserWhatInside(userId, dto.getGroupId()));
+		return ServiceResult.success(() -> findGroupUserWhatInside(userId, dto.getGroupId()));
 	}
 
-    /**
-     * 그룹을 삭제한다.
-     * @param userId 삭제하려는 유저의 아이디
-     * @param groupId 삭제하려는 그룹의 아이디
-     * @return 그룹과 그 안의 폴더 / 파일을 모두 삭제한 후 대상 유저가 가진 그룹 목록을 반환
-     */
-    @Transactional(rollbackFor = Exception.class)
-    public ServiceResult<List<GroupUserWithNameDTO>> deleteGroup(String userId, Long groupId) {
+	/**
+	 * 그룹을 삭제한다.
+	 * @param userId 삭제하려는 유저의 아이디
+	 * @param groupId 삭제하려는 그룹의 아이디
+	 * @return 그룹과 그 안의 폴더 / 파일을 모두 삭제한 후 대상 유저가 가진 그룹 목록을 반환
+	 */
+	@Transactional(rollbackFor = Exception.class)
+	public ServiceResult<List<GroupUserWithNameDto>> deleteGroup(String userId, Long groupId) {
 
-        // 해당 그룹 아이디를 가진 모든 파일 / 폴더의 물리 / DB 내용 삭제
-        ServiceResult<List<GroupTableWithMstUserNameDTO>> result = fileService.deleteFilesByGroupId(userId, groupId);
+		// 해당 그룹 아이디를 가진 모든 파일 / 폴더의 물리 / DB 내용 삭제
+		ServiceResult<List<GroupTableWithMstUserNameDto>> result = fileService.deleteFilesByGroupId(userId, groupId);
 
-       if (!result.status().equals(ResponseMsg.ON_SUCCESS)) {
-           return ServiceResult.failure(ResponseMsg.FILE_DELETE_FAILED);
-       }
+		if (!result.status().equals(ResponseMsg.ON_SUCCESS)) {
+			return ServiceResult.failure(ResponseMsg.FILE_DELETE_FAILED);
+		}
 
-	   GroupTableWithMstUserNameDTO dto = groupTableMapper.findGroupByGroupId(groupId);
+		GroupTableWithMstUserNameDto dto = groupTableMapper.findGroupByGroupId(groupId);
 
-	   // 해당 그룹 유저 (MST_USER) 삭제
+		// 해당 그룹 유저 (MST_USER) 삭제
 		ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
-			groupTableMapper.deleteGroupUser(dto, userId)
-		);
+			groupTableMapper.deleteGroupUser(dto, userId));
 
 		if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
 			return ServiceResult.failure(fsMsg);
@@ -249,15 +249,14 @@ public class GroupService {
 
 		// 그룹 삭제
 		fsMsg = commonMethod.returnResultByResponseMsg(
-			groupTableMapper.deleteGroupTable(groupId)
-		);
+			groupTableMapper.deleteGroupTable(groupId));
 
 		if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
 			return ServiceResult.failure(fsMsg);
 		}
 
-        return ServiceResult.success(() -> findGroupUserWhatInside(userId, groupId));
-    }
+		return ServiceResult.success(() -> findGroupUserWhatInside(userId, groupId));
+	}
 
 	// ───────────────────────────────── helper methods ───────────────────────────────
 
@@ -269,9 +268,9 @@ public class GroupService {
 	 * @param groups 대상 그룹 리스트
 	 * @return 후처리 후 대상 그룹 리스트
 	 */
-	public List<GroupTableWithMstUserNameDTO> postProcessingGroupTables(List<GroupTableWithMstUserNameDTO> groups) {
+	public List<GroupTableWithMstUserNameDto> postProcessingGroupTables(List<GroupTableWithMstUserNameDto> groups) {
 
-		for (GroupTableWithMstUserNameDTO group : groups) {
+		for (GroupTableWithMstUserNameDto group : groups) {
 			postProcessingGroupTable(group);
 		}
 
@@ -285,7 +284,7 @@ public class GroupService {
 	 *
 	 * @param group 대상 그룹
 	 */
-	public void postProcessingGroupTable(GroupTableWithMstUserNameDTO group) {
+	public void postProcessingGroupTable(GroupTableWithMstUserNameDto group) {
 
 		group.setRegDtm(null != group.getRegDtm() ? commonMethod.translateDate(group.getRegDtm()) : null);
 		group.setModDtm(null != group.getModDtm() ? commonMethod.translateDate(group.getModDtm()) : null);
@@ -299,9 +298,9 @@ public class GroupService {
 	 * @param groups 대상 그룹 유저 리스트
 	 * @return 후처리 후 대상 그룹 유저 리스트
 	 */
-	public List<GroupUserWithNameDTO> postProcessingGroupUserTables(List<GroupUserWithNameDTO> groups) {
+	public List<GroupUserWithNameDto> postProcessingGroupUserTables(List<GroupUserWithNameDto> groups) {
 
-		for (GroupUserWithNameDTO group : groups) {
+		for (GroupUserWithNameDto group : groups) {
 			postProcessingGroupUserTable(group);
 		}
 
@@ -315,7 +314,7 @@ public class GroupService {
 	 *
 	 * @param group 대상 그룹
 	 */
-	public void postProcessingGroupUserTable(GroupUserWithNameDTO group) {
+	public void postProcessingGroupUserTable(GroupUserWithNameDto group) {
 
 		group.setRegDtm(null != group.getRegDtm() ? commonMethod.translateDate(group.getRegDtm()) : null);
 		group.setModDtm(null != group.getModDtm() ? commonMethod.translateDate(group.getModDtm()) : null);

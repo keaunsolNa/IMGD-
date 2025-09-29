@@ -7,10 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import com.nks.imgd.component.util.commonMethod.CommonMethod;
-import com.nks.imgd.component.util.maker.ApiResponse;
-import com.nks.imgd.component.util.maker.ServiceResult;
-
 import org.apache.hc.core5.http.HttpHeaders;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
@@ -27,11 +23,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.nks.imgd.dto.dataDTO.MakeFileDTO;
-import com.nks.imgd.dto.Schema.FileTable;
-import com.nks.imgd.dto.dataDTO.GroupTableWithMstUserNameDTO;
-import com.nks.imgd.dto.dataDTO.MakeDirDTO;
-import com.nks.imgd.dto.dataDTO.UserTableWithRelationshipAndPictureNmDTO;
+import com.nks.imgd.component.util.commonmethod.CommonMethod;
+import com.nks.imgd.component.util.maker.ApiResponse;
+import com.nks.imgd.component.util.maker.ServiceResult;
+import com.nks.imgd.dto.data.GroupTableWithMstUserNameDto;
+import com.nks.imgd.dto.data.MakeDirDto;
+import com.nks.imgd.dto.data.MakeFileDto;
+import com.nks.imgd.dto.data.UserTableWithRelationshipAndPictureNmDto;
+import com.nks.imgd.dto.schema.FileTable;
 import com.nks.imgd.service.file.FileService;
 
 @RestController
@@ -39,7 +38,7 @@ import com.nks.imgd.service.file.FileService;
 public class FileController {
 
 	private final FileService fileService;
-    private static final CommonMethod commonMethod = new CommonMethod();
+	private static final CommonMethod commonMethod = new CommonMethod();
 
 	public FileController(FileService fileService) {
 		this.fileService = fileService;
@@ -52,7 +51,8 @@ public class FileController {
 	 * @return 해당 위치에 존재 하는 파일 / 폴더 목록
 	 */
 	@GetMapping("/findFileAndDirectory")
-	public ResponseEntity<List<FileTable>> findFileAndDirectory(@RequestParam Long parentId, @RequestParam Long groupId) {
+	public ResponseEntity<List<FileTable>> findFileAndDirectory(@RequestParam Long parentId,
+		@RequestParam Long groupId) {
 		return ResponseEntity.ok(fileService.findFileAndDirectory(parentId, groupId));
 	}
 
@@ -62,7 +62,7 @@ public class FileController {
 	 * @return 대상 파일 정보
 	 */
 	@GetMapping("/findFileById")
-	public ResponseEntity<FileTable> FileTableDTO(@RequestParam Long fileId) {
+	public ResponseEntity<FileTable> findFileById(@RequestParam Long fileId) {
 		return ResponseEntity.ok(fileService.findFileById(fileId));
 	}
 
@@ -73,7 +73,7 @@ public class FileController {
 	 * @return 파일
 	 */
 	@GetMapping("/downloadFile")
-	public ResponseEntity<Resource> downloadFile (@RequestParam Long fileId) {
+	public ResponseEntity<Resource> downloadFile(@RequestParam Long fileId) {
 
 		Map<String, Object> map = fileService.downloadFile(fileId).details();
 
@@ -91,9 +91,10 @@ public class FileController {
 	 * @return 해당 폴더 정보 목록
 	 */
 	@PostMapping("/makeGroupDir")
-	public ResponseEntity<ApiResponse<FileTable>> makeGroupDir(@RequestBody GroupTableWithMstUserNameDTO dto, @AuthenticationPrincipal Jwt jwt) {
+	public ResponseEntity<ApiResponse<FileTable>> makeGroupDir(@RequestBody GroupTableWithMstUserNameDto dto,
+		@AuthenticationPrincipal Jwt jwt) {
 		dto.setGroupMstUserId(jwt.getSubject());
-        return commonMethod.responseTransaction(fileService.makeGroupDir(dto));
+		return commonMethod.responseTransaction(fileService.makeGroupDir(dto));
 	}
 
 	/**
@@ -102,7 +103,7 @@ public class FileController {
 	 * @return 생성된 폴더가 위치한 곳의 파일 / 폴더 목록
 	 */
 	@PostMapping("/makeDir")
-	public ResponseEntity<ApiResponse<List<FileTable>>> makeDir(@RequestBody MakeDirDTO req) {
+	public ResponseEntity<ApiResponse<List<FileTable>>> makeDir(@RequestBody MakeDirDto req) {
 		return commonMethod.responseTransaction(fileService.makeDir(req));
 	}
 
@@ -113,7 +114,7 @@ public class FileController {
 	 * @throws IOException 파일 생성 실패 시 IOException 반환
 	 */
 	@PostMapping(value = "/makeFile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<ApiResponse<FileTable>> makeFile(@ModelAttribute MakeFileDTO req) throws IOException {
+	public ResponseEntity<ApiResponse<FileTable>> makeFile(@ModelAttribute MakeFileDto req) throws IOException {
 
 		Path tmp = Files.createTempFile("upload-", ".bin");
 		MultipartFile mf = req.getOriginalFile();
@@ -121,17 +122,17 @@ public class FileController {
 
 		try {
 
-            MakeFileDTO file = new MakeFileDTO();
-            file.setFolderId(req.getFolderId());
-            file.setUserId(req.getUserId());
-            file.setGroupId(req.getGroupId());
-            file.setFileOrgNm(mf.getOriginalFilename());
-            file.setOriginalFile(mf);
+			MakeFileDto file = new MakeFileDto();
+			file.setFolderId(req.getFolderId());
+			file.setUserId(req.getUserId());
+			file.setGroupId(req.getGroupId());
+			file.setFileOrgNm(mf.getOriginalFilename());
+			file.setOriginalFile(mf);
 
-            CompletableFuture<ServiceResult<FileTable>> future = fileService.makeFileAsync(file);
+			CompletableFuture<ServiceResult<FileTable>> future = fileService.makeFileAsync(file);
 
-            ServiceResult<FileTable> result = future.join();
-            return commonMethod.responseTransaction(result);
+			ServiceResult<FileTable> result = future.join();
+			return commonMethod.responseTransaction(result);
 
 		} finally {
 			Files.deleteIfExists(tmp); // 임시파일 정리
@@ -145,7 +146,8 @@ public class FileController {
 	 * @throws IOException 파일 업로드 실패 시 IOException 반환
 	 */
 	@PostMapping(value = "/makeUserProfileImg", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<ApiResponse<UserTableWithRelationshipAndPictureNmDTO>> makeUserProfileImg(@ModelAttribute MakeFileDTO req) throws IOException {
+	public ResponseEntity<ApiResponse<UserTableWithRelationshipAndPictureNmDto>> makeUserProfileImg(
+		@ModelAttribute MakeFileDto req) throws IOException {
 
 		Path tmp = Files.createTempFile("upload-", ".bin");
 
@@ -154,10 +156,11 @@ public class FileController {
 
 		try {
 
-            CompletableFuture<ServiceResult<UserTableWithRelationshipAndPictureNmDTO>> future = fileService.makeUserProfileImgAsync(req, tmp.toFile());
+			CompletableFuture<ServiceResult<UserTableWithRelationshipAndPictureNmDto>> future = fileService
+				.makeUserProfileImgAsync(req, tmp.toFile());
 
-            ServiceResult<UserTableWithRelationshipAndPictureNmDTO> result = future.join();
-            return commonMethod.responseTransaction(result);
+			ServiceResult<UserTableWithRelationshipAndPictureNmDto> result = future.join();
+			return commonMethod.responseTransaction(result);
 
 		} finally {
 			Files.deleteIfExists(tmp); // 임시 파일 정리
@@ -174,14 +177,14 @@ public class FileController {
 		return commonMethod.responseTransaction(fileService.deleteFile(fileId));
 	}
 
-    /**
-     * 디렉터리를 삭제한다. 
-     * 이 때 하위 파일/폴더가 있다면 같이 삭제한다.
-     * @param fileId 삭제할 디렉터리 아이디
-     * @return 삭제된 디렉터리의 부모 객체 정보
-     */
-    @DeleteMapping(value ="/deleteDir")
-    public ResponseEntity<ApiResponse<FileTable>> deleteDir(@RequestParam Long fileId) {
-        return commonMethod.responseTransaction(fileService.deleteDir(fileId));
-    }
+	/**
+	 * 디렉터리를 삭제한다.
+	 * 이 때 하위 파일/폴더가 있다면 같이 삭제한다.
+	 * @param fileId 삭제할 디렉터리 아이디
+	 * @return 삭제된 디렉터리의 부모 객체 정보
+	 */
+	@DeleteMapping(value = "/deleteDir")
+	public ResponseEntity<ApiResponse<FileTable>> deleteDir(@RequestParam Long fileId) {
+		return commonMethod.responseTransaction(fileService.deleteDir(fileId));
+	}
 }

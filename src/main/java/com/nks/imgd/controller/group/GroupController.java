@@ -2,15 +2,21 @@ package com.nks.imgd.controller.group;
 
 import java.util.List;
 
-import com.nks.imgd.component.util.commonMethod.CommonMethod;
-import com.nks.imgd.component.util.maker.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import com.nks.imgd.dto.dataDTO.GroupTableWithMstUserNameDTO;
-import com.nks.imgd.dto.dataDTO.GroupUserWithNameDTO;
+import com.nks.imgd.component.util.commonmethod.CommonMethod;
+import com.nks.imgd.component.util.maker.ApiResponse;
+import com.nks.imgd.dto.data.GroupTableWithMstUserNameDto;
+import com.nks.imgd.dto.data.GroupUserWithNameDto;
 import com.nks.imgd.service.group.GroupService;
 
 @RestController
@@ -18,7 +24,7 @@ import com.nks.imgd.service.group.GroupService;
 public class GroupController {
 
 	private final GroupService groupService;
-    private static final CommonMethod commonMethod = new CommonMethod();
+	private static final CommonMethod commonMethod = new CommonMethod();
 
 	public GroupController(GroupService groupService) {
 		this.groupService = groupService;
@@ -31,7 +37,7 @@ public class GroupController {
 	 * @return 대상 유저가 가지고 있는 그룹 목록
 	 */
 	@GetMapping("/findGroupName")
-	public ResponseEntity<List<GroupTableWithMstUserNameDTO>> findGroupName(@AuthenticationPrincipal Jwt jwt) {
+	public ResponseEntity<List<GroupTableWithMstUserNameDto>> findGroupName(@AuthenticationPrincipal Jwt jwt) {
 		return ResponseEntity.ok(groupService.findGroupName(jwt.getSubject()));
 	}
 
@@ -42,7 +48,7 @@ public class GroupController {
 	 * @return 대상 유저가 가지고 있는 그룹 목록
 	 */
 	@GetMapping("/findGroupWhatInside")
-	public ResponseEntity<List<GroupTableWithMstUserNameDTO>> findGroupWhatInside(@AuthenticationPrincipal Jwt jwt) {
+	public ResponseEntity<List<GroupTableWithMstUserNameDto>> findGroupWhatInside(@AuthenticationPrincipal Jwt jwt) {
 		return ResponseEntity.ok(groupService.findGroupWhatInside(jwt.getSubject()));
 	}
 
@@ -53,7 +59,8 @@ public class GroupController {
 	 * @return 대상 유저가 가지고 있는 그룹 목록
 	 */
 	@GetMapping("/findGroupUserWhatInside")
-	public ResponseEntity<List<GroupUserWithNameDTO>> findGroupUserWhatInside(@AuthenticationPrincipal Jwt jwt, @RequestParam Long groupId) {
+	public ResponseEntity<List<GroupUserWithNameDto>> findGroupUserWhatInside(@AuthenticationPrincipal Jwt jwt,
+		@RequestParam Long groupId) {
 		return ResponseEntity.ok(groupService.findGroupUserWhatInside(jwt.getSubject(), groupId));
 	}
 
@@ -67,7 +74,8 @@ public class GroupController {
 	 * @return 생성 된 그룹의 인원
 	 */
 	@PostMapping("/createGroup")
-	public ResponseEntity<ApiResponse<GroupTableWithMstUserNameDTO>> createGroup(@RequestBody GroupTableWithMstUserNameDTO dto, @AuthenticationPrincipal Jwt jwt) {
+	public ResponseEntity<ApiResponse<GroupTableWithMstUserNameDto>> createGroup(
+		@RequestBody GroupTableWithMstUserNameDto dto, @AuthenticationPrincipal Jwt jwt) {
 
 		dto.setGroupMstUserId(jwt.getSubject());
 		return commonMethod.responseTransaction(groupService.createGroup(dto));
@@ -83,7 +91,8 @@ public class GroupController {
 	 * @return 그룹 유저 목록
 	 */
 	@PostMapping(value = "/makeNewGroupUser")
-	public ResponseEntity<ApiResponse<List<GroupUserWithNameDTO>>> makeNewGroupUser(@RequestBody GroupTableWithMstUserNameDTO dto, @RequestParam String userId, @AuthenticationPrincipal Jwt jwt) {
+	public ResponseEntity<ApiResponse<List<GroupUserWithNameDto>>> makeNewGroupUser(
+		@RequestBody GroupTableWithMstUserNameDto dto, @RequestParam String userId, @AuthenticationPrincipal Jwt jwt) {
 
 		dto.setGroupMstUserId(jwt.getSubject());
 		return commonMethod.responseTransaction(groupService.makeNewGroupUser(dto, userId));
@@ -97,7 +106,8 @@ public class GroupController {
 	 * @return 해당 그룹 정보
 	 */
 	@DeleteMapping(value = "/deleteGroupUser")
-	public ResponseEntity<ApiResponse<List<GroupUserWithNameDTO>>> deleteGroupUser(@RequestBody GroupTableWithMstUserNameDTO dto, @RequestParam String userId, @AuthenticationPrincipal Jwt jwt) {
+	public ResponseEntity<ApiResponse<List<GroupUserWithNameDto>>> deleteGroupUser(
+		@RequestBody GroupTableWithMstUserNameDto dto, @RequestParam String userId, @AuthenticationPrincipal Jwt jwt) {
 
 		dto.setGroupMstUserId(jwt.getSubject());
 		return commonMethod.responseTransaction(groupService.deleteGroupUser(dto, userId));
@@ -111,21 +121,23 @@ public class GroupController {
 	 * @return 해당 그룹 정보
 	 */
 	@PostMapping(value = "/changeMstUserGroup")
-	public ResponseEntity<ApiResponse<List<GroupUserWithNameDTO>>> changeMstUserGroup(@RequestBody GroupTableWithMstUserNameDTO dto, @RequestParam String userId, @AuthenticationPrincipal Jwt jwt) {
+	public ResponseEntity<ApiResponse<List<GroupUserWithNameDto>>> changeMstUserGroup(
+		@RequestBody GroupTableWithMstUserNameDto dto, @RequestParam String userId, @AuthenticationPrincipal Jwt jwt) {
 
 		dto.setGroupMstUserId(jwt.getSubject());
-        return commonMethod.responseTransaction(groupService.changeMstUserGroup(dto, userId));
+		return commonMethod.responseTransaction(groupService.changeMstUserGroup(dto, userId));
 	}
 
 	/**
-	 * 그룹을 삭제한다. 
+	 * 그룹을 삭제한다.
 	 * 그룹 삭제 시 해당 그룹에 있는 모든 파일 / 폴더가 다 삭제된다.
 	 * @param jwt 토큰 정보
 	 * @param groupId 대상 그룹 정보
 	 * @return 삭제 후 해당 유저가 가진 그룹 목록
 	 */
 	@DeleteMapping("/deleteGroup")
-	public ResponseEntity<ApiResponse<List<GroupUserWithNameDTO>>> deleteGroup(@AuthenticationPrincipal Jwt jwt, @RequestParam Long groupId) {
+	public ResponseEntity<ApiResponse<List<GroupUserWithNameDto>>> deleteGroup(@AuthenticationPrincipal Jwt jwt,
+		@RequestParam Long groupId) {
 		return commonMethod.responseTransaction(groupService.deleteGroup(jwt.getSubject(), groupId));
 	}
 

@@ -3,6 +3,9 @@ plugins {
     id 'org.springframework.boot' version '3.5.4'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'org.asciidoctor.jvm.convert' version '3.3.2'
+    id 'checkstyle'
+    id 'com.diffplug.spotless' version '6.25.0'
+    id 'org.openrewrite.rewrite' version '7.17.0'
 }
 
 group = 'com.dogfeetbirdfeet'
@@ -11,6 +14,38 @@ version = '0.0.1-SNAPSHOT'
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(24)
+    }
+}
+
+checkstyle {
+    toolVersion = '10.17.0'  // 최신 너무 높은 버전이면 규칙 충돌 가능 → 10.12~10.17 권장
+    configFile = file("$rootDir/rule-config/naver-checkstyle-rules.xml").absoluteFile
+    configProperties = [
+            'suppressionFile': file("$rootDir/rule-config/suppressions.xml").absolutePath
+    ]
+    maxWarnings = 0
+}
+
+spotless {
+
+
+    java {
+
+        // ✅ Naver Eclipse 포매터 적용
+        // Eclipse JDT 포매터 (JDK 24 대응 버전)
+        eclipse('4.32.0')
+                .configFile("$rootDir/rule-config/naver-eclipse-formatter.xml")
+
+        // 체이닝 금지: 따로 호출해야 함
+        toggleOffOn()   // (옵션) // spotless:off/on 블록 존중
+
+        // ✅ Naver import 레이아웃을 반영
+        importOrder("java","javax","org","net","com","", "com.nhncorp","com.navercorp","com.naver")
+        removeUnusedImports()
+
+        // 대상/제외
+        target 'src/**/*.java'
+        targetExclude '**/build/**', '**/out/**', 'src/generated/**'
     }
 }
 
@@ -67,17 +102,33 @@ dependencies {
     // ✅ Reflection
     implementation 'org.reflections:reflections:0.9.12'
 
+    // ✅ httpClient5
     implementation 'org.apache.httpcomponents.client5:httpclient5'
+
     // ✅ TEST
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
     testImplementation 'org.springframework.security:spring-security-test'
     testImplementation "org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.5"
 
+    // ✅ OpenRewrite 코어/자바 레시피
+    rewrite(platform("org.openrewrite.recipe:rewrite-recipe-bom:3.15.0"))
+    rewrite("org.openrewrite.recipe:rewrite-static-analysis")
+    rewrite("org.openrewrite.recipe:rewrite-java")
+
     testImplementation "org.testcontainers:junit-jupiter"
     testImplementation "org.testcontainers:mysql"
 
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+rewrite {
+    activeRecipe(
+            // 1) 컨트롤문에 중괄호 추가 (단문 if/for/while/do 등)
+            "org.openrewrite.staticanalysis.NeedBraces",
+            // 2) 자동 포매팅(괄호/개행 위치 등 세부 정리)
+            "org.openrewrite.java.format.AutoFormat"
+    )
 }
 
 tasks.named('test') {
@@ -89,3 +140,17 @@ tasks.named('asciidoctor') {
     inputs.dir snippetsDir
     dependsOn test
 }
+
+// 한 번에 관리할 가상 태스크
+tasks.register("verifyStyle") {
+    dependsOn "spotlessCheck", "checkstyleMain", "checkstyleTest"
+}
+
+// build(=assemble+check)는 원래 check에 의존하지만, 명시적으로 한 번 더 고정
+tasks.named("build") { dependsOn("verifyStyle") }
+
+// bootRun 해도 반드시 검사 통과해야 실행되도록
+tasks.named("bootRun") { dependsOn("verifyStyle") }
+
+// 컴파일 전에 자동 포맷 적용(자동수정 원치 않으면 spotlessCheck로 바꿔도 됨)
+tasks.named("compileJava") { dependsOn("spotlessApply") }

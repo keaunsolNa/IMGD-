@@ -5,10 +5,10 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.nks.imgd.component.util.commonMethod.CommonMethod;
+import com.nks.imgd.component.util.commonmethod.CommonMethod;
 import com.nks.imgd.component.util.maker.ServiceResult;
-import com.nks.imgd.dto.Enum.ResponseMsg;
-import com.nks.imgd.dto.Schema.Tag;
+import com.nks.imgd.dto.enums.ResponseMsg;
+import com.nks.imgd.dto.schema.Tag;
 import com.nks.imgd.mapper.tag.TagMapper;
 
 @Service
@@ -38,7 +38,7 @@ public class TagService {
 	public Tag findTagById(Long tagId) {
 		return postProcessingTagTable(tagMapper.findTagById(tagId));
 	}
-	
+
 	/**
 	 * 태그 이름으로 Like 검색 시행
 	 *
@@ -61,8 +61,7 @@ public class TagService {
 	public ServiceResult<List<Tag>> insertTagList(String userId, Tag tag) {
 
 		ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
-			tagMapper.makeNewTag(userId, tag)
-		);
+			tagMapper.makeNewTag(userId, tag));
 
 		if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
 			return ServiceResult.failure(fsMsg);
@@ -75,8 +74,7 @@ public class TagService {
 
 	public List<Tag> postProcessingTagTables(List<Tag> tags) {
 
-		for (Tag tag : tags)
-		{
+		for (Tag tag : tags) {
 			postProcessingTagTable(tag);
 		}
 		return tags;

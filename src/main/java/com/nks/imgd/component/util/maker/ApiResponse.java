@@ -1,12 +1,12 @@
 package com.nks.imgd.component.util.maker;
 
+import java.time.Instant;
 
-import com.nks.imgd.dto.Enum.ResponseMsg;
+import com.nks.imgd.dto.enums.ResponseMsg;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.time.Instant;
 
 /**
  * @author nks
@@ -21,32 +21,32 @@ import java.time.Instant;
 @AllArgsConstructor
 public class ApiResponse<T> {
 
-    private boolean success;
-    private T data;
-    private ApiError error;
-    private Instant timestamp = Instant.now();
+	private boolean success;
+	private T data;
+	private ApiError error;
+	private Instant timestamp = Instant.now();
 
-    public static <T> ApiResponse<T> ok(T data) {
-        ApiResponse<T> r = new ApiResponse<>();
-        r.success = true;
-        r.data = data;
-        r.timestamp = Instant.now();
-        return r;
-    }
+	public static <T> ApiResponse<T> ok(T data) {
+		ApiResponse<T> res = new ApiResponse<>();
+		res.success = true;
+		res.data = data;
+		res.timestamp = Instant.now();
+		return res;
+	}
 
-    public static <T> ApiResponse<T> error(ResponseMsg responseMsg) {
-        ApiResponse<T> r = new ApiResponse<>();
-        r.success = false;
-        r.error = new ApiError(responseMsg.getKey(), responseMsg.getMsg());
-        r.timestamp = Instant.now();
-        return r;
-    }
+	public static <T> ApiResponse<T> error(ResponseMsg responseMsg) {
+		ApiResponse<T> res = new ApiResponse<>();
+		res.success = false;
+		res.error = new ApiError(responseMsg.getKey(), responseMsg.getMsg());
+		res.timestamp = Instant.now();
+		return res;
+	}
 
-    @Getter
-    @AllArgsConstructor
-    public static class ApiError {
-        private String code;
-        private String message;
-    }
+	@Getter
+	@AllArgsConstructor
+	public static class ApiError {
+		private String code;
+		private String message;
+	}
 
 }

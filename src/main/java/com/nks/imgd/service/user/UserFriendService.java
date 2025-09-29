@@ -6,10 +6,10 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.nks.imgd.component.util.commonMethod.CommonMethod;
+import com.nks.imgd.component.util.commonmethod.CommonMethod;
 import com.nks.imgd.component.util.maker.ServiceResult;
-import com.nks.imgd.dto.Enum.ResponseMsg;
-import com.nks.imgd.dto.dataDTO.UserTableWithRelationshipAndPictureNmDTO;
+import com.nks.imgd.dto.data.UserTableWithRelationshipAndPictureNmDto;
+import com.nks.imgd.dto.enums.ResponseMsg;
 import com.nks.imgd.mapper.user.UserFriendTableMapper;
 
 @Service
@@ -31,13 +31,14 @@ public class UserFriendService {
 	 * @return 결과값 반환
 	 */
 	@Transactional(rollbackFor = Exception.class)
-	public ServiceResult<List<UserTableWithRelationshipAndPictureNmDTO>>  insertUserFriendTable(@Param("userId") String userId, @Param("targetUserId") String targetUserId, @Param("relationship") String relationship) {
+	public ServiceResult<List<UserTableWithRelationshipAndPictureNmDto>> insertUserFriendTable(
+		@Param("userId") String userId, @Param("targetUserId") String targetUserId,
+		@Param("relationship") String relationship) {
 
 		Long friendId = friendService.findFriendTableIdByUserId(userId).getFriendId();
 
 		ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
-			userFriendTableMapper.insertUserFriendTable(targetUserId, friendId, userId, relationship)
-		);
+			userFriendTableMapper.insertUserFriendTable(targetUserId, friendId, userId, relationship));
 
 		if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
 			return ServiceResult.failure(fsMsg);
@@ -53,13 +54,13 @@ public class UserFriendService {
 	 * @return 결과값 반환
 	 */
 	@Transactional(rollbackFor = Exception.class)
-	public ServiceResult<List<UserTableWithRelationshipAndPictureNmDTO>> deleteUserFriendTable(@Param("userId") String userId, @Param("targetUserId") String targetUserId) {
+	public ServiceResult<List<UserTableWithRelationshipAndPictureNmDto>> deleteUserFriendTable(
+		@Param("userId") String userId, @Param("targetUserId") String targetUserId) {
 
 		Long friendId = friendService.findFriendTableIdByUserId(userId).getFriendId();
 
 		ResponseMsg fsMsg = commonMethod.returnResultByResponseMsg(
-			userFriendTableMapper.deleteUserFriendTable(targetUserId, friendId)
-		);
+			userFriendTableMapper.deleteUserFriendTable(targetUserId, friendId));
 
 		if (!fsMsg.equals(ResponseMsg.ON_SUCCESS)) {
 			return ServiceResult.failure(fsMsg);
