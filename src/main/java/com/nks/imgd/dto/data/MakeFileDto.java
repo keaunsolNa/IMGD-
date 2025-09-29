@@ -1,4 +1,4 @@
-package com.nks.imgd.dto.dataDTO;
+package com.nks.imgd.dto.data;
 
 import org.springframework.web.multipart.MultipartFile;
 
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class MakeFileDTO {
+public class MakeFileDto {
 
 	private long fileId;
 	private String fileNm;

@@ -1,6 +1,6 @@
-package com.nks.imgd.dto.dataDTO;
+package com.nks.imgd.dto.data;
 
-import com.nks.imgd.dto.Enum.SocialLoginType;
+import com.nks.imgd.dto.enums.SocialLoginType;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserTableWithRelationshipAndPictureNmDTO {
+public class UserTableWithRelationshipAndPictureNmDto {
 
 	private String userId;
 	private String name;

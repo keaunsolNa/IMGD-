@@ -1,9 +1,9 @@
-package com.nks.imgd.dto.dataDTO;
+package com.nks.imgd.dto.data;
 
 import java.util.List;
 
-import com.nks.imgd.dto.Enum.ArticleType;
-import com.nks.imgd.dto.Schema.Tag;
+import com.nks.imgd.dto.enums.ArticleType;
+import com.nks.imgd.dto.schema.Tag;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,7 +19,7 @@ public class ArticleWithTagsAndFiles {
 	private String tagIds;
 	private List<Tag> tagList;
 	private List<ArticleWithTagsAndFiles> comments;
-    private List<MakeFileDTO> files;
+	private List<MakeFileDto> files;
 	private String userId;
 	private String pictureNm;
 	private String userNm;
