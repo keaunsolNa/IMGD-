@@ -82,7 +82,7 @@ public class ArticleService {
 	}
 
 	/**
-	 * 신규 게시글 작성
+	 * 신규 게시글(댓글) 작성
 	 * 게시글일 경우 게시글의 태그도 같이 ArticleTag에 등록한다.
 	 * 
 	 * @param dto 게시글 정보

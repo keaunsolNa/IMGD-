@@ -16,6 +16,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -50,9 +51,9 @@ public class FileController {
 	 * @param groupId 현재 유저가 사용 하는 그룹 아이디
 	 * @return 해당 위치에 존재 하는 파일 / 폴더 목록
 	 */
-	@GetMapping("/findFileAndDirectory")
-	public ResponseEntity<List<FileTable>> findFileAndDirectory(@RequestParam Long parentId,
-		@RequestParam Long groupId) {
+	@GetMapping("/{parentId}/{groupId}")
+	public ResponseEntity<List<FileTable>> findFileAndDirectory(@PathVariable Long parentId,
+		@PathVariable Long groupId) {
 		return ResponseEntity.ok(fileService.findFileAndDirectory(parentId, groupId));
 	}
 
@@ -61,8 +62,8 @@ public class FileController {
 	 * @param fileId 대상 파일 아이디
 	 * @return 대상 파일 정보
 	 */
-	@GetMapping("/findFileById")
-	public ResponseEntity<FileTable> findFileById(@RequestParam Long fileId) {
+	@GetMapping("/{fileId}")
+	public ResponseEntity<FileTable> findFileById(@PathVariable Long fileId) {
 		return ResponseEntity.ok(fileService.findFileById(fileId));
 	}
 
@@ -72,7 +73,7 @@ public class FileController {
 	 * @param fileId 다운로드 받을 파일의 ID
 	 * @return 파일
 	 */
-	@GetMapping("/downloadFile")
+	@GetMapping("/file")
 	public ResponseEntity<Resource> downloadFile(@RequestParam Long fileId) {
 
 		Map<String, Object> map = fileService.downloadFile(fileId).details();
@@ -90,7 +91,7 @@ public class FileController {
 	 * @param jwt 유저의 토큰
 	 * @return 해당 폴더 정보 목록
 	 */
-	@PostMapping("/makeGroupDir")
+	@PostMapping("/groupDir")
 	public ResponseEntity<ApiResponse<FileTable>> makeGroupDir(@RequestBody GroupTableWithMstUserNameDto dto,
 		@AuthenticationPrincipal Jwt jwt) {
 		dto.setGroupMstUserId(jwt.getSubject());
@@ -102,7 +103,7 @@ public class FileController {
 	 * @param req 폴더 생성에 필요한 정보
 	 * @return 생성된 폴더가 위치한 곳의 파일 / 폴더 목록
 	 */
-	@PostMapping("/makeDir")
+	@PostMapping("/dir")
 	public ResponseEntity<ApiResponse<List<FileTable>>> makeDir(@RequestBody MakeDirDto req) {
 		return commonMethod.responseTransaction(fileService.makeDir(req));
 	}
@@ -113,7 +114,7 @@ public class FileController {
 	 * @return 생성한 파일 정보
 	 * @throws IOException 파일 생성 실패 시 IOException 반환
 	 */
-	@PostMapping(value = "/makeFile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<ApiResponse<FileTable>> makeFile(@ModelAttribute MakeFileDto req) throws IOException {
 
 		Path tmp = Files.createTempFile("upload-", ".bin");
@@ -145,7 +146,7 @@ public class FileController {
 	 * @return 유저의 정보
 	 * @throws IOException 파일 업로드 실패 시 IOException 반환
 	 */
-	@PostMapping(value = "/makeUserProfileImg", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@PostMapping(value = "/profileImg", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<ApiResponse<UserTableWithRelationshipAndPictureNmDto>> makeUserProfileImg(
 		@ModelAttribute MakeFileDto req) throws IOException {
 
@@ -172,7 +173,7 @@ public class FileController {
 	 * @param fileId 삭제할 파일 아이디
 	 * @return 삭제할 파일이 위치한 디렉터리 정보
 	 */
-	@DeleteMapping(value = "/deleteFile")
+	@DeleteMapping(value = "/file")
 	public ResponseEntity<ApiResponse<FileTable>> deleteFile(@RequestParam Long fileId) {
 		return commonMethod.responseTransaction(fileService.deleteFile(fileId));
 	}
@@ -183,7 +184,7 @@ public class FileController {
 	 * @param fileId 삭제할 디렉터리 아이디
 	 * @return 삭제된 디렉터리의 부모 객체 정보
 	 */
-	@DeleteMapping(value = "/deleteDir")
+	@DeleteMapping(value = "/dir")
 	public ResponseEntity<ApiResponse<FileTable>> deleteDir(@RequestParam Long fileId) {
 		return commonMethod.responseTransaction(fileService.deleteDir(fileId));
 	}
