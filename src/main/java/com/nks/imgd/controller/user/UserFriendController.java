@@ -34,7 +34,7 @@ public class UserFriendController {
 	 * @param relationship F/B/R 세가지로, 친구의 F, 블록의 B, (친구) 거부의 R이 있다.
 	 * @return 상호 친구 목록
 	 */
-	@PostMapping("/insertUserFriendTable")
+	@PostMapping()
 	public ResponseEntity<ApiResponse<List<UserTableWithRelationshipAndPictureNmDto>>> insertUserFriendTable(
 		@AuthenticationPrincipal Jwt jwt, @RequestParam String targetUserId, @RequestParam String relationship) {
 		return commonMethod
@@ -47,7 +47,7 @@ public class UserFriendController {
 	 * @param targetUserId 삭제 하려는 유저 아이디
 	 * @return 상호 친구 목록
 	 */
-	@DeleteMapping("/deleteUserFriendTable")
+	@DeleteMapping()
 	public ResponseEntity<ApiResponse<List<UserTableWithRelationshipAndPictureNmDto>>> deleteUserFriendTable(
 		@AuthenticationPrincipal Jwt jwt, @RequestParam String targetUserId) {
 		return commonMethod
