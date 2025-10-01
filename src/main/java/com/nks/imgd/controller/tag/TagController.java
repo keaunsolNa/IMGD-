@@ -5,12 +5,7 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.nks.imgd.component.util.commonmethod.CommonMethod;
 import com.nks.imgd.component.util.maker.ApiResponse;
@@ -36,7 +31,7 @@ public class TagController {
 	 * 모든 태그 목록을 가져온다.
 	 * @return 모든 태그 목록
 	 */
-	@GetMapping("/findAllTag")
+	@GetMapping("/all")
 	public ResponseEntity<List<Tag>> findAllTag() {
 		return ResponseEntity.ok(tagService.findAllTag());
 	}
@@ -46,8 +41,8 @@ public class TagController {
 	 * @param name 대상 태그 이름
 	 * @return 유사한 태그 목록
 	 */
-	@GetMapping("/selectTagByLikeName")
-	public ResponseEntity<List<Tag>> selectTagByLikeName(@RequestParam("name") String name) {
+	@GetMapping("/{name}")
+	public ResponseEntity<List<Tag>> selectTagByLikeName(@PathVariable("name") String name) {
 		return ResponseEntity.ok(tagService.selectTagByLikeName(name));
 	}
 
@@ -57,7 +52,7 @@ public class TagController {
 	 * @param tag 생성할 태그 정보
 	 * @return 모든 태그 목록
 	 */
-	@PostMapping("/makeNewTag")
+	@PostMapping()
 	public ResponseEntity<ApiResponse<List<Tag>>> makeNewTag(@AuthenticationPrincipal Jwt jwt, @RequestBody Tag tag) {
 		return commonMethod.responseTransaction(tagService.insertTagList(jwt.getSubject(), tag));
 	}
